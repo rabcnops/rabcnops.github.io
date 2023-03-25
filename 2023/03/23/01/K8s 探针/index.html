@@ -1,0 +1,496 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>K8s 探针 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="K8s 探针，你都了解吗？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="K8s 探针">
+<meta property="og:url" content="https://rabcnops.github.io/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/index.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="K8s 探针，你都了解吗？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png">
+<meta property="article:published_time" content="2023-03-23T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-25T09:30:30.864Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="K8s">
+<meta property="article:tag" content="云原生">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://rabcnops.github.io/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'K8s 探针',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-25 17:30:30'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">K8s 探针</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-25T09:30:30.864Z" title="更新于 2023-03-25 17:30:30">2023-03-25</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>15分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="K8s 探针"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="k8s-cert"></p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://huaweicloud.csdn.net/63311d87d3efff3090b52a95.html?spm=1001.2101.3001.6650.5&utm_medium=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~activity-5-123894868-blog-126919159.pc_relevant_3mothn_strategy_recovery&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~activity-5-123894868-blog-126919159.pc_relevant_3mothn_strategy_recovery&utm_relevant_index=10">参考1</a></p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://kubernetes.io/zh-cn/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">官方参考文档</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>玩过 <code>Docker Swarm</code> 的应该都知道，有一种功能叫<code>自愈功能</code>，当集群检测到节点或服务故障时回进行自动故障转移，从而保障业务的可用性。而 K8s 集群相对于其他集群体系，其自愈能力更加强大，这也是 K8s 容器编排引擎的一重要特性。自愈从某种角度上来讲，其实现了以下几几种功能特性：</p>
+<ul>
+<li>零停机部署；</li>
+<li>避免无效镜像；</li>
+<li>实现滚动升级与回退。</li>
+</ul>
+<p>K8s 有三种探针，分别是：<code>存活（Liveness）</code>、<code>就绪（Readiness）</code>和<code>启动（Startup）</code></p>
+<ul>
+<li><p><strong>存活（Liveness）</strong>：kubelet 使用存活探针来确定什么时候要重启容器。 例如，存活探针可以探测到应用死锁（应用程序在运行，但是无法继续执行后面的步骤）情况。 重启这种状态下的容器有助于提高应用的可用性，即使其中存在缺陷。</p>
+</li>
+<li><p><strong>就绪（Readiness）</strong>：kubelet 使用就绪探针可以知道容器何时准备好接受请求流量。当一个 Pod 内的所有容器都就绪时，才能认为该 Pod 就绪。 这种信号的一个用途就是控制哪个 Pod 作为 Service 的后端。 若 Pod 尚未就绪，会被从 Service 的负载均衡器中剔除。</p>
+</li>
+<li><p><strong>启动（Startup）</strong>：kubelet 使用启动探针来了解应用容器何时启动。 如果配置了这类探针，你就可以控制容器在启动成功后再进行存活性和就绪态检查， 确保这些存活、就绪探针不会影响应用的启动。 启动探针可以用于对慢启动容器进行存活性检测，避免它们在启动运行之前就被杀掉。</p>
+</li>
+</ul>
+<p>K8s 探针有三种探测方式，分别是：<code>ExecAction</code>、<code>HTTPGetAction</code> 和 <code>TCPSocketAction</code>，这三种探测方式只能同时使用一种，不能两种或三种同时使用。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ExecAction：      <span class="comment"># 在容器中执行指定的命令，如果执行成功，退出码为0则探测成功。</span></span><br><span class="line">HTTPGetAction：   <span class="comment"># 通过容器的IP地址、端口号及路径调用HTTP Get方法，如果响应的状态码大于等于200且小于400，则认为容器健康。</span></span><br><span class="line">TCPSocketAction： <span class="comment"># 通过容器的IP地址和端口号执行TCP检查，如果能够建立TCP连接，则表明容器健康。</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>探针探测的结果有以下值：</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Success：  <span class="comment"># 表示通过检测。</span></span><br><span class="line">Failure：  <span class="comment"># 表示未通过检测。</span></span><br><span class="line">Unknown：  <span class="comment"># 表示检测没有正常进行。</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="一、默认健康检测"><a href="#一、默认健康检测" class="headerlink" title="一、默认健康检测"></a>一、默认健康检测</h2><h3 id="1-1-restartPolicy"><a href="#1-1-restartPolicy" class="headerlink" title="1.1 restartPolicy"></a>1.1 restartPolicy</h3><p>了解 Docker 的都知道，每个容器启动时都会执行一个进程，该进程由 Dockerfile 的 CMD 或 ENTRYPOINT 指定。如果进程退出或返回状态码为非零时，则认为容器发生故障，这个时候 K8s 就会根据 <code>restartPolicy</code> 重启容器。<code>restartPolicy</code> 有三种重启策略：</p>
+<ul>
+<li><p><strong>Always</strong></p>
+<p>Pod 中容器不论如何停止都将自动重启；</p>
+</li>
+<li><p><strong>OnFailure</strong><br>Pod 中容器非正常停止会自动重启，正常停止不会重启；</p>
+</li>
+<li><p><strong>Never</strong><br>Pod 中容器不论以任何方式停止，都不会自动重启。</p>
+</li>
+</ul>
+<p>K8s 的  <code>restartPolicy</code>  默认为 <code>Always</code>。如果探针超过失败重试的次数，则 Pod 就会根据 restartPolicy 策略进行选择是否重启。</p>
+<h3 id="1-2-测试案例"><a href="#1-2-测试案例" class="headerlink" title="1.2 测试案例"></a>1.2 测试案例</h3><p>1、创建一个 Pod</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    <span class="built_in">test</span>: healthcheck</span><br><span class="line">  name: healthcheck</span><br><span class="line">spec:</span><br><span class="line">  restartPolicy: OnFailure</span><br><span class="line">  containers:</span><br><span class="line">  - name: healthcheck</span><br><span class="line">    image: busybox</span><br><span class="line">    args:</span><br><span class="line">    - /bin/sh</span><br><span class="line">    - -c</span><br><span class="line">    - <span class="built_in">sleep</span> 10;<span class="built_in">exit</span> 1</span><br></pre></td></tr></table></figure>
+
+<p>2、观察 Pod 状态</p>
+<p>这个容器启动 10s 后会发生故障，接下来执行 <code>kubectl apply</code> 创建 Pod，Pod Name 为 healthcheck。过几分钟后看看 Pod 的状态：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221222110433382.png" alt="image-20221222110433382"></p>
+<p>可看到已经重启了三次，该案例中容器进程返回值为非零，k8s 则认为容器发生故障，需要重启。但可能有些情况下发生了故障进程不退出的现象，如访问 Web 服务器时返回 500 错误代码，这可能是系统负荷较大或资源锁死，此时 httpd 进程并没有异常退出，这种情况下可直接重启容器。而 K8s 的 Liveness 机制刚好能解决此类问题（即出现此类问题会直接 Kill 掉容器并重新启动）。</p>
+<h2 id="二、Liveness"><a href="#二、Liveness" class="headerlink" title="二、Liveness"></a>二、Liveness</h2><p>Liveness 探针让用户可以自定义判断容器是否健康的条件，如果探测失败，K8s 就会重启容器，如下案例：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    <span class="built_in">test</span>: liveness</span><br><span class="line">  name: liveness-exec</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: busybox</span><br><span class="line">    args:</span><br><span class="line">    - /bin/sh</span><br><span class="line">    - -c</span><br><span class="line">    - <span class="built_in">touch</span> /tmp/healthy; <span class="built_in">sleep</span> 30; <span class="built_in">rm</span> -f /tmp/healthy; <span class="built_in">sleep</span> 600</span><br><span class="line">    livenessProbe:</span><br><span class="line">      <span class="built_in">exec</span>:</span><br><span class="line">        <span class="built_in">command</span>:</span><br><span class="line">        - <span class="built_in">cat</span></span><br><span class="line">        - /tmp/healthy</span><br><span class="line">      initialDelaySeconds: 5</span><br><span class="line">      periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>在这个配置文件中，可以看到 Pod 中只有一个 <code>Container</code>。 <code>periodSeconds</code> 字段指定了 kubelet 应该每 5 秒执行一次存活探测。 <code>initialDelaySeconds</code> 字段告诉 kubelet 在执行第一次探测前应该等待 5 秒（即 5 秒后才开始启动探针）。 kubelet 在容器内执行命令 <code>cat /tmp/healthy</code> 来进行探测。 如果命令执行成功并且返回值为 0，kubelet 就会认为这个容器是健康存活的。 如果这个命令返回非 0 值，kubelet 会杀死这个容器并重新启动它。当容器启动时，会执行如下的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/bin/sh -c &quot;touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600&quot;</span><br></pre></td></tr></table></figure>
+
+<p>这个容器生命的前 30 秒，<code>/tmp/healthy</code> 文件是存在的。 所以在这最开始的 30 秒内，执行命令 <code>cat /tmp/healthy</code> 会返回成功代码。 30 秒之后，执行命令 <code>cat /tmp/healthy</code> 就会返回失败代码。</p>
+<p>执行 <code>kubectl apply</code> 创建 Pod 。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f liveness.yml</span><br></pre></td></tr></table></figure>
+
+<p>查看 Pod 启动日志：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod liveness-exec</span><br></pre></td></tr></table></figure>
+
+<p>前 30s <code>/tmp/healthy</code> 文件是存在的：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221222113744208.png" alt="image-20221222113744208"></p>
+<p>35s 后检测到<code>/tmp/healthy</code> 文件已经不存在：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221222114051362.png" alt="image-20221222114051362"></p>
+<p>再过十几秒后容器被重启：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221222114308594.png" alt="image-20221222114308594"></p>
+<h2 id="三、Readiness"><a href="#三、Readiness" class="headerlink" title="三、Readiness"></a>三、Readiness</h2><p>除了可以自定义判断容器是否健康的条件外，用户也可以通过 <code>Readiness</code> 探针告诉 K8s 什么时候可以重启容器实现自愈，<code>Readiness</code> 探针则告诉 K8s 什么时候可以将容器加入到 Service 负载均衡池中，对外提供服务。就绪探针的配置和存活探针的配置相似。 唯一区别就是要使用 <code>readinessProbe</code> 字段，而不是 <code>livenessProbe</code> 字段。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">kind: Pod</span><br><span class="line">metadata:</span><br><span class="line">  labels:</span><br><span class="line">    <span class="built_in">test</span>: readiness</span><br><span class="line">  name: readiness-exec</span><br><span class="line">spec:</span><br><span class="line">  containers:</span><br><span class="line">  - name: liveness</span><br><span class="line">    image: busybox</span><br><span class="line">    args:</span><br><span class="line">    - /bin/sh</span><br><span class="line">    - -c</span><br><span class="line">    - <span class="built_in">touch</span> /tmp/healthy; <span class="built_in">sleep</span> 30; <span class="built_in">rm</span> -f /tmp/healthy; <span class="built_in">sleep</span> 600</span><br><span class="line">    readinessProbe:</span><br><span class="line">      <span class="built_in">exec</span>:</span><br><span class="line">        <span class="built_in">command</span>:</span><br><span class="line">        - <span class="built_in">cat</span></span><br><span class="line">        - /tmp/healthy</span><br><span class="line">      initialDelaySeconds: 5</span><br><span class="line">      periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>看看启动日志，与 <code>Liveness</code> 探针类似</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe pod readiness-exec</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221222121220005.png" alt="image-20221222121220005"></p>
+<p>Probe 有很多配置字段，可以使用这些字段精确地控制启动、存活和就绪检测的行为：</p>
+<ul>
+<li><code>initialDelaySeconds</code>：容器启动后要等待多少秒后才启动启动、存活和就绪探针， 默认是 0 秒，最小值是 0。</li>
+<li><code>periodSeconds</code>：执行探测的时间间隔（单位是秒）。默认是 10 秒。最小值是 1。</li>
+<li><code>timeoutSeconds</code>：探测的超时后等待多少秒。默认值是 1 秒。最小值是 1。</li>
+<li><code>successThreshold</code>：探针在失败后，被视为成功的最小连续成功数。默认值是 1。 存活和启动探测的这个值必须是 1。最小值是 1。</li>
+<li><code>failureThreshold</code>：当探测失败时，Kubernetes 的重试次数。 对存活探测而言，放弃就意味着重新启动容器。 对就绪探测而言，放弃意味着 Pod 会被打上未就绪的标签。默认值是 3。最小值是 1。</li>
+</ul>
+<p><mark>注意</mark>：存活探针 <strong>不等待</strong> 就绪性探针成功。如果要在执行存活探针之前等待就绪性探针，应该使用 <code>initialDelaySeconds</code> 或 <code>startupProbe</code>。</p>
+<h2 id="四、Startup"><a href="#四、Startup" class="headerlink" title="四、Startup"></a>四、Startup</h2><p>Startup 是 <code>k8s 1.16+</code> 版本后新加的探测方式，用于判断容器内应用程序是否已经启动，如果同时配置了 <code>startuprobe</code>、<code>Livenessprobe</code>、<code>Readinessprobe</code>，K8s 就会先禁用其他的探针，而首先使用 <code>startuprobe </code>探测直到它成功为止，成功后将不再进行探测。</p>
+<p><strong>startupProbe 探针与另两种区别？</strong></p>
+<ul>
+<li><p>如果三个探针同时存在，先执行startupProbe探针，其他两个探针将会被暂时禁用，直到pod满足startupProbe探针配置的条件，其他2个探针启动，如果不满足按照规则重启容器。</p>
+</li>
+<li><p>另外两种探针在容器启动后，会按照配置，直到容器消亡才停止探测，而startupProbe探针只是在容器启动后按照配置满足一次后，不在进行后续的探测。</p>
+</li>
+</ul>
+<p><mark>那 Startup 存在的意义又是什么呢？</mark></p>
+<p>试想一个问题，如果启动一个服务需要 1 分钟，如果没有 <code>Startup</code> 的情况下，且假设我们配置了 <code>livenessProbe</code> 探针，具体如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">livenessProbe:</span><br><span class="line">  httpGet:</span><br><span class="line">    path: /test</span><br><span class="line">    prot: 80</span><br><span class="line">failureThreshold: 6</span><br><span class="line">initialDelay：40</span><br><span class="line">periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>我们设置了失败重试次数为 6，每 5 秒探测一次，加上我们探测前等待的 40 秒，总时间就是：40 + 6 x 5 &#x3D; 70s，这样 Pod 确实能够启动起来。那问题又来了，如果这个配置用于生产配置上，将会导致我们比较晚的收到服务不可用的情况，也就是说我的服务可能在 5s 时已经不可用，但是由于我们探测机制（有 6 次失败重试的机会），我们在至少 6 x 5 &#x3D; 30s 才会发现服务不可用的情况，这在生产上一般是不被允许的。<strong>那该如何解决类似这样的问题呢？</strong>答案就是 <code>startupProbe</code>。</p>
+<blockquote>
+<p>注意上面这个案例，如果 <code>failureThreshold</code> 设置为 1 或 2，那这个服务是永远起不起来的，因为你把 <code>initialDelay</code> 的时间算上也不足 1 分钟，因为我们说启动至少需要 1 分钟，那超过失败重试次数后，就会根据 Pod 的 <code>restartPolicy</code> 来重启容器。</p>
+</blockquote>
+<p>接着我们引入 <code>startupProbe</code>，继续优化：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">livenessProbe:</span><br><span class="line">  httpGet:</span><br><span class="line">    path: /test</span><br><span class="line">    prot: 80</span><br><span class="line">failureThreshold: 1</span><br><span class="line">initialDelaySeconds：5</span><br><span class="line">periodSeconds: 5</span><br><span class="line"></span><br><span class="line">startupProbe:</span><br><span class="line">  httpGet:</span><br><span class="line">    path: /test</span><br><span class="line">    prot: 80</span><br><span class="line">failureThreshold: 60</span><br><span class="line">initialDelaySeconds：5</span><br><span class="line">periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>前面说了，<code>startupProbe</code> 会在探测成功后停止探测，而其他两种探针则是随着 Pod 的生命周期一直在探测的。因此上面的配置功能就是：K8s 部署服务后会在 5s 后启动 <code>startupProbe</code>，在 5 x 60 &#x3D; 300s 的时间内只要成功探测到服务则停止探测（否则需接受 Pod 的重启策略进行重启），并启用 <code>livenessProbe</code> 探针，此时<code>livenessProbe</code> 探针就会伴随着 Pod 的生命周期每 5s 检测一次，且我们只设置了 1 次失败重试的机会，这就意味着我们只需要在 1 x 5 &#x3D; 5s 时间就可以发现服务不可用。因此，你配置了 <code>startupProbe</code>，那其他2种探针如果配置了<code>initialDelaySeconds</code>，建议时间就不要给太长。<mark>这就是 Startup 探针存在的意义。</mark></p>
+<h2 id="五、应用场景"><a href="#五、应用场景" class="headerlink" title="五、应用场景"></a>五、应用场景</h2><p>从上面的实验来看，探针的作用是很明显的，那这些探针在实际工作中是如何应用的呢？</p>
+<h3 id="5-1-在-Scale-Up-中的应用"><a href="#5-1-在-Scale-Up-中的应用" class="headerlink" title="5.1 在 Scale Up 中的应用"></a>5.1 在 Scale Up 中的应用</h3><p>当我们执行 <code>Scale Up</code> 操作时（如新增副本数），新副本会作为 backend 被添加到 Service 的负载均衡中，与已有的副本一起处理客户的请求。考虑到应用启动通常都需要一个准备阶段，如加载缓存数据、连接数据库等，也就是说从容器启动到真正能够提供服务是需要一段时间的，此时，我们就可以通过 Readiness 探测判断容器是否就绪，避免将请求发送到还没准备好的 backend。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: web</span><br><span class="line">spec:</span><br><span class="line">  replicas: 3</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      run: web</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        run: web</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: web</span><br><span class="line">        image: httpd</span><br><span class="line">        ports:</span><br><span class="line">        - containerPort: 80</span><br><span class="line">        readinessProbe:</span><br><span class="line">          httpGet:</span><br><span class="line">            scheme: HTTP</span><br><span class="line">            path: /</span><br><span class="line">            port: 80</span><br><span class="line">          initialDelaySeconds: 5</span><br><span class="line">          periodSeconds: 5</span><br><span class="line">---</span><br><span class="line">apiVersion: v1</span><br><span class="line">kind: Service</span><br><span class="line">metadata:</span><br><span class="line">  name: web-svc</span><br><span class="line">spec:</span><br><span class="line">  selector:</span><br><span class="line">    run: web</span><br><span class="line">  ports:</span><br><span class="line">  - protocol: TCP</span><br><span class="line">    port: 80</span><br><span class="line">    targetPort: 80</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看 Pod 是否正常</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227102346704.png" alt="image-20221227102346704"></p>
+<blockquote>
+<p>查看 Service 资源</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227102527625.png" alt="image-20221227102527625"></p>
+<blockquote>
+<p>集群请求验证</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227102754960.png" alt="image-20221227102754960"></p>
+<p>因此不难看出，就绪探针的好处就是，只有等待 Pod 完全就绪后才会接收来自客户端的请求。</p>
+<p>完整流程就是：</p>
+<ul>
+<li>容器启动 5s 后开始进行就绪探测；</li>
+<li>如果 GET 请求的 <a target="_blank" rel="noopener external nofollow noreferrer" href="http://container_ip/">http://container_ip:80/</a> 返回代码不是 200~400，则表示容器没就绪，此时该容器不接收 Service web-svc 的请求；</li>
+<li>之后会每隔 5s 探测一次；</li>
+<li>直到 GET 请求的 <a target="_blank" rel="noopener external nofollow noreferrer" href="http://container_ip/">http://container_ip:80/</a> 返回代码为 200~400，则表示容器已经就绪，此时该容器将加入到 web-svc 的负载均衡中，开始处理客户的请求；</li>
+<li>探针还会继续以 5s 的时间间隔探测，如果连续发生 3 次失败（YAML 文件中未指定，默认为 3 次，可通过 <code>failureThreshold</code> 来指定），容器又会从负载均衡中移除，直到下次探测成功再重新加入。</li>
+</ul>
+<p><mark>注意，这里我没有做 NodePort 类型哦，但并不影响我们的实验。</mark></p>
+<h3 id="5-2-在滚动更新中的应用"><a href="#5-2-在滚动更新中的应用" class="headerlink" title="5.2 在滚动更新中的应用"></a>5.2 在滚动更新中的应用</h3><p>还有一个比较重要的应用场景就是<code>滚动更新（Rolling Update）</code>，试想一下，现有一个正常运行的多副本应用，接下来对应用进行更新（如升级镜像版本），K8s 会启动新副本，就会存在一下两种情况：</p>
+<ul>
+<li>正常情况下新副本需要 10s 来完成准备工作，在此期间是无法响应业务请求的；</li>
+<li>由于人为配置错误，副本始终无法完成准备工作（如无法连接后端数据库）。</li>
+</ul>
+<p>那如果出现以上的两种情况，且又没有配置探针的话，会出现什么问题呢？</p>
+<p>新副本本身没有异常退出，那默认的健康检查机制就会认为容器已经就绪，进而就会逐步用新的副本替换现有的副本。最终结果就是：所有旧副本都被替换后，整个应用将无法对外提供服务，那这在生产上是绝对不允许的。</p>
+<p>那如果配置了对应的探针机制后，新副本只有通过了 Readiness 探测才会被添加到 Service 中，如果没有通过探测，则现有副本就不会被全部替换（根据比例可能会替换部分），业务仍然正常进行。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim app-v1.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: app</span><br><span class="line">spec:</span><br><span class="line">  replicas: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      run: app</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        run: app</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: app</span><br><span class="line">        image: busybox</span><br><span class="line">        args:</span><br><span class="line">        - /bin/sh</span><br><span class="line">        - -c</span><br><span class="line">        - <span class="built_in">sleep</span> 10; <span class="built_in">touch</span> /tmp/healthy; <span class="built_in">sleep</span> 30000</span><br><span class="line">        readinessProbe:</span><br><span class="line">          <span class="built_in">exec</span>:</span><br><span class="line">            <span class="built_in">command</span>:</span><br><span class="line">            - <span class="built_in">cat</span></span><br><span class="line">            - /tmp/healthy</span><br><span class="line">          initialDelaySeconds: 10</span><br><span class="line">          periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f app-v1.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可看到10s后副本通过readinessProbe探测</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227121011463.png" alt="image-20221227121011463"></p>
+<p>接下来进行滚动更新应用。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim app-v2.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: app</span><br><span class="line">spec:</span><br><span class="line">  replicas: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      run: app</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        run: app</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: app</span><br><span class="line">        image: busybox</span><br><span class="line">        args:</span><br><span class="line">        - /bin/sh</span><br><span class="line">        - -c</span><br><span class="line">        - <span class="built_in">sleep</span> 3000</span><br><span class="line">        readinessProbe:</span><br><span class="line">          <span class="built_in">exec</span>:</span><br><span class="line">            <span class="built_in">command</span>:</span><br><span class="line">            - <span class="built_in">cat</span></span><br><span class="line">            - /tmp/healthy</span><br><span class="line">          initialDelaySeconds: 10</span><br><span class="line">          periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<p>很显然，本次的更新的新副本中并没有 <code>/tmp/healthy</code> 文件，因此是无法通过 <code>readiness</code> 探测的，开始更新服务。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl apply -f app-v1.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl get pod</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227141219466.png" alt="image-20221227141219466"></p>
+<p><mark>从 kubectl get pod 输出结果分析：</mark></p>
+<ul>
+<li>从启动时间（AGE）可判断，开头 5 个是新副本，出于 NOTREADY 状态；</li>
+<li>旧副本从最初的 10 个减少到 8 个。</li>
+</ul>
+<p><mark>从 kubectl get deployment app 输出结果分析：</mark></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227141624890.png" alt="image-20221227141624890"></p>
+<ul>
+<li>READY：就绪个数&#x2F;期望个数；</li>
+<li>UP-TO-DATE：为了达到期望状态，已经更新的副本数；</li>
+<li>AVAILABLE：可供用户使用的副本数。</li>
+</ul>
+<p>在我们的设定中，新副本始终都无法通过 Readiness 探测，所以这个状态会一直持续下去。对于 K8s 健康检查机制来说，它帮我们屏蔽了有缺陷的副本，同时保留了大部分旧副本，业务没有因为更新失败受到影响。</p>
+<p><mark>为什么新创建的副本数是 5 个，同时只销毁了 2 个旧副本？</mark></p>
+<p>原因是：滚动更新通过参数 <code>maxSurge</code> 和 <code>maxUnavailable</code> 来控制副本替换的数量。</p>
+<p><strong>maxSurge</strong></p>
+<p>此参数控制滚动更新过程中副本总数超过 <code>READY</code> 期望数的上限。maxSurge 可以是具体的整数，也可以是百分比，向上取整。若不指定，则 maxSurge 的默认值为 25%。</p>
+<p>在上面的例子中，期望是 10，那副本总数的最大值为：10 + 10 x 25% &#x3D; 13，所以我们看到的 Pod 数为 13 个就是这么来的。</p>
+<p><strong>maxUnavailable</strong></p>
+<p>此参数控制滚动更新过程中，不可用的副本数占期望数的最大比例。maxUnavailable 可以是整数，也可以是百分比，向下取整。若不指定，则 maxUnavailable 的默认值为 25%。</p>
+<p>在上面的例子中，期望是 10，那可用的副本数至少要为：10 - 10 x 25% &#x3D; 8，所以我们看到的 Pod 中只有 8 个是可用的。</p>
+<p><mark>因此，理想情况下，我们这个案例的滚动更新过程是这样的：</mark></p>
+<ul>
+<li>创建 3 个新副本，使副本总数达到 13 个；</li>
+<li>销毁 2 个旧副本，使可用副本数降到 8 个；</li>
+<li>当 2 个旧副本销毁成功后，再创建 2 个新副本，使副本数保持为 13 个；</li>
+<li>当新副本通过 Readiness 探测后，会使可用副本数增加，超过 8 个；</li>
+<li>进而可继续销毁更多的旧副本，使可用副本数回到 8 个；</li>
+<li>旧副本的销毁会使副本总数低于 13，这样就允许创建更多的新副本；</li>
+<li>这个过程会持续进行，直到所有的旧副本都被新副本替换，滚动更新才完成。</li>
+</ul>
+<p>而上面案例中，我们在第四步就卡主了，因为新的副本无法通过 Readiness 探测。这个过程可通过 Deployment 日志部分来查看。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl describe deployment app</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227150137960.png" alt="image-20221227150137960"></p>
+<p>因此，对于上面的滚动更新失败案例，我们想要恢复原来正常提供的服务，我们只需要进行回滚操作即可。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先看看可回滚的历史版本（revision）</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment app</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227150540721.png" alt="image-20221227150540721"></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看revision的详情</span></span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment app --revision=1</span><br><span class="line">kubectl rollout <span class="built_in">history</span> deployment app --revision=2</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227150744680.png" alt="image-20221227150744680"></p>
+<p>很明显，<code>revision = 1</code> 就是我们最初的版本，我们只需要回滚到这个版本上即可。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl rollout undo deployment app --to-revision=1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可看到，之前被销毁的两个Pod已经启动且为可用状态</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221227151243160.png" alt="image-20221227151243160"></p>
+<p><mark>如何在 YAML 文件中指定 maxSurge 和 maxUnavailable？</mark></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: apps/v1</span><br><span class="line">kind: Deployment</span><br><span class="line">metadata:</span><br><span class="line">  name: app</span><br><span class="line">spec:</span><br><span class="line">  strategy:</span><br><span class="line">    rollingUpdate:</span><br><span class="line">      maxSurge: 35%</span><br><span class="line">      maxUnavailable: 35%</span><br><span class="line">  replicas: 10</span><br><span class="line">  selector:</span><br><span class="line">    matchLabels:</span><br><span class="line">      run: app</span><br><span class="line">  template:</span><br><span class="line">    metadata:</span><br><span class="line">      labels:</span><br><span class="line">        run: app</span><br><span class="line">    spec:</span><br><span class="line">      containers:</span><br><span class="line">      - name: app</span><br><span class="line">        image: busybox</span><br><span class="line">        args:</span><br><span class="line">        - /bin/sh</span><br><span class="line">        - -c</span><br><span class="line">        - <span class="built_in">sleep</span> 10; <span class="built_in">touch</span> /tmp/healthy; <span class="built_in">sleep</span> 30000</span><br><span class="line">        readinessProbe:</span><br><span class="line">          <span class="built_in">exec</span>:</span><br><span class="line">            <span class="built_in">command</span>:</span><br><span class="line">            - <span class="built_in">cat</span></span><br><span class="line">            - /tmp/healthy</span><br><span class="line">          initialDelaySeconds: 10</span><br><span class="line">          periodSeconds: 5</span><br></pre></td></tr></table></figure>
+
+<hr>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://rabcnops.github.io">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://rabcnops.github.io/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/">https://rabcnops.github.io/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://rabcnops.github.io" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/K8s/">K8s</a><a class="post-meta__tags" href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2023/03/23/Ansible-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" title="Ansible 快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Ansible 快速入门</div></div></a></div></nav><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E9%BB%98%E8%AE%A4%E5%81%A5%E5%BA%B7%E6%A3%80%E6%B5%8B"><span class="toc-text">一、默认健康检测</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-restartPolicy"><span class="toc-text">1.1 restartPolicy</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E6%B5%8B%E8%AF%95%E6%A1%88%E4%BE%8B"><span class="toc-text">1.2 测试案例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Liveness"><span class="toc-text">二、Liveness</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81Readiness"><span class="toc-text">三、Readiness</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Startup"><span class="toc-text">四、Startup</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">五、应用场景</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E5%9C%A8-Scale-Up-%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-text">5.1 在 Scale Up 中的应用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E5%9C%A8%E6%BB%9A%E5%8A%A8%E6%9B%B4%E6%96%B0%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="toc-text">5.2 在滚动更新中的应用</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/03/23/Docker%20%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%EF%BC%88%E6%95%B0%E6%8D%AE%EF%BC%89%E5%85%B1%E4%BA%AB/" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/2023/03/23/Docker%20%E5%AE%B9%E5%99%A8%E6%96%87%E4%BB%B6%EF%BC%88%E6%95%B0%E6%8D%AE%EF%BC%89%E5%85%B1%E4%BA%AB/" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/23/Docker-%E5%AE%B9%E5%99%A8%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/2023/03/23/Docker-%E5%AE%B9%E5%99%A8%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/23/Linux%20%E7%8E%AF%E5%A2%83%E4%B8%8B%20Docker%20%E5%AE%B9%E5%99%A8%E7%9A%84%20PID%20%E5%8F%98%E5%8C%96%E6%83%85%E5%86%B5/" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/2023/03/23/Linux%20%E7%8E%AF%E5%A2%83%E4%B8%8B%20Docker%20%E5%AE%B9%E5%99%A8%E7%9A%84%20PID%20%E5%8F%98%E5%8C%96%E6%83%85%E5%86%B5/" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/23/Ansible-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/2023/03/23/Ansible-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/" title="K8s 探针"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="K8s 探针"/></a><div class="content"><a class="title" href="/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/" title="K8s 探针">K8s 探针</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://rabcnops.github.io/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/'
+    this.page.identifier = '/2023/03/23/01/K8s%20%E6%8E%A2%E9%92%88/'
+    this.page.title = 'K8s 探针'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
