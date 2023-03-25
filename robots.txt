@@ -1,0 +1,6 @@
+# hexo robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://blog.rabcnops.cn/sitemap.xml
+Sitemap: https://blog.rabcnops.cn/baidusitemap.xml
