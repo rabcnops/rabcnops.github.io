@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://rabcnops.github.io/01/K8s%20%E6%8E%A2%E9%92%88.html</loc>
+    <loc>https://rabcnops.github.io/K8s%20%E6%8E%A2%E9%92%88/K8s%20%E6%8E%A2%E9%92%88.html</loc>
     
     <lastmod>2023-03-25</lastmod>
     
@@ -83,6 +83,13 @@
 
   
   <url>
+    <loc>https://rabcnops.github.io/tags/Docker/</loc>
+    <lastmod>2023-03-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
     <loc>https://rabcnops.github.io/tags/Ansible/</loc>
     <lastmod>2023-03-25</lastmod>
     <changefreq>weekly</changefreq>
@@ -91,13 +98,6 @@
   
   <url>
     <loc>https://rabcnops.github.io/tags/Linux/</loc>
-    <lastmod>2023-03-25</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://rabcnops.github.io/tags/Docker/</loc>
     <lastmod>2023-03-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
