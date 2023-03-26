@@ -1,0 +1,725 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>基于 Linux 的 Docker Swarm 集群部署及应用 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基于 Linux 的 Docker Swarm 集群部署及应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Linux 的 Docker Swarm 集群部署及应用">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/3717b6ec.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="基于 Linux 的 Docker Swarm 集群部署及应用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp">
+<meta property="article:published_time" content="2023-03-23T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-26T06:44:59.499Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Docker Swarm">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/3717b6ec.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '基于 Linux 的 Docker Swarm 集群部署及应用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-26 14:44:59'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">基于 Linux 的 Docker Swarm 集群部署及应用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-26T06:44:59.499Z" title="更新于 2023-03-26 14:44:59">2023-03-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>29分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="基于 Linux 的 Docker Swarm 集群部署及应用"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" alt="docker-docs"></p>
+<p><font color="Brown"><strong>Author</strong>：rab</font> </p>
+<p><font color="Brown"><strong>Date</strong>：2022&#x2F;08&#x2F;01</font> </p>
+<p><font color="Brown"><strong>Blog</strong>：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/IT_ZRS?type=blog"><font color="Brown">https://blog.csdn.net/IT_ZRS?type&#x3D;blog</font></a></font></p>
+<hr>
+<h2 id="一、规划"><a href="#一、规划" class="headerlink" title="一、规划"></a>一、规划</h2><h3 id="1-1-主机规划"><a href="#1-1-主机规划" class="headerlink" title="1.1 主机规划"></a>1.1 主机规划</h3><table>
+<thead>
+<tr>
+<th>OS</th>
+<th>Service</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>192.168.56.161（2C&#x2F;2G）</td>
+<td>Docker</td>
+<td>Docker_Swarm_Manager（Work）</td>
+</tr>
+<tr>
+<td>192.168.56.162（2C&#x2F;2G）</td>
+<td>Docker</td>
+<td>Docker_Swarm_Work1</td>
+</tr>
+<tr>
+<td>192.168.56.163（2C&#x2F;2G）</td>
+<td>Docker</td>
+<td>Docker_Swarm_Work2</td>
+</tr>
+</tbody></table>
+<p>⚠注意：如果你是正式环境下进行部署，Manager 必须大于等于 3 台且为奇数（因为在 Manager 挂掉后要进行新 Manager 选举）。该文档的内容结合官方来进行简单测试使用，生成环境中最低服务器数量为（3主+3从）。</p>
+<h3 id="1-2-版本规划"><a href="#1-2-版本规划" class="headerlink" title="1.2 版本规划"></a>1.2 版本规划</h3><ul>
+<li><strong>Linux</strong>：CentOS 7.9</li>
+<li><strong>Docker</strong>：18.06.3</li>
+</ul>
+<p>&#x3D;&#x3D;更加具体资料请参考官方文档&#x3D;&#x3D;（<a target="_blank" rel="noopener external nofollow noreferrer" href="https://docs.docker.com/">官方参考文档</a>）</p>
+<h2 id="二、部署"><a href="#二、部署" class="headerlink" title="二、部署"></a>二、部署</h2><h3 id="2-1-Docker-服务部署"><a href="#2-1-Docker-服务部署" class="headerlink" title="2.1 Docker 服务部署"></a>2.1 Docker 服务部署</h3><p>直接执行我下面给的安装脚本即可，安装路径你可以安装完成后再自行更改，我这是一个快速自动化安装脚本，不存再路径优化项。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">#</span><span class="language-bash">！/bin/bash</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">@Default version：18.06.3</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">@Auth：rab</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">@Date：2021/12/11</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">@适用版本：CentOS 7/8</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看是否安装</span></span><br><span class="line">rpm -qa | grep docker &amp;&gt; /dev/null</span><br><span class="line">if [ $? -eq 0 ];then</span><br><span class="line">	v=`rpm -qa |grep docker |awk -F &#x27;-&#x27; &#x27;&#123;print $3&#125;&#x27;`</span><br><span class="line">	echo &quot;docker-ce已经安装，版本为：$v&quot;</span><br><span class="line">	read -p &quot;是否卸载原docker版本并安装其他版本？[y/n] &quot; r</span><br><span class="line">    if [ $r = &quot;y&quot; ];then</span><br><span class="line">        yum remove -y `rpm -qa | grep docker` &amp;&gt; /dev/null</span><br><span class="line">        rpm -qa | grep docker &amp;&gt; /dev/null</span><br><span class="line">        if [ $? -ne 0 ]; then</span><br><span class="line">	    	echo &quot;原docker卸载成功！！&quot;</span><br><span class="line">	    else</span><br><span class="line">	    	echo &quot;原docker卸载失败！！&quot;</span><br><span class="line">	    	exit 1</span><br><span class="line">	    fi</span><br><span class="line">	    # step 1: 安装必要的一些系统工具</span><br><span class="line">		yum install -y yum-utils device-mapper-persistent-data lvm2 &amp;&gt; /dev/null</span><br><span class="line"><span class="meta prompt_">		# </span><span class="language-bash">Step 2: 添加软件源信息</span></span><br><span class="line">		yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo &amp;&gt; /dev/null</span><br><span class="line"><span class="meta prompt_">		# </span><span class="language-bash">Step 3</span></span><br><span class="line">		sed -i &#x27;s+download.docker.com+mirrors.aliyun.com/docker-ce+&#x27; /etc/yum.repos.d/docker-ce.repo</span><br><span class="line"><span class="meta prompt_">		# </span><span class="language-bash">Step 4: 更新并安装Docker-CE</span></span><br><span class="line">       echo &quot;正在建立docker-ce缓存&quot;</span><br><span class="line">		yum makecache       </span><br><span class="line">	    zz=`yum list docker-ce.x86_64 --showduplicates | sort -r |grep docker-ce.x86_64 |awk &#x27;&#123;print $2&#125;&#x27;`</span><br><span class="line">	    for rr in $zz</span><br><span class="line">        do</span><br><span class="line">            echo &quot;可选安装版本：$rr&quot;</span><br><span class="line">        done</span><br><span class="line">        read -p &quot;选择要安装的docker版本[如18.06.3.ce-3.el7]: &quot; o</span><br><span class="line">        echo &quot;&quot;</span><br><span class="line">        echo &quot;正在安装 docker-ce-$o，请耐心等待.....&quot;                         </span><br><span class="line">        yum -y install docker-ce-$o</span><br><span class="line">        if [ $? -eq 0 ]; then</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;安装成功！！&quot;</span><br><span class="line">        else</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;安装失败！！&quot;</span><br><span class="line">            exit 2</span><br><span class="line">        fi</span><br><span class="line">        # 启动docker</span><br><span class="line">        systemctl enable docker.service</span><br><span class="line">        systemctl start docker.service</span><br><span class="line">        if [ $? -eq 0 ]; then</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;启动成功！！&quot;</span><br><span class="line">        else</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;启动失败！！&quot;</span><br><span class="line">            exit 2</span><br><span class="line">        fi</span><br><span class="line">        # 配置加速器</span><br><span class="line">        touch /etc/docker/daemon.json</span><br><span class="line">        tee /etc/docker/daemon.json &lt;&lt;-&#x27;EOF&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://q1rw9tzz.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">		if [ $? -eq 0 ]; then</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;阿里加速器配置成功！！&quot;</span><br><span class="line">        else</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;阿里加速器配置失败！！&quot;</span><br><span class="line">            exit 2</span><br><span class="line">        fi</span><br><span class="line"><span class="meta prompt_">		# </span><span class="language-bash">重启docker</span></span><br><span class="line">		systemctl daemon-reload</span><br><span class="line">		systemctl restart docker</span><br><span class="line">		if [ $? -eq 0 ]; then</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;重启成功！！&quot;</span><br><span class="line">        else</span><br><span class="line">            echo &quot;docker-ce-$&#123;o&#125;重启失败！！&quot;</span><br><span class="line">            exit 2</span><br><span class="line">        fi</span><br><span class="line">	else</span><br><span class="line">	    echo &quot;继续使用原版本，退出执行脚本！！&quot; &amp;&amp; exit 1</span><br><span class="line">	fi</span><br><span class="line">else</span><br><span class="line">	echo &quot;docker未安装，将继续执行安装脚本！！&quot;</span><br><span class="line">        echo &quot;正在搜索可安装的 Docker 版本，请耐心等待.....&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">step 1: 安装必要的一些系统工具</span></span><br><span class="line">	yum install -y yum-utils device-mapper-persistent-data lvm2 &amp;&gt; /dev/null</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">Step 2: 添加软件源信息</span></span><br><span class="line">	yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo &amp;&gt; /dev/null</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">Step 3</span></span><br><span class="line">	sed -i &#x27;s+download.docker.com+mirrors.aliyun.com/docker-ce+&#x27; /etc/yum.repos.d/docker-ce.repo</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">Step 4: 更新并安装Docker-CE</span></span><br><span class="line">   echo &quot;正在建立docker-ce缓存&quot;</span><br><span class="line">	yum makecache</span><br><span class="line">	zz=`yum list docker-ce.x86_64 --showduplicates | sort -r |grep docker-ce.x86_64 |awk &#x27;&#123;print $2&#125;&#x27;`</span><br><span class="line">	for rr in $zz</span><br><span class="line">    do</span><br><span class="line">        echo &quot;可选安装版本：$rr&quot;</span><br><span class="line">    done</span><br><span class="line">    read -p &quot;选择要安装的docker版本[如18.06.3.ce-3.el7]: &quot; o</span><br><span class="line">    echo &quot;&quot;</span><br><span class="line">    echo &quot;正在安装 docker-ce-$o，请耐心等待.....&quot;</span><br><span class="line"></span><br><span class="line">    yum -y install docker-ce-$o &amp;&gt; /dev/null</span><br><span class="line">    if [ $? -eq 0 ]; then</span><br><span class="line">        echo &quot;docker-ce-$&#123;o&#125;安装成功！！&quot;</span><br><span class="line">    else</span><br><span class="line">        echo &quot;docker-ce-$&#123;o&#125;安装失败！！&quot;</span><br><span class="line">        exit 2</span><br><span class="line">    fi</span><br><span class="line">    # 启动docker</span><br><span class="line">    systemctl enable docker.service</span><br><span class="line">    systemctl start docker.service</span><br><span class="line">    if [ $? -eq 0 ]; then</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;启动成功！！&quot;</span><br><span class="line">	else</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;启动失败！！&quot;</span><br><span class="line">		exit 2</span><br><span class="line">	fi</span><br><span class="line">    # 配置加速器</span><br><span class="line">    touch /etc/docker/daemon.json</span><br><span class="line">tee /etc/docker/daemon.json &lt;&lt;-&#x27;EOF&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://q1rw9tzz.mirror.aliyuncs.com&quot;]</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line">	if [ $? -eq 0 ]; then</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;阿里加速器配置成功！！&quot;</span><br><span class="line">	else</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;阿里加速器配置失败！！&quot;</span><br><span class="line">		exit 2</span><br><span class="line">	fi</span><br><span class="line"><span class="meta prompt_">	# </span><span class="language-bash">重启docker</span></span><br><span class="line">	systemctl daemon-reload</span><br><span class="line">	systemctl restart docker</span><br><span class="line">	if [ $? -eq 0 ]; then</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;重启成功！！&quot;</span><br><span class="line">	else</span><br><span class="line">		echo &quot;docker-ce-$&#123;o&#125;重启失败！！&quot;</span><br><span class="line">        exit 2</span><br><span class="line">	fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如脚本名为docker_install.sh</span></span><br><span class="line">sudo chmod +x docker_install.sh</span><br><span class="line">./docker_install.sh</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>执行结果如下图所示。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801113214240.png" alt="image-20220801113214240"></p>
+<h3 id="2-2-Docker-Swarm-集群部署"><a href="#2-2-Docker-Swarm-集群部署" class="headerlink" title="2.2 Docker Swarm 集群部署"></a>2.2 Docker Swarm 集群部署</h3><p>其实 Docker Swarm 集群很简单，一条命令即可完成。</p>
+<p>1、初始化 Linux</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改主机名</span></span><br><span class="line">hostnamectl set-hostname Docker_Swarm_Manager</span><br><span class="line">hostnamectl set-hostname Docker_Swarm_Work1</span><br><span class="line">hostnamectl set-hostname Docker_Swarm_Work2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">互作本地解析（三台均执行）</span></span><br><span class="line">192.168.56.161 Docker_Swarm_Manager</span><br><span class="line">192.168.56.162 Docker_Swarm_Work1</span><br><span class="line">192.168.56.163 Docker_Swarm_Work2</span><br></pre></td></tr></table></figure>
+
+<p>2、初始化 Manager</p>
+<blockquote>
+<p>在其中一台 Manager 节点执行（其他 Manager 节点按命令并入即可）</p>
+<p>Manager 节点也可作为 work 节点使用。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">初始化swarm集群，创建主管理节点</span></span><br><span class="line">docker swarm init \</span><br><span class="line">--advertise-addr 192.168.56.161:2377 \</span><br><span class="line">--listen-addr 192.168.56.161:2377</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line">--advertise-addr：其他节点并入集群的入口地址</span><br><span class="line">--listen-addr：该参数是默认的，如果不添加也是默认IP:2377，它的作用主要是安全问题（如你只希望您的 swarm 管理界面只能在管理网络上访问）</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如果已经执行过该命令了，但是又忘记了相关Token信息，可以重新执行；</p>
+<p>注意，该命令在管理节点执行后，则 Docker Swarm 集群将会被解散。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先删除之前生成的相关信息</span></span><br><span class="line">docker swarm leave --force</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再次初始化新的Manager节点</span></span><br><span class="line">docker swarm init \</span><br><span class="line">--advertise-addr 192.168.56.161:2377 \</span><br><span class="line">--listen-addr 192.168.56.161:2377</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801120658124.png" alt="image-20220801120658124"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801120754165.png" alt="image-20220801120754165"></p>
+<p>3、节点如何并入集群</p>
+<ul>
+<li><p>Manager 节点并入集群</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先在已有的Manager管理节点上生成其他Manager节点并入集群的IP+Token信息</span></span><br><span class="line">docker swarm join-token manager</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801120840144.png" alt="image-20220801120840144"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果我有其他想要成为manager的docker节点</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先在已有的manager节点上生成相关接入信息</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">执行生成的命令即可加入集群并成为manager角色</span></span><br><span class="line">docker swarm join --token SWMTKN-1-17fmka1c0l9e6hr66i5ksrl6wreworhx2gwte0644yaij5agvh-4z5yn1vvlvjzghhg1k36bg81k 192.168.56.161:2377</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Work 节点并入集群</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先在已有的Manager管理节点上生成其他Manager节点并入集群的IP+Token信息</span></span><br><span class="line">docker swarm join-token worker</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801121406755.png" alt="image-20220801121406755"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果我有其他想要加入Docker-Swarm集群的work节点</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">首先在已有的manager节点上生成相关接入信息</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">执行生成的命令即可加入集群并成为work角色</span></span><br><span class="line">docker swarm join --token SWMTKN-1-17fmka1c0l9e6hr66i5ksrl6wreworhx2gwte0644yaij5agvh-cbfo8i5ubyp4j80y9sqzam9tj 192.168.56.161:2377</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>&#x3D;&#x3D;以上两种角色的 Token 信息都生成完毕后，就可以将对应的服务器加入集群了&#x3D;&#x3D;</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">work1</span></span><br><span class="line">docker swarm join --token SWMTKN-1-17fmka1c0l9e6hr66i5ksrl6wreworhx2gwte0644yaij5agvh-cbfo8i5ubyp4j80y9sqzam9tj 192.168.56.161:2377</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">work2</span></span><br><span class="line">docker swarm join --token SWMTKN-1-17fmka1c0l9e6hr66i5ksrl6wreworhx2gwte0644yaij5agvh-cbfo8i5ubyp4j80y9sqzam9tj 192.168.56.161:2377</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801121743804.png" alt="image-20220801121743804"></p>
+<p>4、查看 Docker Swarm 集群状态</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801121931133.png" alt="image-20220801121931133"></p>
+<p>5、集群可用性验证</p>
+<blockquote>
+<p>官方案例：Docker Swarm 集群上部署服务</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">部署应用</span></span><br><span class="line">docker service create --replicas 1 --name helloworld alpine ping docker.com</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看部署情况</span></span><br><span class="line">docker service ls</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--name helloworld：指定服务名为helloworld</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">alpine：为指定的镜像名</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ping docker.com：启动服务后执行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801122924054.png" alt="image-20220801122924054"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801123016151.png" alt="image-20220801123016151"></p>
+<p>&#x3D;&#x3D;至此 Docker Swarm 集群部署完毕！&#x3D;&#x3D;</p>
+<h2 id="三、集群基本用法"><a href="#三、集群基本用法" class="headerlink" title="三、集群基本用法"></a>三、集群基本用法</h2><blockquote>
+<p>根据上面的官方案例来演示。</p>
+<p>除非特别说明，否则所有操作均在管理节点执行（操作）。</p>
+<p>更多命令请参考<a target="_blank" rel="noopener external nofollow noreferrer" href="https://docs.docker.com/engine/reference/commandline/node/">官方文档</a></p>
+</blockquote>
+<h3 id="3-1-运行服务"><a href="#3-1-运行服务" class="headerlink" title="3.1 运行服务"></a>3.1 运行服务</h3><p>1、创建服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">部署应用</span></span><br><span class="line">docker service create \</span><br><span class="line">  --replicas 1 \</span><br><span class="line">  --name helloworld \</span><br><span class="line">  --update-parallelism 2 \</span><br><span class="line">  alpine \</span><br><span class="line">  ping docker.com</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看部署情况</span></span><br><span class="line">docker service ls</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--replicas 1：指定运行的服务数（也就是你要启动几个容器）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--name helloworld：指定服务名为helloworld</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--update-parallelism：同时更新的服务数（默认为1--也就是其策略是一个服务一个服务的更新的）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">alpine：为指定的镜像名</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ping docker.com：启动服务后执行的命令</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过私有容器镜像仓库进行部署</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker login registry.example.com</span><br><span class="line">docker service  create \</span><br><span class="line">  --with-registry-auth \</span><br><span class="line">  --name my_service \</span><br><span class="line">  registry.example.com/acme/my_image:latest</span><br></pre></td></tr></table></figure>
+
+<p>2、运行环境</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">docker service create --name helloworld \</span><br><span class="line">  --env MYVAR=myvalue \</span><br><span class="line">  --workdir /tmp \</span><br><span class="line">  --user my_user \</span><br><span class="line">  --hostname=&quot;&#123;&#123;.Node.ID&#125;&#125;-&#123;&#123;.Service.Name&#125;&#125;&quot; \</span><br><span class="line">  alpine ping docker.com</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--<span class="built_in">env</span>：自定义环境变量</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--workdir：指定容器的工作目录</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--user：以什么用户运行容器（用户名/UID）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--hostname：指定容器主机名</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">alpine：镜像名（不指定版本默认最新版本）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ping docker.com：启动服务后执行的命令</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220805114025744.png" alt="image-20220805114025744"></p>
+<p>设置容器主机名案例：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 2 \</span><br><span class="line">  --name redis \</span><br><span class="line">  --hostname=&quot;redis-3&quot; \</span><br><span class="line">  --update-delay 10s \</span><br><span class="line">  --update-parallelism 2 \</span><br><span class="line">  redis:3.0.6</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220805114429641.png" alt="image-20220805114429641"></p>
+<h3 id="3-2-查看服务详情"><a href="#3-2-查看服务详情" class="headerlink" title="3.2 查看服务详情"></a>3.2 查看服务详情</h3><p>1、简要信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service inspect --pretty helloworld</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801123156070.png" alt="image-20220801123156070"></p>
+<p>2、详细信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service inspect helloworld</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801123224388.png" alt="image-20220801123224388"></p>
+<p>管理节点会通过相关调度，在集群节点中启动对应的容器，容器名以集群启动的服务名为基础随机生成。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801144334563.png" alt="image-20220801144334563"></p>
+<h3 id="3-3-动态扩-缩-容"><a href="#3-3-动态扩-缩-容" class="headerlink" title="3.3 动态扩(缩)容"></a>3.3 动态扩(缩)容</h3><h4 id="3-3-1-扩容"><a href="#3-3-1-扩容" class="headerlink" title="3.3.1 扩容"></a>3.3.1 扩容</h4><blockquote>
+<p>上面的测试实例为1，没有副本数，我们可以在集群中动态扩展副本数。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">方法1</span></span><br><span class="line">docker service scale &lt;SERVICE-ID/SERVICE-NAME&gt;=&lt;NUMBER-OF-TASKS&gt;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">方法2</span></span><br><span class="line">docker service update --replicas &lt;NUMBER-OF-TASKS&gt; &lt;SERVICE-ID/SERVICE-NAME&gt;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">案例（这两种方法都可以实现动态扩/缩容，选其一即可）</span></span><br><span class="line">docker service scale helloworld=2</span><br><span class="line">docker service update --replicas 2 helloworld</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看 swarm 集群运行服务的基本状态</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801145037815.png" alt="image-20220801145037815"></p>
+<blockquote>
+<p>查看 swarm 集群运行服务在哪个节点上运行（在哪个节点运行，就在哪个节点启动容器）</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801145215249.png" alt="image-20220801145215249"></p>
+<h4 id="3-3-2-缩容"><a href="#3-3-2-缩容" class="headerlink" title="3.3.2 缩容"></a>3.3.2 缩容</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">其实扩容和缩容的标准就是想对scale和--replicas而言的，如果指定的数值大于当前运行的服务数就是扩容，反之为缩容。</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-删除运行的服务"><a href="#3-4-删除运行的服务" class="headerlink" title="3.4 删除运行的服务"></a>3.4 删除运行的服务</h3><p>1、删除</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service rm helloworld</span><br></pre></td></tr></table></figure>
+
+<p>2、验证是否删除成功</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service ls</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801150310996.png" alt="image-20220801150310996"></p>
+<h3 id="3-5-服务滚动升级"><a href="#3-5-服务滚动升级" class="headerlink" title="3.5 服务滚动升级"></a>3.5 服务滚动升级</h3><p>1、升级步骤（假设运行了三个服务）</p>
+<ul>
+<li>先停止第一个服务；</li>
+<li>为已停止的服务进行升级；</li>
+<li>执行更新任务（如镜像版本升级）；</li>
+<li>若升级完成后返回 <code>RUNNING</code>，则进入自定义的等待时间，等待时间完成后开始下一个服务的升级；</li>
+<li>若更新期间（不管何时），更新返回结果为 <code>FAILED</code>，则停止更新。</li>
+</ul>
+<p>&#x3D;&#x3D;接下来开始实际案例演示&#x3D;&#x3D;</p>
+<p>2、运行 redis 服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">集群启动一个3.0.6版本的redis服务</span></span><br><span class="line">docker service create \</span><br><span class="line">  --replicas 3 \</span><br><span class="line">  --name redis \</span><br><span class="line">  --update-delay 10s \</span><br><span class="line">  --update-parallelism 2 \</span><br><span class="line">  redis:3.0.6</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--replicas 3：服务数为3</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--name redis：运行的服务名（自定义）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--update-delay 10s：更新完成后等待下一个服务跟新的时间（也就是服务间更的间隔时间）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--update-parallelism：同时更新的服务数（默认为1--也就是其策略是一个服务一个服务的更新的）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">redis:3.0.6：指定镜像名</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801153827618.png" alt="image-20220801153827618"></p>
+<p>3、redis 版本更新</p>
+<blockquote>
+<p>Manager 根据 <code>UpdateConfig</code> 策略将更新应用到节点</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将redis镜像版本更新至3.0.7（管理节点执行）</span></span><br><span class="line">docker service update --image redis:3.0.7 redis</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801154553547.png" alt="image-20220801154553547"></p>
+<p>下图是官方更新成功与失败的案例截图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801154427672.png" alt="image-20220801154427672"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新失败后，可尝试重新更新</span></span><br><span class="line">docker service update redis</span><br></pre></td></tr></table></figure>
+
+<p>&#x3D;&#x3D;看看滚动更新效果&#x3D;&#x3D;</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801154926148.png" alt="image-20220801154926148"></p>
+<h3 id="3-6-集群服务回滚"><a href="#3-6-集群服务回滚" class="headerlink" title="3.6 集群服务回滚"></a>3.6 集群服务回滚</h3><blockquote>
+<p>如果升级失败，可进行回滚操作，会回滚到你上一个版本。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker service update \</span><br><span class="line">  --rollback \</span><br><span class="line">  --update-delay 0s \</span><br><span class="line">  my_web</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-7-节点脱离集群"><a href="#3-7-节点脱离集群" class="headerlink" title="3.7 节点脱离集群"></a>3.7 节点脱离集群</h3><blockquote>
+<p>以下方法二选一即可</p>
+</blockquote>
+<p>1、节点脱离集群</p>
+<blockquote>
+<p>工作节点自己主动脱离集群</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使work1脱离集群</span></span><br><span class="line">[root@docker_swarm_work1 opt]# docker swarm leave</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">强制脱离</span></span><br><span class="line">[root@docker_swarm_work1 opt]# docker swarm leave --force</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>查看集群状态</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801143327408.png" alt="image-20220801143327408"></p>
+<p>2、管理节点移除节点</p>
+<blockquote>
+<p>管理节点强制使节点脱离集群</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从管理节点中移除以停止或失效的节点</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除管理节点：</span></span><br><span class="line">docker node demote &lt;节点ID/HOSTNAME&gt;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">移除work节点：</span></span><br><span class="line">docker node rm -f &lt;节点ID/HOSTNAME&gt;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过管理节点使其他节点脱离集群时，如果被移除的这个集群想再次并入集群时，需要做如下操作</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在要并入集群的节点（被管理节点移除的节点）操作</span></span><br><span class="line">docker swarm leave --force</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开始加入集群</span></span><br><span class="line">docker swarm join --token SWMTKN-1-17fmka1c0l9e6hr66i5ksrl6wreworhx2gwte0644yaij5agvh-cbfo8i5ubyp4j80y9sqzam9tj 192.168.56.161:2377</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-8-节点资源耗尽"><a href="#3-8-节点资源耗尽" class="headerlink" title="3.8 节点资源耗尽"></a>3.8 节点资源耗尽</h3><p>如果集群中某节点资源耗尽，那运行在该节点的服务将会发生什么？停止或是转移，答案是会通过管理节点进行相关调度将资源耗尽的节点上的服务进行转移，使其保持正常提供服务。</p>
+<p>1、如下，我运行了三个服务</p>
+<blockquote>
+<p>每个节点都起了一个 redis 服务</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801160542727.png" alt="image-20220801160542727"></p>
+<p>2、故意将 work1 节点置为资源耗尽状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node update --availability drain docker_swarm_work1</span><br></pre></td></tr></table></figure>
+
+<p>3、查看节点是否可用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node inspect --pretty docker_swarm_work1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801160908128.png" alt="image-20220801160908128"></p>
+<p>4、看其上的 redis 服务是否转移了</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">已经转移到管理节点上了</span></span><br><span class="line">docker service ps redis</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801161011290.png" alt="image-20220801161011290"></p>
+<p>5、恢复至可用状态</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node update --availability active docker_swarm_work1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>在看看节点可用状态</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801161244932.png" alt="image-20220801161244932"></p>
+<p>&#x3D;&#x3D;但是要注意，恢复后，原来运行的服务不会因为它再次可用而还原到原来的状态。但是此时该节点可以接收管理节点的正常资源调度。&#x3D;&#x3D;</p>
+<h3 id="3-9-节点角色管理"><a href="#3-9-节点角色管理" class="headerlink" title="3.9 节点角色管理"></a>3.9 节点角色管理</h3><p>1、升级角色</p>
+<blockquote>
+<p>将节点提升为管理节点</p>
+<p>由 work 节点 —&gt;  manage 节点。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node promote &lt;node_name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>2、降级角色</p>
+<blockquote>
+<p>将节点降为工作节点</p>
+<p>由 manage 节点 —&gt;  work 节点。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node demote &lt;node_name&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-10-节点标签管理"><a href="#3-10-节点标签管理" class="headerlink" title="3.10 节点标签管理"></a>3.10 节点标签管理</h3><p>标签有什么用？当你想部署服务某服务到指定的 work 节点时，可以使用标签的方式来实现。当你的节点没有定义标签，而你又以指定标签来创建服务，那服务是起不来的，如果此时你在其他节点打上刚刚你创建服务时指定的标签，那你之前创建的服务（带标签）就会在你正在打标签的这台节点上运行。</p>
+<p>1、添加标签</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker node update docker_swarm_work1 --label-add label=filebeat1</span><br><span class="line">docker node update docker_swarm_work2 --label-add label=filebeat2</span><br><span class="line">docker node update docker_swarm_manager --label-add label=filebeat-m</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">说明：label=filebeat1是一个可以自定义的键值对</span></span><br></pre></td></tr></table></figure>
+
+<p>2、修改标签</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker node update docker_swarm_work1 --label-add label=filebeat1-new</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其实就是同添加标签命令一样，保证 key 相同就会覆盖原 key 的值。</span></span><br></pre></td></tr></table></figure>
+
+<p>3、删除标签</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node update docker_swarm_manager --label-rm label</span><br></pre></td></tr></table></figure>
+
+<p>4、查看节点标签</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker node inspect docker_swarm_work1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220808161747515.png" alt="image-20220808161747515"></p>
+<p>5、标签应用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 1 \</span><br><span class="line">  --name filebeat \</span><br><span class="line">  --network my-network \</span><br><span class="line">  --hostname=&quot;filebeat&quot; \</span><br><span class="line">  --constraint &#x27;node.labels.label == filebeat1&#x27; \</span><br><span class="line">  --mount type=bind,src=/data/docker_container/filebeat,dst=/usr/share/filebeat \</span><br><span class="line">  --mount type=bind,src=/data/nginx/logs,dst=/data/nginx/logs \</span><br><span class="line">  --mount type=bind,src=/etc/localtime,dst=/etc/localtime \</span><br><span class="line">  docker.elastic.co/beats/filebeat:6.8.23</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>运行后，报错了，错误日志显示为文件权限问题，按照提示修改即可</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220808162208549.png" alt="image-20220808162208549"></p>
+<h3 id="3-11-资源限制"><a href="#3-11-资源限制" class="headerlink" title="3.11 资源限制"></a>3.11 资源限制</h3><p><code>docker run</code> 针对限制容器资源有许多设置选项，但 Swarm 中的 <code>docker service</code> 目前只有 cpu 和 memory 的选项可以操作。</p>
+<p>如果 docker 找不到足够的资源來部署 service，则该 service 会进入 Pending 的狀態，然后持续 kill、recreate 的流程直到找到资源为止。</p>
+<ul>
+<li><strong>reserve</strong>：预定资源，是一种承诺，例如 Host 有 4 CPU，如果把某个 service 的 CPU 资源设为 4，其他 service 將无法取得任何 CPU 资源。&amp;#x20;</li>
+<li><strong>limit</strong>：限制资源，最多可使用的资源。</li>
+</ul>
+<p>示例（资源限制）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker service create --reserve-memory 800M --limit-memory 1024M --reserve-cpu 1 --limit-cpu 1.5 masl</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">预定800M内存，最大可使用1G内存；预定1个cpu，最大可使用1.5个cpu</span></span><br></pre></td></tr></table></figure>
+
+<p>示例（资源限制更新）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker service update --limit-cpu 0.5 --limit-memory 2G masl</span><br><span class="line">docker service update --limit-cpu 3 --limit-memory 1g masl</span><br><span class="line">docker service update --limit-cpu 2 --limit-memory 100m masl</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、集群网络模式"><a href="#四、集群网络模式" class="headerlink" title="四、集群网络模式"></a>四、集群网络模式</h2><p>集群网络模式与 docker 网络类型类似，比如桥接、Host等网络模式。一个服务部署于 docker swarm 集群中后，那客户如何才能访问你部署的服务呢？根据我们所学的 Docker 相关知识，我们一般会做端口的映射。因此 docker swarm 集群也是这种思想。那它具体是如何实现的呢？</p>
+<p>所有节点都使用一个网络入口（模式），该网络入口（模式）上的每个节点都可以在已映射的端口上接收 docker swarm 集群中任何节点上相关服务的连接，即便该节点没有运行任何服务。</p>
+<p>要使用该网络模式之前，需要在 swarm 集群节点间打通以下端口（所以注意防火墙 IP 白名单问题）：</p>
+<ul>
+<li>7946：容器网络发现端口（manager 和 worker 上）；</li>
+<li>4789：容器网络入口端口（manager 和 worker 上）。</li>
+</ul>
+<p>&#x3D;&#x3D;注意：还有个 2377 端口&#x3D;&#x3D;：该端口用于集群管理通信的 TCP 端口（仅在 manager 上）。</p>
+<p>如下图，尽管我的 node3 节点没有运行任何服务，但我依然可以通过该节点 IP+Port 来实现服务访问。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/ingress-routing-mesh.png" alt="ingress-routing-mesh"></p>
+<p>初始化 swarm 或将 Docker 主机加入现有 swarm 时，会在该主机（管理节点）上创建两个新网络，当然工作节点也会创建对应的这两个网络。</p>
+<ul>
+<li><p>名为 ingress 的 overlay 网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">该网络的作用是：处理与swarm集群服务相关的控制和数据流量。swarm群组服务并不会将其连接到用户定义的overlay网络时，而是连接到默认的ingress网络。</span><br><span class="line">若要连接到用户自定义的overlay网络需要使用--network指定(但创建该用户自定义的overlay网络时必须使用--attachable选项)。</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>名为 docker_gwbridge 的 bridge 网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">它将参与到该swarm群集的各个Docker守护程序连接连接起来。可以使用docker network create创建用户定义overlay网络，服务或容器一次可以连接到多个网络，服务或容器只能通过它们各自连接的网络进行通信</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="4-1-服务端口"><a href="#4-1-服务端口" class="headerlink" title="4.1 服务端口"></a>4.1 服务端口</h3><p>默认情况下，当您发布端口时，它默认就是 TCP 端口。当然，你可以指定 TCP 或 UDP 来发布，当您同时发布 TCP 和 UDP 端口时，如果你省略了协议说明符，则该端口将作为 TCP 端口来发布。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801165227555.png" alt="image-20220801165227555"></p>
+<h4 id="4-1-1-TCP"><a href="#4-1-1-TCP" class="headerlink" title="4.1.1 TCP"></a>4.1.1 TCP</h4><p>1、语法</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --name &lt;SERVICE-NAME&gt; \</span><br><span class="line">  --publish published=&lt;PUBLISHED-PORT&gt;,target=&lt;CONTAINER-PORT&gt; \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--publish：指定（映射）要发布的端口号</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">published：你要实际访问的外部端口（可自定义，不要和系统服务现有端口冲突即可）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">targetL：你swarm集群运行的服务（容器）的真实（内部）端口</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">短语法格式</span></span><br><span class="line">docker service create \</span><br><span class="line">  --name &lt;SERVICE-NAME&gt; \</span><br><span class="line">  -p &lt;PUBLISHED-PORT&gt;:&lt;CONTAINER-PORT&gt; \</span><br><span class="line">  &lt;IMAGE&gt;</span><br></pre></td></tr></table></figure>
+
+<p>2、案例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --name my-web \</span><br><span class="line">  --publish published=8080,target=80 \</span><br><span class="line">  --replicas 2 \</span><br><span class="line">  nginx</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801165353092.png" alt="image-20220801165353092"></p>
+<p>3、访问验证</p>
+<blockquote>
+<p>上图可看出，这两个服务分别部署在了 work1、work2 上了，管理节点上没有被调度使用，现在就来验证管理是否能正常访问集群中的服务。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801165529583.png" alt="image-20220801165529583"></p>
+<p>所以得出结论，在集群中部署的服务，不管是单节点服务，还是集群，在整个集群节点中都会映射对应的发布端口，所在集群部署服务时，确保所有集群节点的端口与你现在部署的服务端口不发生冲突。</p>
+<p>4、如何改变现有服务的发布端口</p>
+<blockquote>
+<p>上面我定义发布端口为 8080，现在需要改为 8181，可做如下修改。</p>
+<p>实际上这是新增映射端口，原来端口（8080）还存在，如果不需要可在添加完成后删掉旧的映射端口。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">语法</span></span><br><span class="line">docker service update \</span><br><span class="line">  --publish-add published=&lt;PUBLISHED-PORT&gt;,target=&lt;CONTAINER-PORT&gt; \</span><br><span class="line">  &lt;SERVICE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">实例--新增端口映射</span></span><br><span class="line">docker service update \</span><br><span class="line">  --publish-add published=8181,target=80 \</span><br><span class="line">  my-web</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除映射的端口</span></span><br><span class="line">docker service update \</span><br><span class="line">  --publish-rm published=8080,target=80 \</span><br><span class="line">  my-web</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">但是注意，删除的时候新增的8181端口也被删除，还得重新映射，所以一般的操作步骤就是将原端口先<span class="built_in">rm</span>掉，在添加端口</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>如下图，同样是滚动更新的。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801172328081.png" alt="image-20220801172328081"></p>
+<p>5、如何查看服务的发布端口？</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service inspect --format=&quot;&#123;&#123;json .Endpoint.Spec.Ports&#125;&#125;&quot; my-web</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220801172550912.png" alt="image-20220801172550912"></p>
+<h4 id="4-1-2-UDP"><a href="#4-1-2-UDP" class="headerlink" title="4.1.2 UDP"></a>4.1.2 UDP</h4><p>1、语法</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">docker service create --name &lt;SERVICE-NAME&gt; \</span><br><span class="line">  --publish published=&lt;PUBLISHED-PORT&gt;,target=&lt;CONTAINER-PORT&gt;,protocol=udp \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--publish：指定（映射）要发布的端口号</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">published：你要实际访问的外部端口（可自定义，不要和系统服务现有端口冲突即可）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">targetL：你swarm集群运行的服务（容器）的真实（内部）端口</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">短语法格式</span></span><br><span class="line">docker service create \</span><br><span class="line">  --name &lt;SERVICE-NAME&gt; \</span><br><span class="line">  -p &lt;PUBLISHED-PORT&gt;:&lt;CONTAINER-PORT&gt;/udp \</span><br><span class="line">  &lt;IMAGE&gt;</span><br></pre></td></tr></table></figure>
+
+<p>2、案例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">长语法</span></span><br><span class="line">docker service create --name dns-cache \</span><br><span class="line">  --publish published=53,target=53,protocol=udp \</span><br><span class="line">  dns-cache</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">短语法</span></span><br><span class="line">docker service create --name dns-cache \</span><br><span class="line">  -p 53:53/udp \</span><br><span class="line">  dns-cache</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-1-3-TCP-及-UDP"><a href="#4-1-3-TCP-及-UDP" class="headerlink" title="4.1.3 TCP 及 UDP"></a>4.1.3 TCP 及 UDP</h4><p>1、语法</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">docker service create --name dns-cache \</span><br><span class="line">  --publish published=53,target=53 \</span><br><span class="line">  --publish published=53,target=53,protocol=udp \</span><br><span class="line">  dns-cache</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">--publish：指定（映射）要发布的端口号</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">published：你要实际访问的外部端口（可自定义，不要和系统服务现有端口冲突即可）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">targetL：你swarm集群运行的服务（容器）的真实（内部）端口</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">短语法格式</span></span><br><span class="line">docker service create --name &lt;SERVICE-NAME&gt; \</span><br><span class="line">  -p &lt;PUBLISHED-PORT&gt;:&lt;CONTAINER-PORT&gt; \</span><br><span class="line">  -p &lt;PUBLISHED-PORT&gt;:&lt;CONTAINER-PORT&gt;/udp \</span><br><span class="line">  &lt;IMAGE&gt;</span><br></pre></td></tr></table></figure>
+
+<p>2、案例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">长语法</span></span><br><span class="line">docker service create --name dns-cache \</span><br><span class="line">  --publish published=53,target=53 \</span><br><span class="line">  --publish published=53,target=53,protocol=udp \</span><br><span class="line">  dns-cache</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">短语法</span></span><br><span class="line">docker service create --name dns-cache \</span><br><span class="line">  -p 53:53 \</span><br><span class="line">  -p 53:53/udp \</span><br><span class="line">  dns-cache</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-Host-网络"><a href="#4-2-Host-网络" class="headerlink" title="4.2 Host 网络"></a>4.2 Host 网络</h3><p>如不想经过路由，而直接访问集群服务，可采用 Host 模式，在部署服务时指定。其实这就是 Docker 的 Host 网络模式，共享宿主机网络。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker service create --name dns-cache \</span><br><span class="line">  --publish published=53,target=53,protocol=udp,mode=host \</span><br><span class="line">  --mode global \</span><br><span class="line">  dns-cache</span><br></pre></td></tr></table></figure>
+
+<p>&#x3D;&#x3D;至此，基于 Linux 的 Docker Swarm 集群部署及应用告一段落，这种简单的容器编排最终还是会转向 K8s，但是我们也要根据实际场景来部署，别什么一来就上 K8s，也许你目前的服务数量都不够 K8s 的基本生产部署条件。因此，我们是逐步转向 K8s 集群的，不管任何技术，它都有个过渡期。后续会继续分享 Docker Swarm 集群详细的工作原理及网络模式。&#x3D;&#x3D;</p>
+<h3 id="4-3-负载均衡"><a href="#4-3-负载均衡" class="headerlink" title="4.3 负载均衡"></a>4.3 负载均衡</h3><p>在集群中，可通过任意一个节点来实现访问，不管该节点是否已经部署了服务都可访问。因此所有节点都是平等的（对于客户端而言）。于是，我们可以使用负载均衡技术来实现统一入口访问。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/ingress-lb.png" alt="ingress-lb"></p>
+<p>如上图，Docker Swarm 负载均衡有两种模式，一种是vip（默认），另一种是dnsrr，dnsrr模式下 -p参数是无效的，就是说其服务器是无法直接通过端口映射被外边访问的，如果想要被外边访问有两种方式：一种是使用浏览器代理，可参考<a target="_blank" rel="noopener external nofollow noreferrer" href="https://5socks.net/Manual/browser_en.html">https://5socks.net/Manual/browser_en.html</a> ；另一种是使用类似nginx转发功能。</p>
+<p>&#x3D;&#x3D;使用 Nginx 实现：&#x3D;&#x3D;</p>
+<p>1、创建 overlay 网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker network create --driver overlay swarm-net</span><br></pre></td></tr></table></figure>
+
+<p>2、创建 nginx 转发路由服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 1 \</span><br><span class="line">  --name proxy_docker \</span><br><span class="line">  --network swarm-net \</span><br><span class="line">  --publish published=8088,target=8088 \</span><br><span class="line">  --publish published=50070,target=50070 \</span><br><span class="line">  centos7.3:latest /usr/sbin/init /bin/bash</span><br></pre></td></tr></table></figure>
+<p>官方的说明：</p>
+<p>Use the –publish flag to publish a port when you create a service. target is used to specify the port inside the container, and published is used to specify the port to bind on the routing mesh. If you leave off the published port, a random high-numbered port is bound for each service task. You need to inspect the task to determine the port.</p>
+<p>翻译：</p>
+<p>在创建服务时，使用–Publish标志发布端口。Target用于指定容器内部的端口，PUBLISHED用于指定要绑定到路由网格上的端口。如果不使用发布的端口，则会为每个服务任务绑定一个随机的高编号端口。您需要检查任务以确定端口。</p>
+<p>3、在proxy_docker容器中安装nginx并配置负载均衡即可</p>
+<p>此时就可以通过8088、50070进行访问了。</p>
+<h3 id="4-4-自定义网络"><a href="#4-4-自定义网络" class="headerlink" title="4.4 自定义网络"></a>4.4 自定义网络</h3><p>1、创建网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker network create \</span><br><span class="line">  --driver overlay \</span><br><span class="line">  --subnet 10.0.9.0/24 \</span><br><span class="line">  --gateway 10.0.9.1 \</span><br><span class="line">  my-network</span><br></pre></td></tr></table></figure>
+
+<p>2、使用自定义的网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 2 \</span><br><span class="line">  --name my-web \</span><br><span class="line">  --network my-network \</span><br><span class="line">  nginx</span><br></pre></td></tr></table></figure>
+
+<p>说明：自定义的网络可使该网络模式下的服务互相通信（包括跨主机通信）。</p>
+<p>4、将现有服务并入自定义的网络</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service update --network-add my-network my-web</span><br></pre></td></tr></table></figure>
+
+<p>5、将自定义网络下的服务移除</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker service update --network-rm my-network my-web</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、集群安全"><a href="#五、集群安全" class="headerlink" title="五、集群安全"></a>五、集群安全</h2><h3 id="5-1-集群安全"><a href="#5-1-集群安全" class="headerlink" title="5.1 集群安全"></a>5.1 集群安全</h3><ul>
+<li></li>
+</ul>
+<h3 id="5-2-服务安全"><a href="#5-2-服务安全" class="headerlink" title="5.2 服务安全"></a>5.2 服务安全</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">     --name nginx \</span><br><span class="line">     --secret site.key \</span><br><span class="line">     --secret site.crt \</span><br><span class="line">     --secret site.conf \</span><br><span class="line">     --publish published=3000,target=443 \</span><br><span class="line">     nginx:latest \</span><br><span class="line">     sh -c &quot;ln -s /root/site.conf /etc/nginx/conf.d/site.conf &amp;&amp; exec nginx -g &#x27;daemon off;&#x27;&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-3-数据持久化"><a href="#5-3-数据持久化" class="headerlink" title="5.3 数据持久化"></a>5.3 数据持久化</h3><p>Docker 相关得服务，我们一般是要做数据持久化的。集群中使用 volume 或者 bind 类型来挂载，而 –mount 无论使用哪种类型，在创建服务时都是使用该参数。如何对现有的服务更新持久化目录？可采用这两个参数来实现：<code>--mount-add</code>、<code>--mount-rm</code>。</p>
+<p>1、创建服务时指定持久化目录</p>
+<ul>
+<li><p>默认数据卷驱动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">语法</span></span><br><span class="line">docker service create \</span><br><span class="line">  --mount src=&lt;VOLUME-NAME&gt;,dst=&lt;CONTAINER-PATH&gt; \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">src：宿主机持久化目录（执行时不存在则自动创建）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">dst：容器内部数据目录</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">默认数据卷驱动为<span class="built_in">local</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>指定数据卷驱动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">语法</span></span><br><span class="line">docker service create \</span><br><span class="line">  --mount type=volume,src=&lt;VOLUME-NAME&gt;,dst=&lt;CONTAINER-PATH&gt;,volume-driver=&lt;DRIVER&gt;,volume-opt=&lt;KEY0&gt;=&lt;VALUE0&gt;,volume-opt=&lt;KEY1&gt;=&lt;VALUE1&gt; \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">src：宿主机持久化目录（执行时不存在则自动创建）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">dst：容器内部数据目录</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --mount type=bind,src=&lt;HOST-PATH&gt;,dst=&lt;CONTAINER-PATH&gt; \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">要求src必须提前存在</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">权限：读写</span></span><br><span class="line"></span><br><span class="line">========================================</span><br><span class="line">docker service create \</span><br><span class="line">  --mount type=bind,src=&lt;HOST-PATH&gt;,dst=&lt;CONTAINER-PATH&gt;,readonly \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br><span class="line"><span class="meta prompt_">  </span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">要求src必须提前存在</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">权限：只读</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>2、更新现有的服务的持久化目录</p>
+<ul>
+<li><p>新增数据卷</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --mount-add src=&lt;VOLUME-NAME&gt;,dst=&lt;CONTAINER-PATH&gt; \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除数据卷</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --mount-rm src=&lt;VOLUME-NAME&gt;,dst=&lt;CONTAINER-PATH&gt; \</span><br><span class="line">  --name myservice \</span><br><span class="line">  &lt;IMAGE&gt;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>3、案例</p>
+<p>&#x3D;&#x3D;用 bind 方式来实现&#x3D;&#x3D;</p>
+<ul>
+<li><p>创建持久化目录</p>
+<blockquote>
+<p>先在集群中某台服务器执行，完成后在将整体目录结构同步于其他集群节点</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /data/nginx/&#123;conf,html,logs&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动临时容器（拷贝必要配置文件至持久化目录）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行临时容器</span></span><br><span class="line">docker run -d --name=tmp nginx:1.20.2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">拷贝相关文件</span></span><br><span class="line">docker cp tmp:/etc/nginx/nginx.conf /data/nginx/conf/</span><br><span class="line">docker cp tmp:/etc/nginx/conf.d /data/nginx/conf/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>将目录&#x2F;文件 scp 至其他节点</p>
+<blockquote>
+<p>因为集群内部服务运行节点是随机的，所以要保证集群中所有工作节点都具备相同的程序（服务）运行环境。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">scp -r /data/nginx/conf 192.168.56.132:/data/nginx/</span><br><span class="line">scp -r /data/nginx/conf 192.168.56.133:/data/nginx/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Docker Swarm 集群启动服务</p>
+<blockquote>
+<p>以上配置完成后，就可以在集群的管理节点执行如下命令来启动一个服务</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 2 \</span><br><span class="line">  --name my-web \</span><br><span class="line">  --network my-network \</span><br><span class="line">  --publish published=8080,target=80 \</span><br><span class="line">  --hostname=&quot;my-nginx&quot; \</span><br><span class="line">  --mount type=bind,src=/data/nginx/conf/nginx.conf,dst=/etc/nginx/nginx.conf \</span><br><span class="line">  --mount type=bind,src=/data/nginx/conf/conf.d,dst=/etc/nginx/conf.d \</span><br><span class="line">  --mount type=bind,src=/data/nginx/html,dst=/usr/share/nginx/html \</span><br><span class="line">  --mount type=bind,src=/data/nginx/logs,dst=/var/log/nginx \</span><br><span class="line">  nginx:1.20.2</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建测试数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">touch /data/nginx/html/index.html</span><br><span class="line">echo &quot;test&quot; &gt; /data/nginx/html/index.html</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220805130319377.png" alt="image-20220805130319377"></p>
+</li>
+</ul>
+<p>&#x3D;&#x3D;用 volume 来实现：&#x3D;&#x3D;</p>
+<p>下面的功能实现将容器内部的 <code>/usr/share/nginx/html</code> 目录以  volume 持久化到 Host 本地，至于会持久化到哪个 node 节点，就看这个 service 是在哪个节点上运行的，service 在哪个节点上运行就持久化到哪个节点上，并且你会看到挂载的目录。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker service create \</span><br><span class="line">  --replicas 1 \</span><br><span class="line">  --name my-web \</span><br><span class="line">  --publish published=10800,target=80 \</span><br><span class="line">  --hostname=&quot;my-nginx&quot; \</span><br><span class="line">  --constraint node.labels.label==produce-smzhsserver \</span><br><span class="line">  --mount &#x27;type=volume,src=nginx,dst=/usr/share/nginx/html,volume-driver=local,volume-nocopy=true,volume-opt=type=nfs,volume-opt=device=172.17.16.86:/data/nginx,&quot;volume-opt=o=addr=172.17.16.86,vers=4,soft,timeo=180,bg,tcp,rw&quot;&#x27; \</span><br><span class="line">  nginx:1.20.2</span><br></pre></td></tr></table></figure>
+
+<p>我去 produce-smzhsserver 节点上去看看：</p>
+<blockquote>
+<p>86 NFS 共享的目录已经被自动挂载到运行 service 的节点上，当集群删除 service 时会自动取消挂载。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221118173834456.png" alt="image-20221118173834456"></p>
+<p>再看看 produce-smzhsserver 节点上的持久化目录：</p>
+<blockquote>
+<p>volume 数据卷路径：&#x2F;var&#x2F;lib&#x2F;docker&#x2F;volumes&#x2F;nginx&#x2F;_data</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221118174309280.png" alt="image-20221118174309280"></p>
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p>注意关闭相关主机防火墙，或者你开放了防火墙后，注意添加相关 IP Port 白名单、安全组等。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/3717b6ec.html">https://blog.rabcnops.cn/posts/articles/3717b6ec.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Docker-Swarm/">Docker Swarm</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/82357013.html" title="kubeadm 部署 k8s 集群"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">kubeadm 部署 k8s 集群</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/2ac58511.html" title="K8s 高可用集群架构（二进制）部署及应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">K8s 高可用集群架构（二进制）部署及应用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/mydockerswarm.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">Docker Swarm NFS 数据持久化存储</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%A7%84%E5%88%92"><span class="toc-text">一、规划</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%B8%BB%E6%9C%BA%E8%A7%84%E5%88%92"><span class="toc-text">1.1 主机规划</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%89%88%E6%9C%AC%E8%A7%84%E5%88%92"><span class="toc-text">1.2 版本规划</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%83%A8%E7%BD%B2"><span class="toc-text">二、部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Docker-%E6%9C%8D%E5%8A%A1%E9%83%A8%E7%BD%B2"><span class="toc-text">2.1 Docker 服务部署</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Docker-Swarm-%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="toc-text">2.2 Docker Swarm 集群部署</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E9%9B%86%E7%BE%A4%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="toc-text">三、集群基本用法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E8%BF%90%E8%A1%8C%E6%9C%8D%E5%8A%A1"><span class="toc-text">3.1 运行服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%9F%A5%E7%9C%8B%E6%9C%8D%E5%8A%A1%E8%AF%A6%E6%83%85"><span class="toc-text">3.2 查看服务详情</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%8A%A8%E6%80%81%E6%89%A9-%E7%BC%A9-%E5%AE%B9"><span class="toc-text">3.3 动态扩(缩)容</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-%E6%89%A9%E5%AE%B9"><span class="toc-text">3.3.1 扩容</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-%E7%BC%A9%E5%AE%B9"><span class="toc-text">3.3.2 缩容</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-%E5%88%A0%E9%99%A4%E8%BF%90%E8%A1%8C%E7%9A%84%E6%9C%8D%E5%8A%A1"><span class="toc-text">3.4 删除运行的服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E6%9C%8D%E5%8A%A1%E6%BB%9A%E5%8A%A8%E5%8D%87%E7%BA%A7"><span class="toc-text">3.5 服务滚动升级</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-%E9%9B%86%E7%BE%A4%E6%9C%8D%E5%8A%A1%E5%9B%9E%E6%BB%9A"><span class="toc-text">3.6 集群服务回滚</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-%E8%8A%82%E7%82%B9%E8%84%B1%E7%A6%BB%E9%9B%86%E7%BE%A4"><span class="toc-text">3.7 节点脱离集群</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-8-%E8%8A%82%E7%82%B9%E8%B5%84%E6%BA%90%E8%80%97%E5%B0%BD"><span class="toc-text">3.8 节点资源耗尽</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-9-%E8%8A%82%E7%82%B9%E8%A7%92%E8%89%B2%E7%AE%A1%E7%90%86"><span class="toc-text">3.9 节点角色管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-10-%E8%8A%82%E7%82%B9%E6%A0%87%E7%AD%BE%E7%AE%A1%E7%90%86"><span class="toc-text">3.10 节点标签管理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-11-%E8%B5%84%E6%BA%90%E9%99%90%E5%88%B6"><span class="toc-text">3.11 资源限制</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%9B%86%E7%BE%A4%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%BC%8F"><span class="toc-text">四、集群网络模式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E5%8F%A3"><span class="toc-text">4.1 服务端口</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-1-TCP"><span class="toc-text">4.1.1 TCP</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-2-UDP"><span class="toc-text">4.1.2 UDP</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-3-TCP-%E5%8F%8A-UDP"><span class="toc-text">4.1.3 TCP 及 UDP</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Host-%E7%BD%91%E7%BB%9C"><span class="toc-text">4.2 Host 网络</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="toc-text">4.3 负载均衡</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-4-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%BD%91%E7%BB%9C"><span class="toc-text">4.4 自定义网络</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E9%9B%86%E7%BE%A4%E5%AE%89%E5%85%A8"><span class="toc-text">五、集群安全</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E9%9B%86%E7%BE%A4%E5%AE%89%E5%85%A8"><span class="toc-text">5.1 集群安全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E6%9C%8D%E5%8A%A1%E5%AE%89%E5%85%A8"><span class="toc-text">5.2 服务安全</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E6%95%B0%E6%8D%AE%E6%8C%81%E4%B9%85%E5%8C%96"><span class="toc-text">5.3 数据持久化</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FAQ"><span class="toc-text">FAQ</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/43811.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/43811.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/5333.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/5333.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/30985.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/30985.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/44560.html" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/posts/articles/44560.html" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/550cc753.html" title="Docker 容器镜像制作"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-02.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器镜像制作"/></a><div class="content"><a class="title" href="/posts/articles/550cc753.html" title="Docker 容器镜像制作">Docker 容器镜像制作</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/3717b6ec.html'
+    this.page.identifier = '/posts/articles/3717b6ec.html'
+    this.page.title = '基于 Linux 的 Docker Swarm 集群部署及应用'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>

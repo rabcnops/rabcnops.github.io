@@ -1,0 +1,510 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>kubeadm 部署 k8s 集群 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="kubeadm 部署 k8s 集群。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kubeadm 部署 k8s 集群">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/82357013.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="kubeadm 部署 k8s 集群。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png">
+<meta property="article:published_time" content="2023-03-23T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-26T06:29:04.253Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="K8s">
+<meta property="article:tag" content="云原生">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/82357013.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'kubeadm 部署 k8s 集群',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-26 14:29:04'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">kubeadm 部署 k8s 集群</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-26T06:29:04.253Z" title="更新于 2023-03-26 14:29:04">2023-03-26</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="kubeadm 部署 k8s 集群"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="k8s-cert"></p>
+<p>K8s 版本：1.23</p>
+<hr>
+<h2 id="规划"><a href="#规划" class="headerlink" title="规划"></a>规划</h2><p><strong>1、服务器配置</strong></p>
+<table>
+<thead>
+<tr>
+<th>OS</th>
+<th>配置</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CentOS 7.9（172.27.0.13）</td>
+<td>2C&#x2F;4G</td>
+<td>k8s-master</td>
+</tr>
+<tr>
+<td>CentOS 7.9（172.27.0.10）</td>
+<td>2C&#x2F;4G</td>
+<td>k8s-work1</td>
+</tr>
+<tr>
+<td>CentOS 7.9（172.27.0.11）</td>
+<td>2C&#x2F;4G</td>
+<td>k8s-work2</td>
+</tr>
+</tbody></table>
+<p><strong>注</strong>：这是演示 k8s 集群安装的实验环境，配置较低，生产环境中我们的服务器配置至少都是 <code>8C/16G</code> 的基础配置。</p>
+<p><strong>2、版本选择</strong></p>
+<ul>
+<li>CentOS：7.9+</li>
+<li>k8s组件版本：1.23.6（当前最新）</li>
+</ul>
+<h2 id="一、服务器基础配置"><a href="#一、服务器基础配置" class="headerlink" title="一、服务器基础配置"></a>一、服务器基础配置</h2><p><strong>1、配置主机名</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@server ~]# hostnamectl set-hostname k8s-master</span><br><span class="line">[root@server ~]# hostnamectl set-hostname k8s-work1</span><br><span class="line">[root@server ~]# hostnamectl set-hostname k8s-work2</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、关闭防火墙</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">关闭firewalld</span></span><br><span class="line">[root@k8s-master ~]# systemctl stop firewalld</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">关闭selinux</span></span><br><span class="line">[root@k8s-master ~]# sed -i &#x27;s/enforcing/disabled/&#x27; /etc/selinux/config</span><br><span class="line">[root@k8s-master ~]# setenforce 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、互做本地解析</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# vim /etc/hosts</span><br><span class="line"></span><br><span class="line">172.27.0.13 k8s-master</span><br><span class="line">172.27.0.10 k8s-work1</span><br><span class="line">172.27.0.11 k8s-work2</span><br></pre></td></tr></table></figure>
+
+<p><strong>4、SSH 免密通信（可选）</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# ssh-keygen </span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file in which to save the key (/root/.ssh/id_rsa): </span><br><span class="line">Enter passphrase (empty for no passphrase): </span><br><span class="line">Enter same passphrase again: </span><br><span class="line">Your identification has been saved in /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved in /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">SHA256:qmMRk/pyFrxMRCqzeko/fPbVBzPYz1Em4u5cNR7dvzs root@k8s-master</span><br><span class="line">The key&#x27;s randomart image is:</span><br><span class="line">+---[RSA 2048]----+</span><br><span class="line">|                 |</span><br><span class="line">|    .            |</span><br><span class="line">|   o .     . . o |</span><br><span class="line">|o . =     + . + o|</span><br><span class="line">| + + o  S. * . +o|</span><br><span class="line">|. . =  .  o * + +|</span><br><span class="line">|...+ +.  . o = ..|</span><br><span class="line">|o +oO+  . o o  E.|</span><br><span class="line">|.o *=...   o   oo|</span><br><span class="line">+----[SHA256]-----+</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>所有节点执行（互发公钥）</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# ssh-copy-id root@172.27.0.9</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: &quot;/root/.ssh/id_rsa.pub&quot;</span><br><span class="line">The authenticity of host &#x27;172.27.0.9 (172.27.0.9)&#x27; can&#x27;t be established.</span><br><span class="line">ECDSA key fingerprint is SHA256:IzYTCZWXEv8rTdYYx+RdTyi+EJF2Jqggz0pT5v/oZwk.</span><br><span class="line">ECDSA key fingerprint is MD5:d0:89:66:b8:73:d0:eb:3b:19:cb:b2:3c:82:d0:a5:ff.</span><br><span class="line">Are you sure you want to continue connecting (yes/no)? yes</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed</span><br><span class="line">/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys</span><br><span class="line">root@172.27.0.9&#x27;s password: </span><br><span class="line"></span><br><span class="line">Number of key(s) added: 1</span><br><span class="line"></span><br><span class="line">Now try logging into the machine, with:   &quot;ssh &#x27;root@172.27.0.9&#x27;&quot;</span><br><span class="line">and check to make sure that only the key(s) you wanted were added.</span><br></pre></td></tr></table></figure>
+
+<p><strong>5、加载 br_netfilter 模块</strong></p>
+<blockquote>
+<p>确保 br_netfilter 模块被加载<br>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载模块</span></span><br><span class="line">[root@k8s-master ~]# modprobe br_netfilter</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看加载请看</span></span><br><span class="line">[root@k8s-master ~]# lsmod | grep br_netfilter</span><br><span class="line">br_netfilter           22256  0 </span><br><span class="line">bridge                151336  1 br_netfilter</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">永久生效</span></span><br><span class="line">cat &lt;&lt;EOF | tee /etc/modules-load.d/k8s.conf</span><br><span class="line">br_netfilter</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<p><strong>6、允许 iptables 检查桥接流量</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# cat &lt;&lt;EOF | sudo tee /etc/modules-load.d/k8s.conf</span><br><span class="line">br_netfilter</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">[root@k8s-master ~]# cat &lt;&lt;EOF | sudo tee /etc/sysctl.d/k8s.conf</span><br><span class="line">net.bridge.bridge-nf-call-ip6tables = 1</span><br><span class="line">net.bridge.bridge-nf-call-iptables = 1</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">[root@k8s-master ~]# sudo sysctl --system</span><br></pre></td></tr></table></figure>
+
+<p><strong>7、关闭 swap</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">临时关闭</span></span><br><span class="line">[root@k8s-master ~]# swapoff -a</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">永久关闭</span></span><br><span class="line">[root@k8s-master ~]# sed -ri &#x27;s/.*swap.*/#&amp;/&#x27; /etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p><strong>8、时间同步</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">同步网络时间</span></span><br><span class="line">[root@k8s-master ~]# ntpdate time.nist.gov</span><br><span class="line">26 Apr 19:58:05 ntpdate[13947]: the NTP socket is in use, exiting</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将网络时间写入硬件时间</span></span><br><span class="line">[root@k8s-master ~]# hwclock --systohc</span><br></pre></td></tr></table></figure>
+
+<p><strong>9、安装 Docker</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">过程略，需要 Docker 快速安装脚本的可私我。</span><br></pre></td></tr></table></figure>
+
+<p><strong>10、安装 kubeadm、kubelet</strong></p>
+<blockquote>
+<p>所有节点执行</p>
+</blockquote>
+<ul>
+<li><p>添加 k8s 镜像源</p>
+<blockquote>
+<p>地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://developer.aliyun.com/mirror/kubernetes?spm=a2c6h.13651102.0.0.1cd01b116JYQIn">https://developer.aliyun.com/mirror/kubernetes?spm=a2c6h.13651102.0.0.1cd01b116JYQIn</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo</span><br><span class="line">[kubernetes]</span><br><span class="line">name=Kubernetes</span><br><span class="line">baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">repo_gpgcheck=0</span><br><span class="line">gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>建立 k8s YUM 缓存</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# yum makecache</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>安装 k8s 相关工具</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看可安装版本</span></span><br><span class="line">[root@k8s-master ~]# yum list kubelet --showduplicates</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">kubelet.x86_64                                           1.23.0-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.1-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.2-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.3-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.4-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.5-0                                             kubernetes</span><br><span class="line">kubelet.x86_64                                           1.23.6-0                                             kubernetes</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开始安装（指定你要安装的版本）</span></span><br><span class="line">[root@k8s-master ~]# yum install -y kubelet-1.23.6 kubeadm-1.23.6 kubectl-1.23.6</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置开机自启动并启动kubelet（kubelet由systemd管理）</span></span><br><span class="line">[root@k8s-master ~]# systemctl enable kubelet &amp;&amp; systemctl start kubelet</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="二、Master-节点"><a href="#二、Master-节点" class="headerlink" title="二、Master 节点"></a>二、Master 节点</h2><p><strong>1、k8s 初始化</strong></p>
+<blockquote>
+<p>Master 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubeadm init \</span><br><span class="line">  --apiserver-advertise-address=172.27.0.13 \</span><br><span class="line">  --image-repository registry.aliyuncs.com/google_containers \</span><br><span class="line">  --kubernetes-version v1.23.6 \</span><br><span class="line">  --service-cidr=10.96.0.0/12 \</span><br><span class="line">  --pod-network-cidr=10.244.0.0/16 \</span><br><span class="line">  --ignore-preflight-errors=all</span><br></pre></td></tr></table></figure>
+
+<p>参数说明：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">--apiserver-advertise-address  # 集群master地址</span><br><span class="line">--image-repository             # 指定k8s镜像仓库地址（会从阿里的Registry下载组件的Docker镜像，不指定则默认为Google的Registry，但可能会pull镜像失败）</span><br><span class="line">--kubernetes-version           # 指定K8s版本（与kubeadm、kubelet版本保持一致）</span><br><span class="line">--service-cidr                 # Pod统一访问入口（即Service的IP地址池）</span><br><span class="line">--pod-network-cidr             # Pod网络（即Pod的IP地址池，与CNI网络保持一致）</span><br></pre></td></tr></table></figure>
+
+<p>初始化后输出内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">...</span><br><span class="line">[bootstrap-token] configured RBAC rules to allow certificate rotation for all node client certificates in the cluster</span><br><span class="line">[bootstrap-token] Creating the &quot;cluster-info&quot; ConfigMap in the &quot;kube-public&quot; namespace</span><br><span class="line">[kubelet-finalize] Updating &quot;/etc/kubernetes/kubelet.conf&quot; to point to a rotatable kubelet client certificate and key</span><br><span class="line">[addons] Applied essential addon: CoreDNS</span><br><span class="line">[addons] Applied essential addon: kube-proxy</span><br><span class="line"></span><br><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line"></span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line"></span><br><span class="line">  mkdir -p $HOME/.kube</span><br><span class="line">  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">  sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"></span><br><span class="line">Alternatively, if you are the root user, you can run:</span><br><span class="line"></span><br><span class="line">  export KUBECONFIG=/etc/kubernetes/admin.conf</span><br><span class="line"></span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run &quot;kubectl apply -f [podnetwork].yaml&quot; with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line"></span><br><span class="line">Then you can join any number of worker nodes by running the following on each as root:</span><br><span class="line"></span><br><span class="line">kubeadm join 172.27.0.13:6443 --token hgtxra.fccj35x2szia3r3c \</span><br><span class="line">	--discovery-token-ca-cert-hash sha256:578cf5ca4cf588e3d84005d06f6503bf5d9ee25f63b0cfab4f78677a24b92bdd</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、根据输出提示创建相关文件</strong></p>
+<blockquote>
+<p>Master 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# mkdir -p $HOME/.kube</span><br><span class="line">[root@k8s-master ~]# cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line">[root@k8s-master ~]# chown $(id -u):$(id -g) $HOME/.kube/config</span><br></pre></td></tr></table></figure>
+
+<p><strong>3、查看 k8s 运行的容器</strong></p>
+<blockquote>
+<p>Master 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get pods -n kube-system</span><br><span class="line">NAME                                 READY   STATUS    RESTARTS   AGE</span><br><span class="line">coredns-6d8c4cb4d-85dx9              0/1     Pending   0          53m</span><br><span class="line">coredns-6d8c4cb4d-f7wld              0/1     Pending   0          53m</span><br><span class="line">etcd-k8s-master                      1/1     Running   1          53m</span><br><span class="line">kube-apiserver-k8s-master            1/1     Running   1          53m</span><br><span class="line">kube-controller-manager-k8s-master   1/1     Running   1          53m</span><br><span class="line">kube-proxy-5mpdp                     1/1     Running   0          13m</span><br><span class="line">kube-proxy-9lp29                     1/1     Running   0          12m</span><br><span class="line">kube-proxy-9ttf6                     1/1     Running   0          53m</span><br><span class="line">kube-scheduler-k8s-master            1/1     Running   1          53m</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>4、查看 k8s 节点</strong></p>
+<blockquote>
+<p>Master 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get nodes</span><br><span class="line">NAME         STATUS     ROLES                  AGE    VERSION</span><br><span class="line">k8s-master   NotReady   control-plane,master   8m9s   v1.23.6</span><br></pre></td></tr></table></figure>
+
+<p>可看到当前只有 k8s-master 节点，而且状态是 NotReady（未就绪），因为我们还没有部署网络插件（<code>kubectl apply -f [podnetwork].yaml</code>），于是接着部署容器网络（CNI）。</p>
+<p><strong>5、容器网络（CNI）部署</strong></p>
+<blockquote>
+<p>Master 节点执行<br>插件地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://kubernetes.io/docs/concepts/cluster-administration/addons/">https://kubernetes.io/docs/concepts/cluster-administration/addons/</a><br>该地址在 k8s-master 初始化成功时打印出来。</p>
+</blockquote>
+<ul>
+<li><p>选择一个主流的容器网络插件部署（Calico）</p>
+<p><img src="https://note.youdao.com/yws/res/17339/WEBRESOURCE2ed933b27228fe02892255f43ca7c0db" alt="image"></p>
+</li>
+<li><p>下载yml文件</p>
+<blockquote>
+<p>github地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/projectcalico/calico/blob/master/manifests/calico.yaml">https://github.com/projectcalico/calico/blob/master/manifests/calico.yaml</a><br>个人地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://k8s-config-rab.oss-cn-chengdu.aliyuncs.com/calico/v3.15.1/calico.yaml">https://k8s-config-rab.oss-cn-chengdu.aliyuncs.com/calico/v3.15.1/calico.yaml</a></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://docs.projectcalico.org/manifests/calico.yaml</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改yaml配置</p>
+</li>
+</ul>
+<p><img src="https://note.youdao.com/yws/res/17338/WEBRESOURCEc51e5f6651f8c4ab80e769324de2ef9e" alt="image"></p>
+<p><img src="https://note.youdao.com/yws/res/17341/WEBRESOURCE04e66e523573eb30cbac25f3b3e6a974" alt="image"></p>
+<ul>
+<li><p>根据初始化的输出提示执行启动指令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl apply -f calico.yaml</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">clusterrolebinding.rbac.authorization.k8s.io/calico-kube-controllers created</span><br><span class="line">clusterrole.rbac.authorization.k8s.io/calico-node created</span><br><span class="line">clusterrolebinding.rbac.authorization.k8s.io/calico-node created</span><br><span class="line">daemonset.apps/calico-node created</span><br><span class="line">serviceaccount/calico-node created</span><br><span class="line">deployment.apps/calico-kube-controllers created</span><br><span class="line">serviceaccount/calico-kube-controllers created</span><br><span class="line">Warning: policy/v1beta1 PodDisruptionBudget is deprecated in v1.21+, unavailable in v1.25+; use policy/v1 PodDisruptionBudget</span><br><span class="line">poddisruptionbudget.policy/calico-kube-controllers created</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>看看该yaml文件所需要启动的容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# cat calico.yaml |grep image</span><br><span class="line">          image: docker.io/calico/cni:v3.22.2</span><br><span class="line">          image: docker.io/calico/cni:v3.22.2</span><br><span class="line">          image: docker.io/calico/pod2daemon-flexvol:v3.22.2</span><br><span class="line">          image: docker.io/calico/node:v3.22.2</span><br><span class="line">          image: docker.io/calico/kube-controllers:v3.22.2</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看容器是否都 Running</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get pods -n kube-system</span><br><span class="line">NAME                                      READY   STATUS    RESTARTS   AGE</span><br><span class="line">calico-kube-controllers-7c845d499-rh7tb   1/1     Running   0          5m27s</span><br><span class="line">calico-node-fpdjb                         1/1     Running   0          5m28s</span><br><span class="line">calico-node-jsdf4                         1/1     Running   0          5m28s</span><br><span class="line">calico-node-kmpnr                         1/1     Running   0          5m28s</span><br><span class="line">coredns-6d8c4cb4d-85dx9                   1/1     Running   0          98m</span><br><span class="line">coredns-6d8c4cb4d-f7wld                   1/1     Running   0          98m</span><br><span class="line">etcd-k8s-master                           1/1     Running   1          99m</span><br><span class="line">kube-apiserver-k8s-master                 1/1     Running   1          99m</span><br><span class="line">kube-controller-manager-k8s-master        1/1     Running   1          99m</span><br><span class="line">kube-proxy-5mpdp                          1/1     Running   0          58m</span><br><span class="line">kube-proxy-9lp29                          1/1     Running   0          58m</span><br><span class="line">kube-proxy-9ttf6                          1/1     Running   0          98m</span><br><span class="line">kube-scheduler-k8s-master                 1/1     Running   1          99m</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="三、work-节点"><a href="#三、work-节点" class="headerlink" title="三、work 节点"></a>三、work 节点</h2><p><strong>1、work 节点加入 k8s 集群</strong></p>
+<blockquote>
+<p>所有 work 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">复制k8s-master初始化屏幕输出的语句并在work节点执行</span></span><br><span class="line">[root@k8s-work1 ~]# kubeadm join 172.27.0.13:6443 --token hgtxra.fccj35x2szia3r3c --discovery-token-ca-cert-hash sha256:578cf5ca4cf588e3d84005d06f6503bf5d9ee25f63b0cfab4f78677a24b92bdd</span><br><span class="line">[root@k8s-work2 ~]# kubeadm join 172.27.0.13:6443 --token hgtxra.fccj35x2szia3r3c --discovery-token-ca-cert-hash sha256:578cf5ca4cf588e3d84005d06f6503bf5d9ee25f63b0cfab4f78677a24b92bdd</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、查询集群节点</strong></p>
+<blockquote>
+<p>Master 节点执行</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master ~]# kubectl get nodes</span><br><span class="line">NAME         STATUS   ROLES                  AGE   VERSION</span><br><span class="line">k8s-master   Ready    control-plane,master   99m   v1.23.6</span><br><span class="line">k8s-work1    Ready    &lt;none&gt;                 59m   v1.23.6</span><br><span class="line">k8s-work2    Ready    &lt;none&gt;                 58m   v1.23.6</span><br></pre></td></tr></table></figure>
+
+<p>都为就绪状态了</p>
+<p>&#x3D;&#x3D;整个 K8s 集群中，就只有 kubelets 没有以容器形式运行，而是通过 systemd 服务运行。&#x3D;&#x3D;</p>
+<h2 id="四、验证"><a href="#四、验证" class="headerlink" title="四、验证"></a>四、验证</h2><p>k8s 集群部署 nginx 服务，并通过浏览器进行访问验证。</p>
+<p><strong>1、创建 pod</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl create deployment nginx --image=nginx</span><br><span class="line">kubectl expose deployment nginx --port=80 --type=NodePort</span><br><span class="line">kubectl get pod,svc  # 查看NodeIP</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、访问 Nginx</strong><br><img src="https://note.youdao.com/yws/res/17340/WEBRESOURCE0759fe5137b7c51c0b0e187d38bd5d21" alt="image.png"></p>
+<p>&#x3D;&#x3D;至此：kubeadm方式的k8s集群已经部署完成。&#x3D;&#x3D;</p>
+<h2 id="FAQ"><a href="#FAQ" class="headerlink" title="FAQ"></a>FAQ</h2><p><strong>1、k8s编译报错</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">...</span><br><span class="line">[kubelet-check] It seems like the kubelet isn&#x27;t running or healthy.</span><br><span class="line">[kubelet-check] The HTTP call equal to &#x27;curl -sSL http://localhost:10248/healthz&#x27; failed with error: Get &quot;http://localhost:10248/healthz&quot;: dial tcp [::1]:10248: connect: connection refused.</span><br><span class="line"></span><br><span class="line">	Unfortunately, an error has occurred:</span><br><span class="line">		timed out waiting for the condition</span><br><span class="line"></span><br><span class="line">	This error is likely caused by:</span><br><span class="line">		- The kubelet is not running</span><br><span class="line">		- The kubelet is unhealthy due to a misconfiguration of the node in some way (required cgroups disabled)</span><br><span class="line"></span><br><span class="line">	If you are on a systemd-powered system, you can try to troubleshoot the error with the following commands:</span><br><span class="line">		- &#x27;systemctl status kubelet&#x27;</span><br><span class="line">		- &#x27;journalctl -xeu kubelet&#x27;</span><br><span class="line"></span><br><span class="line">	Additionally, a control plane component may have crashed or exited when started by the container runtime.</span><br><span class="line">	To troubleshoot, list all containers using your preferred container runtimes CLI.</span><br><span class="line"></span><br><span class="line">	Here is one example how you may list all Kubernetes containers running in docker:</span><br><span class="line">		- &#x27;docker ps -a | grep kube | grep -v pause&#x27;</span><br><span class="line">		Once you have found the failing container, you can inspect its logs with:</span><br><span class="line">		- &#x27;docker logs CONTAINERID&#x27;</span><br><span class="line"></span><br><span class="line">error execution phase wait-control-plane: couldn&#x27;t initialize a Kubernetes cluster</span><br><span class="line">To see the stack trace of this error execute with --v=5 or higher</span><br></pre></td></tr></table></figure>
+
+<p><strong>查看日志</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Apr 26 20:33:30 test3 kubelet: I0426 20:33:30.588349   21936 docker_service.go:264] &quot;Docker Info&quot; dockerInfo=&amp;&#123;ID:2NSH:KJPQ:XOKI:5XHN:ULL3:L4LG:SXA4:PR6J:DITW:HHCF:2RKL:U2NJ Containers:0 ContainersRunning:0 ContainersPaused:0 ContainersStopped:0 Images:7 Driver:overlay2 DriverStatus:[[Backing Filesystem extfs] [Supports d_type true] [Native Overlay Diff true]] SystemStatus:[] Plugins:&#123;Volume:[local] Network:[bridge host macvlan null overlay] Authorization:[] Log:[awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog]&#125; MemoryLimit:true SwapLimit:true KernelMemory:true KernelMemoryTCP:false CPUCfsPeriod:true CPUCfsQuota:true CPUShares:true CPUSet:true PidsLimit:false IPv4Forwarding:true BridgeNfIptables:true BridgeNfIP6tables:true Debug:false NFd:24 OomKillDisable:true NGoroutines:45 SystemTime:2022-04-26T20:33:30.583063427+08:00 LoggingDriver:json-file CgroupDriver:cgroupfs CgroupVersion: NEventsListener:0 KernelVersion:3.10.0-1160.59.1.el7.x86_64 OperatingSystem:CentOS Linux 7 (Core) OSVersion: OSType:linux Architecture:x86_64 IndexServerAddress:https://index.docker.io/v1/ RegistryConfig:0xc000263340 NCPU:2 MemTotal:3873665024 GenericResources:[] DockerRootDir:/var/lib/docker HTTPProxy: HTTPSProxy: NoProxy: Name:k8s-master Labels:[] ExperimentalBuild:false ServerVersion:18.06.3-ce ClusterStore: ClusterAdvertise: Runtimes:map[runc:&#123;Path:docker-runc Args:[] Shim:&lt;nil&gt;&#125;] DefaultRuntime:runc Swarm:&#123;NodeID: NodeAddr: LocalNodeState:inactive ControlAvailable:false Error: RemoteManagers:[] Nodes:0 Managers:0 Cluster:&lt;nil&gt; Warnings:[]&#125; LiveRestoreEnabled:false Isolation: InitBinary:docker-init ContainerdCommit:&#123;ID:468a545b9edcd5932818eb9de8e72413e616e86e Expected:468a545b9edcd5932818eb9de8e72413e616e86e&#125; RuncCommit:&#123;ID:a592beb5bc4c4092b1b1bac971afed27687340c5 Expected:a592beb5bc4c4092b1b1bac971afed27687340c5&#125; InitCommit:&#123;ID:fec3683 Expected:fec3683&#125; SecurityOptions:[name=seccomp,profile=default] ProductLicense: DefaultAddressPools:[] Warnings:[]&#125;</span><br><span class="line">Apr 26 20:33:30 test3 kubelet: E0426 20:33:30.588383   21936 server.go:302] &quot;Failed to run kubelet&quot; err=&quot;failed to run Kubelet: misconfiguration: kubelet cgroup driver: \&quot;systemd\&quot; is different from docker cgroup driver: \&quot;cgroupfs\&quot;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>看报错的最后解释<code>kubelet cgroup driver: \&quot;systemd\&quot; is different from docker cgroup driver: \&quot;cgroupfs\&quot;&quot;</code>很明显 kubelet 与 Docker 的 cgroup 驱动程序不同，kubelet 为 systemd，而 Docker 为 cgroupfs。</p>
+<p><code>简单查看一下docker驱动：</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-master opt]# docker info |grep Cgroup</span><br><span class="line">Cgroup Driver: cgroupfs</span><br></pre></td></tr></table></figure>
+
+<p><strong>解决方案</strong><br>重置初始化操作并删除相关文件，然后再修改 Docker 的 cgroup 驱动程序为 systemd 即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重置初始化</span></span><br><span class="line">[root@k8s-master ~]# kubeadm reset</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除相关配置文件</span></span><br><span class="line">[root@k8s-master ~]# rm -rf $HOME/.kube/config  &amp;&amp; rm -rf $HOME/.kube</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改 Docker 驱动为 systemd（即<span class="string">&quot;exec-opts&quot;</span>: [<span class="string">&quot;native.cgroupdriver=systemd&quot;</span>]）</span></span><br><span class="line">[root@k8s-master opt]# cat /etc/docker/daemon.json </span><br><span class="line">&#123;</span><br><span class="line">  &quot;registry-mirrors&quot;: [&quot;https://q1rw9tzz.mirror.aliyuncs.com&quot;],</span><br><span class="line">  &quot;exec-opts&quot;: [&quot;native.cgroupdriver=systemd&quot;]</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启 Docker</span></span><br><span class="line">[root@k8s-master opt]# systemctl daemon-reload </span><br><span class="line">[root@k8s-master opt]# systemctl restart docker.service</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">再次初始化k8s即可</span></span><br><span class="line">[root@k8s-master ~]# kubeadm init ...</span><br></pre></td></tr></table></figure>
+
+<p><strong>2、work 节点加入 k8s 集群报错</strong></p>
+<p><em><strong>报错1</strong></em>**：**</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">accepts at most 1 arg(s), received 3</span><br><span class="line">To see the stack trace of this error execute with --v=5 or higher</span><br></pre></td></tr></table></figure>
+
+<p>原因：命令不对，我是直接复制粘贴 k8s-master 初始化的终端输出结果，导致报错，所以最好先复制到 txt 文本下修改好格式再粘贴执行。<br>查看日志</p>
+<p><em><strong>报错2</strong></em>**：**</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-work1 ~]# kubeadm join 172.27.0.13:6443 --token hgtxra.fccj35x2szia3r3c --discovery-token-ca-cert-hash sha256:578cf5ca4cf588e3d84005d06f6503bf5d9ee25f63b0cfab4f78677a24b92bdd</span><br><span class="line">[preflight] Running pre-flight checks</span><br><span class="line">error execution phase preflight: [preflight] Some fatal errors occurred:</span><br><span class="line">	[ERROR Port-10250]: Port 10250 is in use</span><br><span class="line">[preflight] If you know what you are doing, you can make a check non-fatal with `--ignore-preflight-errors=...`</span><br><span class="line">To see the stack trace of this error execute with --v=5 or higher</span><br></pre></td></tr></table></figure>
+
+<p>根据提示查看被占端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-work1 ~]# netstat -lntp</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    </span><br><span class="line">tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      17616/kubelet       </span><br><span class="line">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1152/sshd           </span><br><span class="line">tcp        0      0 127.0.0.1:36281         0.0.0.0:*               LISTEN      17616/kubelet       </span><br><span class="line">tcp6       0      0 :::10250                :::*                    LISTEN      17616/kubelet       </span><br><span class="line">tcp6       0      0 :::10255                :::*                    LISTEN      17616/kubelet</span><br></pre></td></tr></table></figure>
+
+<p>原因：10250端口被占用了，kill 掉然后再次 join 即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@k8s-work1 ~]#  kill -9 17616</span><br><span class="line">[root@k8s-work1 ~]# netstat -lntp</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    </span><br><span class="line">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1152/sshd</span><br></pre></td></tr></table></figure>
+
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/82357013.html">https://blog.rabcnops.cn/posts/articles/82357013.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/K8s/">K8s</a><a class="post-meta__tags" href="/tags/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/f3a0a47c.html" title="修改 Docker 默认数据存储路径"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">修改 Docker 默认数据存储路径</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/3717b6ec.html" title="基于 Linux 的 Docker Swarm 集群部署及应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">基于 Linux 的 Docker Swarm 集群部署及应用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/20679.html" title="K8s 探针"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">K8s 探针</div></div></a></div><div><a href="/posts/articles/2ac58511.html" title="K8s 高可用集群架构（二进制）部署及应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">K8s 高可用集群架构（二进制）部署及应用</div></div></a></div><div><a href="/posts/articles/e927d0f0.html" title="如何理解 K8s 动态伸缩与触发上线？"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/yys.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">如何理解 K8s 动态伸缩与触发上线？</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">21</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">6</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A7%84%E5%88%92"><span class="toc-text">规划</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%9F%BA%E7%A1%80%E9%85%8D%E7%BD%AE"><span class="toc-text">一、服务器基础配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Master-%E8%8A%82%E7%82%B9"><span class="toc-text">二、Master 节点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81work-%E8%8A%82%E7%82%B9"><span class="toc-text">三、work 节点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%AA%8C%E8%AF%81"><span class="toc-text">四、验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FAQ"><span class="toc-text">FAQ</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/43811.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/43811.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/5333.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/5333.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/30985.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/30985.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/44560.html" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/posts/articles/44560.html" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/550cc753.html" title="Docker 容器镜像制作"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-02.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器镜像制作"/></a><div class="content"><a class="title" href="/posts/articles/550cc753.html" title="Docker 容器镜像制作">Docker 容器镜像制作</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/82357013.html'
+    this.page.identifier = '/posts/articles/82357013.html'
+    this.page.title = 'kubeadm 部署 k8s 集群'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
