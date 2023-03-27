@@ -1,0 +1,467 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Jenkins 实现 Gitlab API 调用及共享库应用 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Jenkins 实现 Gitlab API 调用及共享库应用案例。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins 实现 Gitlab API 调用及共享库应用">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/c2464361.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="Jenkins 实现 Gitlab API 调用及共享库应用案例。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg">
+<meta property="article:published_time" content="2022-07-22T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-27T09:18:43.678Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="CICD">
+<meta property="article:tag" content="Jenkins_Pipeline">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/c2464361.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Jenkins 实现 Gitlab API 调用及共享库应用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-27 17:18:43'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Jenkins 实现 Gitlab API 调用及共享库应用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-07-22T03:33:14.000Z" title="发表于 2022-07-22 11:33:14">2022-07-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-27T09:18:43.678Z" title="更新于 2023-03-27 17:18:43">2023-03-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/">DevOps</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/Jenkins/">Jenkins</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Jenkins 实现 Gitlab API 调用及共享库应用"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/original.webp" alt="original"></p>
+<p><font color="Brown"><strong>Author</strong>：rab</font><br><strong>Gitlab 版本</strong>：15.1.2<br><strong>Jenkins 版本</strong>：2.332.3</p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://www.jenkins.io/doc/">Jenkins 官方文档</a><br><a target="_blank" rel="noopener external nofollow noreferrer" href="https://docs.gitlab.com/">Gitlab 官方文档</a></p>
+<hr>
+<p>我们可通过 <code>Branches API</code> 接口来创建分支，先进行接口调试，调试完成后以 Jenkins Pipeline 的方式执行，并最终通过进一步优化实现 Jenkins 共享库构建效果。</p>
+<h2 id="一、Branches-API"><a href="#一、Branches-API" class="headerlink" title="一、Branches API"></a>一、Branches API</h2><h3 id="1-1-获取接口地址"><a href="#1-1-获取接口地址" class="headerlink" title="1.1 获取接口地址"></a>1.1 获取接口地址</h3><p>此时，就可以根据官方接口文档，获取如下创建分支的接口地址。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720212457723.png" alt="image-20220720212457723"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --request POST --header &quot;PRIVATE-TOKEN: &lt;your_access_token&gt;&quot; &quot;https://gitlab.example.com/api/v4/projects/5/repository/branches?branch=newbranch&amp;ref=main&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-创建-Token"><a href="#1-2-创建-Token" class="headerlink" title="1.2 创建 Token"></a>1.2 创建 Token</h3><p>然后在 Gitlab 上创建 Token，操作步骤如下图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720210637927.png" alt="image-20220720210637927"></p>
+<blockquote>
+<p>创建完成后会生成一个 Token，复制到接口地址</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720211017865.png" alt="image-20220720211017865"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl --request POST --header &quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot; &quot;https://192.168.56.133/api/v4/projects/5/repository/branches?branch=newbranch&amp;ref=main&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">这个toke与上图不符，是因为上图的toke被我删了，然后这是我重新创建的token</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>接口地址中 <code>/projects/5</code> 就是 Gitlab 的项目 ID，如果你要对下图项目做相关操作，应修改为 <code>/projects/3</code>；</li>
+<li>newbranch 表示你要创建的分支名称（自定义）；</li>
+<li>main 表示你以哪个分支为基础来创建新分支。</li>
+</ul>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720211901227.png" alt="image-20220720211901227"></p>
+<p>所以最终地址为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">curl --request POST --header &quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot; &quot;https://192.168.56.133/api/v4/projects/3/repository/branches?branch=rab_test&amp;ref=main&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">我定义了一个名为rab_test的新分支，且以main分支为基础进行创建</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果你的Gitlab没有开启443认证，那需要把https---&gt;http</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">curl --request POST --header <span class="string">&quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot;</span> <span class="string">&quot;http://192.168.56.133/api/v4/projects/3/repository/branches?branch=rab_test&amp;ref=main&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-接口调试"><a href="#1-3-接口调试" class="headerlink" title="1.3 接口调试"></a>1.3 接口调试</h3><h4 id="1-3-1-shell-终端调试"><a href="#1-3-1-shell-终端调试" class="headerlink" title="1.3.1 shell 终端调试"></a>1.3.1 shell 终端调试</h4><p>此时，你在任意 <code>shell 终端</code>进行调试，最终看是否生成预期分支，这里我就在 <code>Jenkins</code> 服务器上执行上述接口地址。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720213450615.png" alt="image-20220720213450615"></p>
+<p>看样子是没什么问题，然后到 Gitlab 上看看有没有创建指定的分支。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720213716467.png" alt="image-20220720213716467"></p>
+<p>看到上图结果，完全是没问题的，说明调试已经调通了。</p>
+<h4 id="1-3-2-Postman-调试"><a href="#1-3-2-Postman-调试" class="headerlink" title="1.3.2 Postman 调试"></a>1.3.2 Postman 调试</h4><p>1、新建 POST 请求</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720215246034.png" alt="image-20220720215246034"></p>
+<p>2、请求头添加 Token 信息（k-v）</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720215715183.png" alt="image-20220720215715183"></p>
+<p>3、配置好后点击 Send</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720220019813.png" alt="image-20220720220019813"></p>
+<p>4、Gitlab 查看结果</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720215923496.png" alt="image-20220720215923496"></p>
+<p>也是能够成功构建的。</p>
+<p>postman 有一个好处就是，可以根据你的接口地址生成对应的语言片段，入下图，生成 cURL 格式的片段：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220721074130645.png" alt="image-20220721074130645"></p>
+<p>当然，它还支持其他语言片段，如 python、Java等</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220721074618259.png" alt="image-20220721074618259"></p>
+<h3 id="1-4-Pipeline-实现"><a href="#1-4-Pipeline-实现" class="headerlink" title="1.4 Pipeline 实现"></a>1.4 Pipeline 实现</h3><p>以上接口都调通后，接下来就可以通过 Jenkins 流水线来实现了，写一个简单的案例，创建分支<code>rab_test-2</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;create branch&quot;)&#123;</span><br><span class="line">			steps&#123;</span><br><span class="line">				// 复制刚刚postman调通的接口地址</span><br><span class="line">				sh &quot;&quot;&quot;</span><br><span class="line">					curl --location --request POST \</span><br><span class="line">					&quot;http://192.168.56.133/api/v4/projects/3/repository/branches?branch=rab_test-2&amp;ref=main&quot; \</span><br><span class="line">					--header &quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot;</span><br><span class="line">				&quot;&quot;&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>进行 Jenkins 构建操作，如图构建成功。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720221858742.png" alt="image-20220720221858742"></p>
+<p>接下来去 Gitlab 上看看是否生成新的分支。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220720222025108.png" alt="image-20220720222025108"></p>
+<p>完全没问题，由于我的分支在 Pipeline 脚本中写死了，后面你可以自己优化一下，比如传递一些参数进行动态创建。</p>
+<h2 id="二、优化-Pipeline"><a href="#二、优化-Pipeline" class="headerlink" title="二、优化 Pipeline"></a>二、优化 Pipeline</h2><p>你会发现，上面的 Pipeline 脚本的接口都是写死的，也就是说如果你想修改相关参数值的话，需要进入脚本中修改，比较麻烦，因此我们再次进行优化。</p>
+<h3 id="2-1-参数化构建"><a href="#2-1-参数化构建" class="headerlink" title="2.1 参数化构建"></a>2.1 参数化构建</h3><p>实现功能：使用者可以灵活自定义新分支名、基础分支，而不需要再次进入修改 Pipeline 脚本，只需要传递参数即可值。</p>
+<p>1、配置参数化配置</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722160509602.png" alt="image-20220722160509602"></p>
+<p>最终效果如下图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722161159292.png" alt="image-20220722161159292"></p>
+<p>2、修改 Pipeline 脚本</p>
+<p>上述参数定义好后，接下来就需要把参数名写进 Pipeline 脚本对应位置，实现参数传递。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;create branch&quot;)&#123;</span><br><span class="line">			steps&#123;</span><br><span class="line">				// 复制刚刚postman调通的接口地址</span><br><span class="line">				sh &quot;&quot;&quot;</span><br><span class="line">					curl --location --request POST \</span><br><span class="line">					&quot;http://192.168.56.133/api/v4/projects/3/repository/branches?branch=$&#123;env.NewBranchName&#125;&amp;ref=$&#123;env.BaseBranchName&#125;&quot; \</span><br><span class="line">					--header &quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot;</span><br><span class="line">				&quot;&quot;&quot;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、构建验证</p>
+<ul>
+<li><p>Jenkins 构建</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722163726215.png" alt="image-20220722163726215"></p>
+</li>
+<li><p>Gitlab 查看是否创建成功</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722163829870.png" alt="image-20220722163829870"></p>
+</li>
+</ul>
+<h3 id="2-2-Token-加密"><a href="#2-2-Token-加密" class="headerlink" title="2.2 Token 加密"></a>2.2 Token 加密</h3><p>上面的 Token 是以明文形式传输传输的，并不安全，我们需要用到凭证方式来代替明文方式。</p>
+<p>1、在安全设置中找到管理凭据</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722164231089.png" alt="image-20220722164231089"></p>
+<p>2、具体配置</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722164704419.png" alt="image-20220722164704419"></p>
+<p>3、通过 Jenkins 自带的<code>片段生成器</code>来生成相关片段语句</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722165500385.png" alt="image-20220722165500385"></p>
+<p>4、修改 Pipeline 脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;Create Branch&quot;)&#123;</span><br><span class="line">			steps&#123;</span><br><span class="line">				script&#123;</span><br><span class="line">					withCredentials([string(credentialsId: &#x27;gitlab-create-branch&#x27;, variable: &#x27;Gitlab_Token&#x27;)]) &#123;</span><br><span class="line">						// 创建分支</span><br><span class="line">						sh &quot;&quot;&quot;</span><br><span class="line">							curl --location --request POST \</span><br><span class="line">							&quot;http://192.168.56.133/api/v4/projects/3/repository/branches?branch=$&#123;env.NewBranchName&#125;&amp;ref=$&#123;env.BaseBranchName&#125;&quot; \</span><br><span class="line">							--header &quot;PRIVATE-TOKEN: $&#123;Gitlab_Token&#125;&quot;</span><br><span class="line">						&quot;&quot;&quot;</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>5、构建验证</p>
+<ul>
+<li><p>Jenkins 构建</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722170212203.png" alt="image-20220722170212203"></p>
+</li>
+<li><p>Gitlab 查看是否创建成功</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722170244315.png" alt="image-20220722170244315"></p>
+</li>
+</ul>
+<h3 id="2-3-定义函数（方法）"><a href="#2-3-定义函数（方法）" class="headerlink" title="2.3 定义函数（方法）"></a>2.3 定义函数（方法）</h3><p>函数的作用在于更加灵活的传递参数、减少书写代码量。</p>
+<p>1、定义函数</p>
+<blockquote>
+<p>注意：函数体的参数名要和定义函数中的参数保持一致</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">// 创建分支</span><br><span class="line">def CreateBranch(ProjectID, NewBranchName, BaseBranchName) &#123;</span><br><span class="line">	withCredentials([string(credentialsId: &#x27;gitlab-create-branch&#x27;, variable: &#x27;Gitlab_Token&#x27;)]) &#123;</span><br><span class="line">		sh &quot;&quot;&quot;</span><br><span class="line">			curl --location --request POST \</span><br><span class="line">			&quot;http://192.168.56.133/api/v4/projects/$&#123;ProjectID&#125;/repository/branches?branch=$&#123;NewBranchName&#125;&amp;ref=$&#123;BaseBranchName&#125;&quot; \</span><br><span class="line">			--header &quot;PRIVATE-TOKEN: $&#123;Gitlab_Token&#125;&quot;</span><br><span class="line">		&quot;&quot;&quot;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 流水线（主）</span><br><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;Create Branch&quot;) &#123;</span><br><span class="line">			steps &#123;</span><br><span class="line">				script &#123;</span><br><span class="line">					ProjectID = 3</span><br><span class="line">					// 调用函数时，如果定义的参数类型为字符串时需夹双引号，为数字时则不需要</span><br><span class="line">					CreateBranch(ProjectID, &quot;$&#123;env.NewBranchName&#125;&quot;, &quot;$&#123;BaseBranchName&#125;&quot;)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、构建验证</p>
+<ul>
+<li><p>Jenkins 构建</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722171720258.png" alt="image-20220722171720258"></p>
+</li>
+<li><p>Gitlab 查看是否创建成功</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722171903832.png" alt="image-20220722171903832"></p>
+</li>
+</ul>
+<p>到这里，Gitlab 的工程 ID 还是被写死的，因此我们需要通过 Gitlab 的项目名动态获取 Gitlab 项目对应的 ID 值，这也需要调用 Gitlab 的相关接口，如下图。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722174810022.png" alt="image-20220722174810022"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">curl --header &quot;PRIVATE-TOKEN: &lt;your_access_token&gt;&quot; &quot;https://gitlab.example.com/api/v4/projects?search=test&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">PRIVATE-TOKEN：Token值</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">test</span>：表示你要填入的项目名称</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改一下</span></span><br><span class="line">curl --header &quot;PRIVATE-TOKEN: DxVUpBnVmg4NUNfBdyxx&quot; &quot;http://192.168.56.133/api/v4/projects?search=Tq&quot;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>现在命令行测试一下，看看该接口返回的结果；</p>
+<p>可看到，已经返回了 Gitlab 中 Tq 项目的 id 值了，说明该接口可用。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722175431433.png" alt="image-20220722175431433"></p>
+<blockquote>
+<p>Postman 上更直观一点</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220722180306186.png" alt="image-20220722180306186"></p>
+<p>3、再次优化</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">// 请求地址</span><br><span class="line">def HttpReq(ApiUrl, Method) &#123;</span><br><span class="line">	GitlabAPI = &quot;http://192.168.56.133/api/v4&quot;</span><br><span class="line">	withCredentials([string(credentialsId: &#x27;gitlab-create-branch&#x27;, variable: &#x27;Gitlab_Token&#x27;)]) &#123;</span><br><span class="line">		response = sh returnStdout: true, script: &quot;&quot;&quot;</span><br><span class="line">			curl --location --request $&#123;Method&#125; \</span><br><span class="line">				&quot;$&#123;GitlabAPI&#125;/$&#123;ApiUrl&#125;&quot; \</span><br><span class="line">				--header &quot;PRIVATE-TOKEN: $&#123;Gitlab_Token&#125;&quot;</span><br><span class="line">		&quot;&quot;&quot;</span><br><span class="line">	&#125;</span><br><span class="line">	return response</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 创建分支</span><br><span class="line">def CreateBranch(ProjectID, NewBranchName, BaseBranchName) &#123;</span><br><span class="line">	ApiUrl = &quot;projects/$&#123;ProjectID&#125;/repository/branches?branch=$&#123;NewBranchName&#125;&amp;ref=$&#123;BaseBranchName&#125;&quot;</span><br><span class="line">	Method = &quot;POST&quot;</span><br><span class="line">	HttpReq(ApiUrl, Method)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 获取项目ID</span><br><span class="line">def GetProjectID(ProjectName) &#123;</span><br><span class="line">	ApiUrl = &quot;projects?search=$&#123;ProjectName&#125;&quot;</span><br><span class="line">	Method = &quot;GET&quot;</span><br><span class="line">	result = HttpReq(ApiUrl, Method)</span><br><span class="line">	result = readJSON text: result</span><br><span class="line">	return result[0][&quot;id&quot;]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 流水线（主）</span><br><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;Create Branch&quot;) &#123;</span><br><span class="line">			steps &#123;</span><br><span class="line">				script &#123;</span><br><span class="line">					ProjectID = GetProjectID(&quot;$&#123;ProjectName&#125;&quot;)</span><br><span class="line">					CreateBranch(ProjectID, &quot;$&#123;env.NewBranchName&#125;&quot;, &quot;$&#123;BaseBranchName&#125;&quot;)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>进行构建</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723141300754.png" alt="image-20220723141300754"></p>
+</li>
+<li><p>Gitlab 上查看是否生成</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723145203412.png" alt="image-20220723145203412"></p>
+</li>
+</ul>
+<p>=&#x3D;注意：如果你使用了 <code>readJSON</code> JSON 解析，那你需要安装如下插件，否则报错。&#x3D;&#x3D;</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723144954347.png" alt="image-20220723144954347"></p>
+<p>&#x3D;&#x3D;错误现象：提示没有 readJDSON 这个方法，这种报错类型一般是缺少插件导致的，安装对应插件即可。&#x3D;&#x3D;</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723145457812.png" alt="image-20220723145457812"></p>
+<h2 id="三、共享库"><a href="#三、共享库" class="headerlink" title="三、共享库"></a>三、共享库</h2><p>上面已经做了相关优化了，但是在生产环境中的代码量远比上面多，而且定义的函数也会越来越多，因此，我们就需要使用 Jenkins 的共享库，共享库的作用是将具备同样性质或很少改动的函数（方法）归档于 Git 仓库管理，并在 Jenkinsfile 中调用（引用）的手段，这将大大减少 Pipeline 代码量。</p>
+<h3 id="3-1-创建共享库"><a href="#3-1-创建共享库" class="headerlink" title="3.1 创建共享库"></a>3.1 创建共享库</h3><p>1、创建项目仓库</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723150155668.png" alt="image-20220723150155668"></p>
+<p>2、添加目录&#x2F;文件</p>
+<ul>
+<li>点击 <code>Web IDE</code></li>
+</ul>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723151049250.png" alt="image-20220723151049250"></p>
+<ul>
+<li><p>创建目录</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723150944708.png" alt="image-20220723150944708"></p>
+</li>
+<li><p>添加文件</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723152123651.png"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723152250816.png" alt="image-20220723152250816"></p>
+</li>
+</ul>
+<p>3、将定义好的方法提交到代码仓库</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723152849499.png" alt="image-20220723152849499"></p>
+<h3 id="3-2-加载共享库"><a href="#3-2-加载共享库" class="headerlink" title="3.2 加载共享库"></a>3.2 加载共享库</h3><p>1、流水线脚本加载共享库</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">// 加载共享库，其中jenkinslib要与Jenkins系统配置中保持一致（jenkinslib可自定义），@amin表示共享库所在分支</span><br><span class="line">@Library(&quot;jenkinslib@main&quot;) _</span><br><span class="line">// 导入jenkinsfile.groovy。这里要注意：下面的jenkinsfile()名字必须与你共享库中jenkinsfile.groovy名一致，否则报错</span><br><span class="line">def myjenkinsfile = new org.devops.jenkinsfile()</span><br><span class="line"></span><br><span class="line">// 流水线（主）</span><br><span class="line">pipeline &#123;</span><br><span class="line">	agent any</span><br><span class="line">	tools &#123;</span><br><span class="line">		git &#x27;git&#x27;</span><br><span class="line">	&#125;</span><br><span class="line">	stages &#123;</span><br><span class="line">		stage(&quot;Create Branch&quot;) &#123;</span><br><span class="line">			steps &#123;</span><br><span class="line">				script &#123;</span><br><span class="line">					// 然后就可以调用共享库中的方法了 myjenkinsfile 即为我上面引用的方法（可在上面自定义）</span><br><span class="line">					ProjectID = myjenkinsfile.GetProjectID(&quot;$&#123;env.ProjectName&#125;&quot;)</span><br><span class="line">					myjenkinsfile.CreateBranch(ProjectID, &quot;$&#123;env.NewBranchName&#125;&quot;, &quot;$&#123;env.BaseBranchName&#125;&quot;)</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2、同样将流水线脚本也进行 Git 版本管理</p>
+<blockquote>
+<p>这样的话便于管理 Jenkinfile 及共享库</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723153913871.png" alt="image-20220723153913871"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723162121271.png" alt="image-20220723162121271"></p>
+<h3 id="3-3-Jenkins-配置"><a href="#3-3-Jenkins-配置" class="headerlink" title="3.3 Jenkins 配置"></a>3.3 Jenkins 配置</h3><p>1、Jenkins 流水线配置</p>
+<p>因为我们的流水线脚本进行了 Git 版本管理，所以你可以在 Jenkins 流水线配置中配置 URL 即可。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723155806926.png" alt="image-20220723155806926"></p>
+<p>2、Jenkins 系统配置</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723161609360.png" alt="image-20220723161609360"></p>
+<h3 id="3-4-Jenkins-构建"><a href="#3-4-Jenkins-构建" class="headerlink" title="3.4 Jenkins 构建"></a>3.4 Jenkins 构建</h3><p>以上都配置好之后，接下来就开始构建了。</p>
+<p>1、Jenkins 构建</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723190934794.png" alt="image-20220723190934794"></p>
+<p>2、Gitlab 查看是否构建成功</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220723190856525.png" alt="image-20220723190856525"></p>
+<p><mark>至此，已实现 Jenkins 如何调用 Gitlab API 及 Jenkins 共享库的最终应用。</mark></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/c2464361.html">https://blog.rabcnops.cn/posts/articles/c2464361.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/CICD/">CICD</a><a class="post-meta__tags" href="/tags/Jenkins-Pipeline/">Jenkins_Pipeline</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/7ede8fbb.html" title="Jenkins Pipeline 配置钉钉消息通知"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Jenkins Pipeline 配置钉钉消息通知</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/7e46479a.html" title="Jenkins Pipeline 密钥远程部署"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/pipeline.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Jenkins Pipeline 密钥远程部署</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/7e46479a.html" title="Jenkins Pipeline 密钥远程部署"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/pipeline.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins Pipeline 密钥远程部署</div></div></a></div><div><a href="/posts/articles/fcc16254.html" title="Jenkins Pipeline 方法定义及调用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/%E6%B5%81%E6%B0%B4%E7%BA%BF.webp" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-08-22</div><div class="title">Jenkins Pipeline 方法定义及调用</div></div></a></div><div><a href="/posts/articles/7ede8fbb.html" title="Jenkins Pipeline 配置钉钉消息通知"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-08-22</div><div class="title">Jenkins Pipeline 配置钉钉消息通知</div></div></a></div><div><a href="/posts/articles/1be7f41.html" title="Active Choice Parameter 在 Jenkinsfile 中的应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/js.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Active Choice Parameter 在 Jenkinsfile 中的应用</div></div></a></div><div><a href="/posts/articles/a951d278.html" title="Pipeline 核心技术"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/%E6%B5%81%E6%B0%B4%E7%BA%BF.webp" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Pipeline 核心技术</div></div></a></div><div><a href="/posts/articles/7255efaf.html" title="Gitlab 备份与恢复"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与恢复</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Branches-API"><span class="toc-text">一、Branches API</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E8%8E%B7%E5%8F%96%E6%8E%A5%E5%8F%A3%E5%9C%B0%E5%9D%80"><span class="toc-text">1.1 获取接口地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%88%9B%E5%BB%BA-Token"><span class="toc-text">1.2 创建 Token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-%E6%8E%A5%E5%8F%A3%E8%B0%83%E8%AF%95"><span class="toc-text">1.3 接口调试</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-1-shell-%E7%BB%88%E7%AB%AF%E8%B0%83%E8%AF%95"><span class="toc-text">1.3.1 shell 终端调试</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-2-Postman-%E8%B0%83%E8%AF%95"><span class="toc-text">1.3.2 Postman 调试</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-Pipeline-%E5%AE%9E%E7%8E%B0"><span class="toc-text">1.4 Pipeline 实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E4%BC%98%E5%8C%96-Pipeline"><span class="toc-text">二、优化 Pipeline</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%8F%82%E6%95%B0%E5%8C%96%E6%9E%84%E5%BB%BA"><span class="toc-text">2.1 参数化构建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Token-%E5%8A%A0%E5%AF%86"><span class="toc-text">2.2 Token 加密</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%EF%BC%88%E6%96%B9%E6%B3%95%EF%BC%89"><span class="toc-text">2.3 定义函数（方法）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%85%B1%E4%BA%AB%E5%BA%93"><span class="toc-text">三、共享库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%88%9B%E5%BB%BA%E5%85%B1%E4%BA%AB%E5%BA%93"><span class="toc-text">3.1 创建共享库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%8A%A0%E8%BD%BD%E5%85%B1%E4%BA%AB%E5%BA%93"><span class="toc-text">3.2 加载共享库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Jenkins-%E9%85%8D%E7%BD%AE"><span class="toc-text">3.3 Jenkins 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Jenkins-%E6%9E%84%E5%BB%BA"><span class="toc-text">3.4 Jenkins 构建</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/posts/articles/7fbc334.html" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/mydockerswarm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker Swarm NFS 数据持久化存储"/></a><div class="content"><a class="title" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储">Docker Swarm NFS 数据持久化存储</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/c2464361.html'
+    this.page.identifier = '/posts/articles/c2464361.html'
+    this.page.title = 'Jenkins 实现 Gitlab API 调用及共享库应用'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>

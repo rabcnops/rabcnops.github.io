@@ -1,0 +1,534 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Gitlab 详细操作入门 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Gitlab 详细操作入门。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Gitlab 详细操作入门">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/9e594074.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="Gitlab 详细操作入门。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg">
+<meta property="article:published_time" content="2021-03-23T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-27T08:41:11.441Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="CICD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/9e594074.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Gitlab 详细操作入门',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-27 16:41:11'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Gitlab 详细操作入门</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-03-23T03:33:14.000Z" title="发表于 2021-03-23 11:33:14">2021-03-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-27T08:41:11.441Z" title="更新于 2023-03-27 16:41:11">2023-03-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/">DevOps</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/Gitlab/">Gitlab</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>9分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Gitlab 详细操作入门"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h4 id="一、Gitlab-配置"><a href="#一、Gitlab-配置" class="headerlink" title="一、Gitlab 配置"></a>一、Gitlab 配置</h4><h5 id="1、部署方式"><a href="#1、部署方式" class="headerlink" title="1、部署方式"></a>1、部署方式</h5><p>通过 Docker 运行 Gitlab 容器，并对相关的端口和目录进行了映射。再就是 GitLab 是基于Ruby语言开发的，另外用了redis 和postgresql 数据库</p>
+<h5 id="2、端口"><a href="#2、端口" class="headerlink" title="2、端口"></a>2、端口</h5><ul>
+<li><p>22 端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2022:22      # 将 Gitlab 容器的 22 端口映射到宿主机的 2022 端口</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>443 端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2443:443     # 将 Gitlab 容器的 443 端口映射到宿主机的 2443 端口</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>80 端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2080:80      # 将 Gitlab 容器的 80 端口映射到宿主机的 2080 端口</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>因此访问 Gitlab 时，应跟上对应的 2080 端口</p>
+</blockquote>
+</li>
+</ul>
+<h5 id="3、文件路径"><a href="#3、文件路径" class="headerlink" title="3、文件路径"></a>3、文件路径</h5><ul>
+<li><p>配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/home/data/gitlab/etc   # 宿主机</span><br><span class="line">/etc/gitlab             # Gitlab 容器</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>数据文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/home/data/gitlab/data  # 宿主机</span><br><span class="line">/var/opt/gitlab         # Gitlab 容器</span><br><span class="line">/var/opt/gitlab/postgresql/data   # PostgreSQL 数据库，用于存放 Gitlab 数据</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>日志文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/home/data/gitlab/log   # 宿主机</span><br><span class="line">/var/log/gitlab         # Gitlab 容器</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5 id="4、用户"><a href="#4、用户" class="headerlink" title="4、用户"></a>4、用户</h5><p>默认用户为 git ，这里也可以修改默认的用户。在 Gitlab 上可以创建相应的用户，用户的数据会存储到对应的数据文件之中。</p>
+<h4 id="二、Gitlab-使用教程"><a href="#二、Gitlab-使用教程" class="headerlink" title="二、Gitlab 使用教程"></a>二、Gitlab 使用教程</h4><h5 id="1、创建用户"><a href="#1、创建用户" class="headerlink" title="1、创建用户"></a>1、创建用户</h5><blockquote>
+<p>首先研发人员给到项目组所有成员名单（包括：姓名&#x2F;职位&#x2F;邮箱），用于账号注册。</p>
+<p>这里是以管理员账号去创建的普通用户（注意是普通用户），权限在添加到群组中时再赋予。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174734982.png" alt="image-20221214174734982"></p>
+<h5 id="2、用户访问"><a href="#2、用户访问" class="headerlink" title="2、用户访问"></a>2、用户访问</h5><p>账号注册完成后即可登录到自己的 Gitlab 端，首次登录用户需进行初始密码修改，修改后需牢记密码，防止数据丢失。</p>
+<h5 id="3、创建群组"><a href="#3、创建群组" class="headerlink" title="3、创建群组"></a>3、创建群组</h5><p>（1）创建群组</p>
+<p>【群组】–&gt;【您的群组】–&gt;【新建群组】</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174753848.png" alt="image-20221214174753848"></p>
+<p>（2）设置群组</p>
+<blockquote>
+<p>私有：仅该组组员才有权限查看该项目</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174808158.png" alt="image-20221214174808158"></p>
+<p>（3）将用户添加到群组中</p>
+<ul>
+<li><p>添加用户到群组</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174825153.png" alt="image-20221214174825153"></p>
+</li>
+<li><p>用户权限划分</p>
+<p>在这里就涉及到了用户的权限问题，可根据项目组来确定，一般会设置我们的项目主管为该项目的项目管理员，其他成员则为普通的研发人员。</p>
+<ul>
+<li><p>项目管理员（Owner）</p>
+<p>是该群组和项目组的管理员，权限仅次于 Gitlab 管理员，可批准代码合并请求并进行合并（合并到 master 分支）。</p>
+</li>
+<li><p>普通成员（Dev）</p>
+<p>加入群组的普通成员均有权限查看所在组的项目详情，同时可进行相应的 clone 操作。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h5 id="4、创建项目"><a href="#4、创建项目" class="headerlink" title="4、创建项目"></a>4、创建项目</h5><p>（1）创建项目</p>
+<p>【项目】–&gt;【新建项目】</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174839937.png" alt="image-20221214174839937"></p>
+<p>【创建空白项目】：当然也可导入项目</p>
+<blockquote>
+<p>注：不同的 Gitlab 版本可能有些差异，我这里是中文版的，英文版的话是 Create a project（看不习惯中文可进行中英文切换，设置方法在后面）</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174854685.png" alt="image-20221214174854685"></p>
+<p>（2）设置项目</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214174912124.png" alt="image-20221214174912124"></p>
+<p>（3）创建分支</p>
+<blockquote>
+<p>具体的分支内容以研发那边为准进行确定。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181204879.png" alt="image-20221214181204879"></p>
+<blockquote>
+<p>输入分支名称：</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181222319.png" alt="image-20221214181222319"></p>
+<p>（4）合并分支</p>
+<ul>
+<li><p>研发人员的合并请求操作</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181244230.png" alt="image-20221214181244230"></p>
+</li>
+<li><p>项目主管批准并进行合并操作</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181321758.png" alt="image-20221214181321758"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181345862.png" alt="image-20221214181345862"></p>
+</li>
+</ul>
+<h5 id="5、Clone-项目"><a href="#5、Clone-项目" class="headerlink" title="5、Clone 项目"></a>5、Clone 项目</h5><p>（1）生成秘钥</p>
+<blockquote>
+<p>研发人员在 Windows 上生成秘钥</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ssh-keygen.exe -C <span class="string">&quot;xxxx@126.com&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>（2）上传公钥至 Gitlab </p>
+<blockquote>
+<p>把公钥上传至自己的 Gitlab 上（登录gitlab，按下图操作）</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub     <span class="comment"># 上传cat的内容至gitlab</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181422324.png" alt="image-20221214181422324"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181436337.png" alt="image-20221214181436337"></p>
+<p>（3）配置个人的用户名称和电子邮件地址</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.name <span class="string">&quot;name&quot;</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.email <span class="string">&quot;test@163.com&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：user.name 和 user.email 是你 gitlab 上的用户名称和电子邮件</p>
+</blockquote>
+<p>（4）clone 项目到本地</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git <span class="built_in">clone</span> ssh://git@10.20.10.62:2022/mygroup/myproject.git</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="6、Gitlab-语言设置"><a href="#6、Gitlab-语言设置" class="headerlink" title="6、Gitlab 语言设置"></a>6、Gitlab 语言设置</h5><p>每个用户登录 Gitlab 默认的语言是 English 可个人情况进行中英文切换，保存后刷新一下即可，具体步骤如下：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181452446.png" alt="image-20221214181452446"></p>
+<h4 id="三、Gitlab-管理"><a href="#三、Gitlab-管理" class="headerlink" title="三、Gitlab 管理"></a>三、Gitlab 管理</h4><h5 id="1、项目管理"><a href="#1、项目管理" class="headerlink" title="1、项目管理"></a>1、项目管理</h5><p>（1）代码管理</p>
+<p>代码通过相应的开发人员进行开发，将开发好的代码 push 到 Gitlab 上进行代码托管。这里重点在于如何备份&#x2F;恢复&#x2F;迁移数据的问题。</p>
+<p>（2）分支管理</p>
+<p>分支主要有研发人员那边来确定，具体的操作步骤在上述【创建群组】中有提到。</p>
+<h5 id="2、数据备份"><a href="#2、数据备份" class="headerlink" title="2、数据备份"></a>2、数据备份</h5><p>（1）查看版本信息</p>
+<p>在数据备份或数据迁移前，应查看对应的系统版本、软件版本等因素，否则可能会导致迁移后数据的不可用。这里以 CentOS 7 为例进行数据备份、恢复和迁移测试。CentOS 8 操作步骤一样。</p>
+<ul>
+<li><p>CentOS 系统版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cat</span> /etc/redhat-release</span> </span><br><span class="line">CentOS Linux release 7.4.1708 (Core)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Gitlab 软件版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cat</span> /opt/gitlab/embedded/service/gitlab-rails/VERSION</span></span><br><span class="line">13.5.1</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>（2）数据备份</p>
+<p>在数据备份这里需要注意，当我们在执行备份操作时，为了保证备份数据的一致性，应事先停掉我们的Gitlab服务，如果不停掉的话，可能我们在备份的过程中有其他研发人员进行数据的上传，从而导致备份数据的不一致性和不完整性，甚至出现一些不可预估的错误。</p>
+<ul>
+<li><p>停Gitlab服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop unicorn</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop sidekiq</span></span><br><span class="line">ok: down: sidekiq: 0s, normally up</span><br></pre></td></tr></table></figure>
+
+<p>打开&#x2F;etc&#x2F;gitlab&#x2F;gitlab.rb配置文件，查看一个和备份相关的配置项：<code>gitlab_rails[&#39;backup_path&#39;] = &quot;/data/gitlab/backups&quot;</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">vim /etc/gitlab/gitlab.rb</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181519087.png" alt="image-20221214181519087"></p>
+<p>该项定义了默认备份出文件的路径，可以通过修改该配置，并执行 <strong>gitlab-ctl reconfigure 或者 gitlab-ctl  restart</strong> 重启服务生效。</p>
+</li>
+</ul>
+<p>（3）开始备份</p>
+<blockquote>
+<p>接下来我们通过备份命令进行数据备份，备份后的数据默认存放在该路径下：<code>/var/opt/gitlab/backups/</code></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> /var/opt/gitlab/backups/</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-rake gitlab:backup:create    <span class="comment"># 开始备份（等待..）</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">ls</span></span></span><br><span class="line">1604716638_2020_11_07_13.5.1_gitlab_backup.tar     # 备份后的数据包</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>也可以添加到 crontab 中定时执行：</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0 3 * * * /opt/gitlab/bin/gitlab-rake gitlab:backup:create</span><br></pre></td></tr></table></figure>
+
+<p>可以到&#x2F;data&#x2F;gitlab&#x2F;backups找到备份包，解压查看，会发现备份的还是比较全面的，数据库、repositories、build、upload等分类还是比较清晰的。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181534308.png" alt="image-20221214181534308"></p>
+<h5 id="3、数据恢复"><a href="#3、数据恢复" class="headerlink" title="3、数据恢复"></a>3、数据恢复</h5><p>（1）删除数据</p>
+<p>为了测试效果，这里我们模拟不小心删掉了项目的某个文件（当然了这里是可以通过<code>log</code>回滚的，假设这里已经删了很久了）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">ls</span></span></span><br><span class="line">html  README.md</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git <span class="built_in">rm</span> -r html/   <span class="comment"># 删除文件</span></span></span><br><span class="line">rm &#x27;html/index.html&#x27;</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git add .</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git commit -m <span class="string">&#x27;意外删除html文件&#x27;</span></span></span><br><span class="line">[dev 0c35330] 意外删除html文件</span><br><span class="line"> 1 file changed, 3 deletions(-)</span><br><span class="line"> delete mode 100644 html/index.html</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git push sz dev   <span class="comment"># 提交代码</span></span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181552992.png" alt="image-20221214181552992"></p>
+<p>（2）停Gitlab服务</p>
+<blockquote>
+<p>当我们在做数据备份和数据迁移时，应先停这两个服务，目的是为了保证数据的一致性。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop unicorn</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop sidekiq</span></span><br><span class="line">ok: down: sidekiq: 0s, normally up</span><br></pre></td></tr></table></figure>
+
+<p>（3）权限</p>
+<blockquote>
+<p>注意权限：600权限是无权恢复的。 实验环境可改成了777，生产环境建议修改属主属组。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">pwd</span></span></span><br><span class="line">/data/gitlab/backups</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">chmod</span> 777 1604716638_2020_11_07_13.5.1_gitlab_backup.tar</span></span><br></pre></td></tr></table></figure>
+
+<p>（4）开始恢复数据</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">ls</span></span></span><br><span class="line">1604716638_2020_11_07_13.5.1_gitlab_backup.tar</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-rake gitlab:backup:restore BACKUP=1604716638_2020_11_07_13.5.1</span></span><br></pre></td></tr></table></figure>
+
+<p>（5）启动Gitlab服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl start unicorn</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl start sidekiq</span></span><br><span class="line">ok: run: sidekiq: (pid 9457) 1s</span><br><span class="line"></span><br><span class="line">或：</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl restart</span></span><br></pre></td></tr></table></figure>
+
+<p>（6）恢复验证</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181610920.png" alt="image-20221214181610920"></p>
+<p>至此，数据成功恢复。</p>
+<h5 id="4、数据迁移"><a href="#4、数据迁移" class="headerlink" title="4、数据迁移"></a>4、数据迁移</h5><p>（1）停Gitlab服务</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop unicorn</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">gitlab-ctl stop sidekiq</span></span><br><span class="line">ok: down: sidekiq: 0s, normally up</span><br></pre></td></tr></table></figure>
+
+<p>（2）数据迁移</p>
+<p>将老服务器<code>/data/gitlab/backups</code>目录下的备份文件拷贝到新服务器上的<code>/data/gitlab/backups</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">rsync -avz 1604716638_2020_11_07_13.5.1_gitlab_backup.tar 10.20.151.135:/data/gitlab/backups/</span> </span><br></pre></td></tr></table></figure>
+
+<h5 id="5、用户管理"><a href="#5、用户管理" class="headerlink" title="5、用户管理"></a>5、用户管理</h5><p>（1）用户创建</p>
+<p>用户创建的过程在使用教程的那一节已经做了详细的介绍，可按照该方法进行用户创建。</p>
+<p>（2）用户权限</p>
+<p>在创建用户的时候是不需要授权的，也就说刚开始创建的时候都是普通用户，其授权是在将成员添加到群组的时候进行的，即该用户对该群组所拥有的权限，一般我们的项目主管会设置为群组管理员，其他成员为普通的开发人员，在该群组的这些成员可以查看当前组的所有项目并进行 clone 操作。</p>
+<p>（3）员工离职</p>
+<p>对于员工离职删除员工账户数据保留的问题，员工要离职前，他应将他所写的代码 push 到 gitlab 的对应分支上，这样在后面有新员工入职时可接手其上一个项目。比如要离职的某员工先将代码 push 到 dev 分支上，后面新员工注册相应的账户后 <code>git pull --rebase origin dev</code>整合代码，该命令的作用是：取回远程主机某个分支的更新，再与本地的指定分支合并。</p>
+<h4 id="四、Gitlab-客户端"><a href="#四、Gitlab-客户端" class="headerlink" title="四、Gitlab 客户端"></a>四、Gitlab 客户端</h4><h5 id="1、Client1"><a href="#1、Client1" class="headerlink" title="1、Client1"></a>1、Client1</h5><p>（1）Git下载</p>
+<p>下载地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://gitforwindows.org/">https://gitforwindows.org/</a></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181630869.png" alt="image-20221214181630869"></p>
+<p>（2）Git 使用教程</p>
+<ul>
+<li><p>打开 Git 客户端</p>
+<p>安装完成后，点击【开始菜单】–&gt;【Git Bash】 </p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181650294.png" alt="image-20221214181650294"></p>
+</li>
+<li><p>生成秘钥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">ssh-keygen  -t rsa -C <span class="string">&quot;xxxx@126.com&quot;</span>    <span class="comment"># 你Gitlab对应的邮箱账户</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>上传公钥</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub     <span class="comment"># 将cat的内容上传至 Gitlab</span></span> </span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置 Git</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.email <span class="string">&quot;xxxx@126.com&quot;</span>     <span class="comment"># 你 Gitlab 邮箱对应的邮箱账户</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git config --global user.name <span class="string">&quot;win&quot;</span>      <span class="comment"># 你 Gitlab 的用户名</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Clone 项目</p>
+<p>首先 clone 的项目需要放到哪里，选择好文件夹，比如我 D 盘下的 project 文件夹，操作如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">cd</span> /d/project/      <span class="comment"># 作为项目仓库</span></span></span><br></pre></td></tr></table></figure>
+
+<p>SSH方式：</p>
+<blockquote>
+<p>这种方式clone项目的优势在于不需要每次clone时都需要输密码</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git <span class="built_in">clone</span> ssh://git@10.20.10.62:2022/mygroup/myproject.git</span></span><br></pre></td></tr></table></figure>
+
+<p>HTTP方式：</p>
+<blockquote>
+<p>这种方式clone的项目时每次都需要输入账户和密码</p>
+<p>账户：是你当前登录的 Gitlab 账户</p>
+<p>密码：Gitlab 账户对应的登录密码</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git <span class="built_in">clone</span> http://10.20.10.62:2080/mygroup/myproject.git</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：</strong>在每次编写代码时，第一步先去 Git 仓库拉取（pull）代码，否则会造成冲突，因为不添加的话，你修改了别人的内容，就会造成相关错误。</p>
+</li>
+<li><p>创建分支</p>
+<p>创建分支并切换到分支：一般会在 gitlab 上创建好分支，研发人员根据gitlab上的分支，再在Git客户端上创建对应的分支。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git checkout -b dev    <span class="comment"># 创建dev分支并切换到dev分支</span></span></span><br><span class="line">或</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git branch dev      <span class="comment"># 创建dev分支</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">git checkout dev    <span class="comment"># 切换到dev分支</span></span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除分支</p>
+<p>删除已合并分支</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -d 分支名</span><br></pre></td></tr></table></figure>
+
+<p>删除未合并分支</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -D 分支名</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h5 id="2、Client2"><a href="#2、Client2" class="headerlink" title="2、Client2"></a>2、Client2</h5><p>下载地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://tortoisegit.org/download/">https://tortoisegit.org/download/</a></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221214181720622.png" alt="image-20221214181720622"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/9e594074.html">https://blog.rabcnops.cn/posts/articles/9e594074.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/CICD/">CICD</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Gitlab 基础操作快速入门</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/c74519c0.html" title="Gitlab 项目自动同步"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Gitlab 项目自动同步</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/7255efaf.html" title="Gitlab 备份与恢复"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与恢复</div></div></a></div><div><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 基础操作快速入门</div></div></a></div><div><a href="/posts/articles/c74519c0.html" title="Gitlab 项目自动同步"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 项目自动同步</div></div></a></div><div><a href="/posts/articles/3da9adc.html" title="Gitlab 备份与迁移"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与迁移</div></div></a></div><div><a href="/posts/articles/7e46479a.html" title="Jenkins Pipeline 密钥远程部署"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/pipeline.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins Pipeline 密钥远程部署</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%80%E3%80%81Gitlab-%E9%85%8D%E7%BD%AE"><span class="toc-text">一、Gitlab 配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E9%83%A8%E7%BD%B2%E6%96%B9%E5%BC%8F"><span class="toc-text">1、部署方式</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E7%AB%AF%E5%8F%A3"><span class="toc-text">2、端口</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E6%96%87%E4%BB%B6%E8%B7%AF%E5%BE%84"><span class="toc-text">3、文件路径</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E7%94%A8%E6%88%B7"><span class="toc-text">4、用户</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Gitlab-%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B"><span class="toc-text">二、Gitlab 使用教程</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BA%E7%94%A8%E6%88%B7"><span class="toc-text">1、创建用户</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E7%94%A8%E6%88%B7%E8%AE%BF%E9%97%AE"><span class="toc-text">2、用户访问</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA%E7%BE%A4%E7%BB%84"><span class="toc-text">3、创建群组</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="toc-text">4、创建项目</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81Clone-%E9%A1%B9%E7%9B%AE"><span class="toc-text">5、Clone 项目</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#6%E3%80%81Gitlab-%E8%AF%AD%E8%A8%80%E8%AE%BE%E7%BD%AE"><span class="toc-text">6、Gitlab 语言设置</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E3%80%81Gitlab-%E7%AE%A1%E7%90%86"><span class="toc-text">三、Gitlab 管理</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81%E9%A1%B9%E7%9B%AE%E7%AE%A1%E7%90%86"><span class="toc-text">1、项目管理</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81%E6%95%B0%E6%8D%AE%E5%A4%87%E4%BB%BD"><span class="toc-text">2、数据备份</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3%E3%80%81%E6%95%B0%E6%8D%AE%E6%81%A2%E5%A4%8D"><span class="toc-text">3、数据恢复</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#4%E3%80%81%E6%95%B0%E6%8D%AE%E8%BF%81%E7%A7%BB"><span class="toc-text">4、数据迁移</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#5%E3%80%81%E7%94%A8%E6%88%B7%E7%AE%A1%E7%90%86"><span class="toc-text">5、用户管理</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Gitlab-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-text">四、Gitlab 客户端</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#1%E3%80%81Client1"><span class="toc-text">1、Client1</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2%E3%80%81Client2"><span class="toc-text">2、Client2</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/posts/articles/7fbc334.html" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/mydockerswarm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker Swarm NFS 数据持久化存储"/></a><div class="content"><a class="title" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储">Docker Swarm NFS 数据持久化存储</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/9e594074.html'
+    this.page.identifier = '/posts/articles/9e594074.html'
+    this.page.title = 'Gitlab 详细操作入门'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>

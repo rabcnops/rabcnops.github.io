@@ -1,0 +1,353 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Jenkins Pipeline 配置钉钉消息通知 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="有这样一个需求，在编写 Jenkinsfile 脚本中，需配置钉钉告警功能，里面涉及到的相关告警信息中，需包含构建人，即哪个该项目是由哪个人进行构建的，构建成功后相关的构建信息会以钉钉消息的形式通知。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Jenkins Pipeline 配置钉钉消息通知">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/7ede8fbb.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="有这样一个需求，在编写 Jenkinsfile 脚本中，需配置钉钉告警功能，里面涉及到的相关告警信息中，需包含构建人，即哪个该项目是由哪个人进行构建的，构建成功后相关的构建信息会以钉钉消息的形式通知。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg">
+<meta property="article:published_time" content="2022-08-22T03:33:14.000Z">
+<meta property="article:modified_time" content="2023-03-27T09:18:14.209Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="CICD">
+<meta property="article:tag" content="Jenkins_Pipeline">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/7ede8fbb.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Jenkins Pipeline 配置钉钉消息通知',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-27 17:18:14'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fa-fw fas fa-list"></i><span> 更多</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于作者</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Jenkins Pipeline 配置钉钉消息通知</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-08-22T03:33:14.000Z" title="发表于 2022-08-22 11:33:14">2022-08-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-27T09:18:14.209Z" title="更新于 2023-03-27 17:18:14">2023-03-27</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/">DevOps</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/DevOps/Jenkins/">Jenkins</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Jenkins Pipeline 配置钉钉消息通知"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="2d697c8b26a7d91dc044f623e7f80f4a"></p>
+<p><font color="Brown"><strong>Author</strong>：rab</font> <font color="Brown"><strong>Date</strong>：2022&#x2F;07&#x2F;08</font> <font color="Brown"><strong>Blog</strong>：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/IT_ZRS?type=blog"><font color="Brown">https://blog.csdn.net/IT_ZRS?type&#x3D;blog</font></a></font></p>
+<p><strong>Jenkins 版本</strong>：2.341</p>
+<hr>
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>有这样一个需求，在编写 Jenkinsfile 脚本中，需配置钉钉告警功能，里面涉及到的相关告警信息中，需包含构建人，即哪个该项目是由哪个人进行构建的，构建成功后相关的构建信息会以钉钉消息的形式通知。</p>
+<p>功能实现：</p>
+<ul>
+<li>构建编号；</li>
+<li>构建列表；</li>
+<li>构建分支；</li>
+<li>构建环境；</li>
+<li>构建状态；</li>
+<li>项目地址；</li>
+<li>构建日志；</li>
+<li>构建后启动状态；</li>
+<li>执行人；</li>
+<li>构建持续时间。</li>
+</ul>
+<h2 id="一、安装插件"><a href="#一、安装插件" class="headerlink" title="一、安装插件"></a>一、安装插件</h2><h3 id="1-1-build-user-vars-plugin"><a href="#1-1-build-user-vars-plugin" class="headerlink" title="1.1 build user vars plugin"></a>1.1 build user vars plugin</h3><p>如果需要获取项目构建的人信息，需要安装 <code>build user vars plugin</code> 插件，否在获取变量值的时为 <code>Null</code>，下图我已经安装了，大家在搜索框搜索安装即可。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/plugin.png" alt="plugin"></p>
+<h3 id="1-2-Ding-Talk"><a href="#1-2-Ding-Talk" class="headerlink" title="1.2 Ding Talk"></a>1.2 Ding Talk</h3><p>这里还需要安装钉钉插件 <code>Ding Talk</code>，这后面会在 <code>Jenkins 系统配置</code>中进行相关配置。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708101206429.png" alt="image-20220708101206429"></p>
+<h2 id="二、配置钉钉告警"><a href="#二、配置钉钉告警" class="headerlink" title="二、配置钉钉告警"></a>二、配置钉钉告警</h2><h3 id="2-1-钉钉添加机器人"><a href="#2-1-钉钉添加机器人" class="headerlink" title="2.1 钉钉添加机器人"></a>2.1 钉钉添加机器人</h3><p><strong>1、进入你对应的相关群聊</strong></p>
+<blockquote>
+<p>点击右上角的设置图标；</p>
+<p>下图是我已经配置过钉钉了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708102604257.png" alt="image-20220708102604257"></p>
+<p><strong>2、点击<code>智能群助手</code></strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708102736255.png" alt="image-20220708102736255"></p>
+<p><strong>3、点击<code>添加机器人</code></strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708103008728.png" alt="image-20220708103008728"></p>
+<p>这时会跳到这个页面：继续点击<code>添加机器人</code></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708103218129.png" alt="image-20220708103218129"></p>
+<p><strong>4、选择<code>自定义</code></strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708103341118.png" alt="image-20220708103341118"></p>
+<p><strong>5、完成相关填写即可</strong></p>
+<blockquote>
+<p>不清楚的可以点击图片上的<code>说明问文档</code></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708103446648.png" alt="image-20220708103446648"></p>
+<p>此时会生成 <code>webhook</code> 口令！你也可以点击对应的机器人获取：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708103943044.png" alt="image-20220708103943044"></p>
+<h3 id="2-2-Jenkins-系统配置"><a href="#2-2-Jenkins-系统配置" class="headerlink" title="2.2 Jenkins 系统配置"></a>2.2 Jenkins 系统配置</h3><p><strong>1、进入系统配置</strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708102301654.png" alt="image-20220708102301654"></p>
+<p><strong>2、找到钉钉模块</strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708102207159.png" alt="image-20220708102207159"></p>
+<h2 id="三、编写-Jenkinsfile"><a href="#三、编写-Jenkinsfile" class="headerlink" title="三、编写 Jenkinsfile"></a>三、编写 Jenkinsfile</h2><p>以上配置均完成后，接下来就是在 <code>jenkinsfile</code> 中配置了。</p>
+<p>构建后通知配置于 <code>pipeline &#123;&#125;</code> 中，与 <code>stages &#123;&#125;</code> 同级，下面是具体的模板信息，这里我只设置了<code>成功</code>、<code>失败</code>两种情况，当然还有其他情况，大家根据实际情况配置即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">pipeline &#123;</span><br><span class="line">	stages &#123;</span><br><span class="line">		// 流水线阶段/步骤</span><br><span class="line">	&#125;</span><br><span class="line">    post &#123;</span><br><span class="line">        success &#123;</span><br><span class="line">            wrap([$class: &#x27;BuildUser&#x27;]) &#123;</span><br><span class="line">                dingtalk(</span><br><span class="line">                    robot: &#x27;Jenkins-Dingtalk&#x27;,</span><br><span class="line">                    type: &#x27;MARKDOWN&#x27;,</span><br><span class="line">                    title: &quot;success: $&#123;JOB&#125;&quot;,</span><br><span class="line">                    text: [&quot;### 项目信息&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 项目主体: CheckCheck&quot;,</span><br><span class="line">                        &quot;- 子项目: 斗地主&quot;,</span><br><span class="line">                        &quot;![ddz](https://xxx.com/img/puk.jpeg)&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 构建信息&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 构建编号: &lt;font color=#008000&gt;$&#123;BUILD_ID&#125;&lt;/font&gt;&quot;,</span><br><span class="line">                        &quot;- 构建列表: $&#123;JOB&#125;&quot;,</span><br><span class="line">                        &quot;- 构建分支: $&#123;BRANCH_TAG&#125;&quot;,</span><br><span class="line">                        &quot;- 构建环境: $&#123;ENV&#125;&quot;,</span><br><span class="line">                        &quot;- 构建状态: **&lt;font color=#008000&gt;$&#123;currentBuild.result&#125;&lt;/font&gt;**&quot;,</span><br><span class="line">                        &quot;- 项目地址: $&#123;BUILD_URL&#125;&quot;,</span><br><span class="line">                        &quot;- 构建日志: $&#123;BUILD_URL&#125;console&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 是否启动&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 构建后启动: $&#123;START&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 执行人&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- $&#123;env.BUILD_USER&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 持续时间&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- $&#123;currentBuild.durationString&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;]</span><br><span class="line">                )</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        failure &#123;</span><br><span class="line">            wrap([$class: &#x27;BuildUser&#x27;]) &#123;</span><br><span class="line">                dingtalk(</span><br><span class="line">                    robot: &#x27;Jenkins-Dingtalk&#x27;,</span><br><span class="line">                    type: &#x27;MARKDOWN&#x27;,</span><br><span class="line">                    title: &quot;failure: $&#123;JOB&#125;&quot;,</span><br><span class="line">                    text: [&quot;### 项目信息&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 项目主体: CheckCheck&quot;,</span><br><span class="line">                        &quot;- 子项目: 斗地主&quot;,</span><br><span class="line">                        &quot;![ddz](https://xxx.com/img/puk.jpeg)&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 构建信息&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 构建编号: &lt;font color=#dd3238&gt;$&#123;BUILD_ID&#125;&lt;/font&gt;&quot;,</span><br><span class="line">                        &quot;- 构建列表: $&#123;JOB&#125;&quot;,</span><br><span class="line">                        &quot;- 构建分支: $&#123;BRANCH_TAG&#125;&quot;,</span><br><span class="line">                        &quot;- 构建环境: $&#123;ENV&#125;&quot;,</span><br><span class="line">                        &quot;- 构建状态: **&lt;font color=#dd3238&gt;$&#123;currentBuild.result&#125;&lt;/font&gt;**&quot;,</span><br><span class="line">                        &quot;- 项目地址: $&#123;BUILD_URL&#125;&quot;,</span><br><span class="line">                        &quot;- 构建日志: $&#123;BUILD_URL&#125;console&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 是否启动&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- 构建后启动: $&#123;START&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 执行人&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- $&#123;env.BUILD_USER&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;### 持续时间&quot;,</span><br><span class="line">                        &#x27;---&#x27;,</span><br><span class="line">                        &quot;- $&#123;currentBuild.durationString&#125;&quot;,</span><br><span class="line">                        &quot;&quot;,</span><br><span class="line">                        &#x27;---&#x27;]</span><br><span class="line">                )</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在编写 <code>jenkinsfile</code> 需注意的几个问题：</p>
+<ul>
+<li>变量：需确保你定义的变量有效；</li>
+<li>钉钉配置：robot: ‘Jenkins-Dingtalk’  这个值必须为 <code>2.2 小结</code> 中系统配置定义的机器人 ID，因为钉钉的 webhook 是配置在 Jenkins 系统上的，否则你的 jenkinsfile 是无法连接或找到钉钉的。</li>
+</ul>
+<h2 id="四、钉钉告警验证"><a href="#四、钉钉告警验证" class="headerlink" title="四、钉钉告警验证"></a>四、钉钉告警验证</h2><p>配完成后，就可以进行构建操作，不管成功或失败，都会接收到告警信息。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220708105131153.png" alt="image-20220708105131153"></p>
+<p><mark>至此，Jenkins pipeline 配置钉钉消息通知已经完成！</mark></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/7ede8fbb.html">https://blog.rabcnops.cn/posts/articles/7ede8fbb.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/CICD/">CICD</a><a class="post-meta__tags" href="/tags/Jenkins-Pipeline/">Jenkins_Pipeline</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/fcc16254.html" title="Jenkins Pipeline 方法定义及调用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/%E6%B5%81%E6%B0%B4%E7%BA%BF.webp" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Jenkins Pipeline 方法定义及调用</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/7e46479a.html" title="Jenkins Pipeline 密钥远程部署"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/pipeline.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins Pipeline 密钥远程部署</div></div></a></div><div><a href="/posts/articles/fcc16254.html" title="Jenkins Pipeline 方法定义及调用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/%E6%B5%81%E6%B0%B4%E7%BA%BF.webp" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-08-22</div><div class="title">Jenkins Pipeline 方法定义及调用</div></div></a></div><div><a href="/posts/articles/1be7f41.html" title="Active Choice Parameter 在 Jenkinsfile 中的应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/js.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Active Choice Parameter 在 Jenkinsfile 中的应用</div></div></a></div><div><a href="/posts/articles/a951d278.html" title="Pipeline 核心技术"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/%E6%B5%81%E6%B0%B4%E7%BA%BF.webp" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Pipeline 核心技术</div></div></a></div><div><a href="/posts/articles/7255efaf.html" title="Gitlab 备份与恢复"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与恢复</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">35</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="fas fa-envelope"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="fa fa-book-open"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-text">背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6"><span class="toc-text">一、安装插件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-build-user-vars-plugin"><span class="toc-text">1.1 build user vars plugin</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-Ding-Talk"><span class="toc-text">1.2 Ding Talk</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AE%E9%92%89%E9%92%89%E5%91%8A%E8%AD%A6"><span class="toc-text">二、配置钉钉告警</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E9%92%89%E9%92%89%E6%B7%BB%E5%8A%A0%E6%9C%BA%E5%99%A8%E4%BA%BA"><span class="toc-text">2.1 钉钉添加机器人</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Jenkins-%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="toc-text">2.2 Jenkins 系统配置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%BC%96%E5%86%99-Jenkinsfile"><span class="toc-text">三、编写 Jenkinsfile</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E9%92%89%E9%92%89%E5%91%8A%E8%AD%A6%E9%AA%8C%E8%AF%81"><span class="toc-text">四、钉钉告警验证</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 快速入门"/></a><div class="content"><a class="title" href="/posts/articles/7fbc334.html" title="Ansible 快速入门">Ansible 快速入门</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/mydockerswarm.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker Swarm NFS 数据持久化存储"/></a><div class="content"><a class="title" href="/posts/articles/2499c9dc.html" title="Docker Swarm NFS 数据持久化存储">Docker Swarm NFS 数据持久化存储</a><time datetime="2023-03-23T03:33:14.000Z" title="发表于 2023-03-23 11:33:14">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/7ede8fbb.html'
+    this.page.identifier = '/posts/articles/7ede8fbb.html'
+    this.page.title = 'Jenkins Pipeline 配置钉钉消息通知'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
