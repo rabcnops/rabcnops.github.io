@@ -1,0 +1,816 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>基于 Docker 的 Prometheus 监控方案 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基于 Docker 的 Prometheus 监控方案及应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 Docker 的 Prometheus 监控方案">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/e36de20c.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="基于 Docker 的 Prometheus 监控方案及应用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg">
+<meta property="article:published_time" content="2023-03-28T07:51:14.000Z">
+<meta property="article:modified_time" content="2023-03-28T07:52:38.491Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Prometheus">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/e36de20c.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '基于 Docker 的 Prometheus 监控方案',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-03-28 15:52:38'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">基于 Docker 的 Prometheus 监控方案</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-03-28T07:51:14.000Z" title="发表于 2023-03-28 15:51:14">2023-03-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-03-28T07:52:38.491Z" title="更新于 2023-03-28 15:52:38">2023-03-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">监控系统</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/Prometheus/">Prometheus</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">7.1k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>34分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="基于 Docker 的 Prometheus 监控方案"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg" alt="prometheus"></p>
+<p><font color=Brown><strong>Author</strong>：rab</font><br><font color=Brown><strong>Date</strong>：2022&#x2F;07&#x2F;18</font><br><font color=Brown><strong>Blog</strong>：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/IT_ZRS?type=blog"><font color=Brown>https://blog.csdn.net/IT_ZRS?type&#x3D;blog</font></a></font></p>
+<hr>
+<h2 id="一、规划"><a href="#一、规划" class="headerlink" title="一、规划"></a>一、规划</h2><h3 id="1-1-架构图"><a href="#1-1-架构图" class="headerlink" title="1.1 架构图"></a>1.1 架构图</h3><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/architecture.png" alt="architecture"></p>
+<p>我们将按照架构图来实现。</p>
+<h3 id="1-2-主机规划"><a href="#1-2-主机规划" class="headerlink" title="1.2 主机规划"></a>1.2 主机规划</h3><blockquote>
+<p>由于主机资源问题，暂且以两台服务器进行演示。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Host</th>
+<th>server</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>192.168.56.141</td>
+<td>Prometheus、Node_exporter</td>
+<td>Prometheus 服务、采集插件</td>
+</tr>
+<tr>
+<td>192.168.56.142</td>
+<td>Grafana、Alertmanager、Node_exporter、DingTalk</td>
+<td>监控展示、告警服务、采集插件</td>
+</tr>
+</tbody></table>
+<p>版本：</p>
+<ul>
+<li><p>CentOS：7.9</p>
+</li>
+<li><p>Prometheus：2.37.0</p>
+</li>
+<li><p>Grafana：9.0.3</p>
+</li>
+<li><p>Alertmanager：0.20.0</p>
+</li>
+<li><p>node-exporter：1.4.0</p>
+</li>
+<li><p>Dingding：1.4.0</p>
+</li>
+</ul>
+<p>下载：</p>
+<ul>
+<li>Prometheus：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://prometheus.io/docs/prometheus/latest/installation/">https://prometheus.io/docs/prometheus/latest/installation/</a></li>
+<li>Grafana：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://grafana.com/grafana/download">https://grafana.com/grafana/download</a></li>
+<li>Alertmanager：</li>
+<li>node-exporter：</li>
+</ul>
+<h2 id="二、部署"><a href="#二、部署" class="headerlink" title="二、部署"></a>二、部署</h2><blockquote>
+<p>相关组件下载地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://prometheus.io/download/">https://prometheus.io/download/</a></p>
+<p>前提：已经对服务器做了相关初始化，且安装了 docker 容器引擎。</p>
+</blockquote>
+<h3 id="2-1-Prometheus"><a href="#2-1-Prometheus" class="headerlink" title="2.1 Prometheus"></a>2.1 Prometheus</h3><blockquote>
+<p>官方文档：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://prometheus.io/docs/introduction/overview/">https://prometheus.io/docs/introduction/overview/</a></p>
+</blockquote>
+<p>1、pull 镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">docker pull bitnami/prometheus:2.37.0</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">本次采用最新稳定版</span></span><br></pre></td></tr></table></figure>
+
+<p>2、创建监控用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">groupadd -g 2000 monitor</span><br><span class="line">useradd -u 2000 -g monitor monitor</span><br></pre></td></tr></table></figure>
+
+<p>3、创建相关目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /home/data/prometheus/&#123;etc,data,rules&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">etc：配置文件目录</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">data：数据目录</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">rules：规则目录</span></span><br></pre></td></tr></table></figure>
+
+<p>4、创建配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /home/data/prometheus/etc/prometheus.yml</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或先启动临时容器再copy也是可以的</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">my global config</span></span><br><span class="line">global:</span><br><span class="line">  scrape_interval:     15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.</span><br><span class="line">  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">scrape_timeout is <span class="built_in">set</span> to the global default (10s).</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Alertmanager configuration</span></span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">  - static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      # - alertmanager:9093</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Load rules once and periodically evaluate them according to the global <span class="string">&#x27;evaluation_interval&#x27;</span>.</span></span><br><span class="line">rule_files:</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">- <span class="string">&quot;first_rules.yml&quot;</span></span></span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">- <span class="string">&quot;second_rules.yml&quot;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">A scrape configuration containing exactly one endpoint to scrape:</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Here it<span class="string">&#x27;s Prometheus itself.</span></span></span><br><span class="line">scrape_configs:</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash"><span class="string">The job name is added as a label `job=&lt;job_name&gt;` to any timeseries scraped from this config.</span></span></span><br><span class="line">  - job_name: &#x27;prometheus&#x27;</span><br><span class="line"></span><br><span class="line">    # metrics_path defaults to &#x27;/metrics&#x27;</span><br><span class="line">    # scheme defaults to &#x27;http&#x27;.</span><br><span class="line"></span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&#x27;localhost:9090&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>5、目录授权</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chown monitor. -R /home/data/prometheus</span><br></pre></td></tr></table></figure>
+
+<p>6、启动容器</p>
+<blockquote>
+<p>运行容器前，先看看这个镜像容器启动后会执行什么命令</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker inspect -f &#x27;&#123;&#123;.Config.Cmd&#125;&#125;&#x27; bitnami/prometheus:2.37.0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924181619392.png" alt="image-20220924181619392"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --user root \</span><br><span class="line">    --name=prometheus \</span><br><span class="line">    --privileged=true \</span><br><span class="line">    --restart=always \</span><br><span class="line">    -p 9090:9090 \</span><br><span class="line">    -v /home/data/prometheus/etc/prometheus.yml:/etc/prometheus/prometheus.yml \</span><br><span class="line">    -v /home/data/prometheus/rules:/etc/prometheus/rules \</span><br><span class="line">    -v /home/data/prometheus/data:/data/prometheus \</span><br><span class="line">    -v /etc/localtime:/etc/localtime \</span><br><span class="line">    bitnami/prometheus:2.37.0 \</span><br><span class="line">    --config.file=&quot;/etc/prometheus/prometheus.yml&quot; \</span><br><span class="line">    --storage.tsdb.path=&quot;/data/prometheus&quot; \</span><br><span class="line">    --web.console.libraries=/opt/bitnami/prometheus/conf/console_libraries \</span><br><span class="line">    --web.console.templates=/opt/bitnami/prometheus/conf/consoles \</span><br><span class="line">    --web.enable-lifecycle \</span><br><span class="line">    --web.enable-admin-api</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">至于为什么跟什么--参数，在我前面 docker 原理中有讲到</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">docker inspect &lt;image&gt;   <span class="comment"># 查看CMD参数</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">想要使用热加载，需指定--web.enable-lifecycle参数</span></span><br></pre></td></tr></table></figure>
+
+<p>7、访问验证</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220718122145247.png" alt="image-20220718122145247">8、热更新</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">curl -X POST http://192.168.56.141:9090/-/reload</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">我docker方式部署的热加载无效，正在找原因</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">原因已经找到，我自己大意，没看镜像的相关信息，已解决</span></span><br></pre></td></tr></table></figure>
+
+<p>9、语法检测</p>
+<blockquote>
+<p>这一点的好处在于检测你更新配置后是否有语法错误</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker exec prometheus promtool check config /etc/prometheus/prometheus.yml</span><br></pre></td></tr></table></figure>
+
+<p>确保无误后即可重启或热更新 Prometheus。 </p>
+<h3 id="2-2-Grafana"><a href="#2-2-Grafana" class="headerlink" title="2.2 Grafana"></a>2.2 Grafana</h3><blockquote>
+<p>官方文档：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://grafana.com/docs/">https://grafana.com/docs/</a></p>
+</blockquote>
+<p>1、pull 镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull grafana/grafana:9.0.3</span><br></pre></td></tr></table></figure>
+
+<p>2、创建监控用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">groupadd -g 2000 monitor</span><br><span class="line">useradd -u 2000 -g monitor monitor</span><br></pre></td></tr></table></figure>
+
+<p>3、创建相关目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /home/data/grafana/data</span><br><span class="line">mkdir -p /home/data/grafana/logs</span><br></pre></td></tr></table></figure>
+
+<p>4、启动临时容器（copy相关配置文件）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 3000:3000 --name=tmp grafana/grafana:9.0.3</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">复制配置文件</span></span><br><span class="line">docker cp tmp:/etc/grafana/ /home/data/grafana/</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">退出临时容器</span></span><br><span class="line">exit</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改文件名</span></span><br><span class="line">mv /home/data/grafana/grafana /home/data/grafana/etc</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">删除临时容器</span></span><br><span class="line">docker stop tmp</span><br><span class="line">docker rm tmp</span><br></pre></td></tr></table></figure>
+
+<p>5、目录授权</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chown -R monitor. /home/data/grafana</span><br><span class="line">chmod 777 -R /home/data/grafana</span><br></pre></td></tr></table></figure>
+
+<p>6、启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --user root \</span><br><span class="line">    --name=grafana \</span><br><span class="line">    --privileged=true \</span><br><span class="line">    --restart=always \</span><br><span class="line">    -p 3000:3000 \</span><br><span class="line">    -v /home/data/grafana/etc:/etc/grafana \</span><br><span class="line">    -v /home/data/grafana/data:/var/lib/grafana \</span><br><span class="line">    -v /home/data/grafana/logs:/var/log/grafana \</span><br><span class="line">    -v /etc/localtime:/etc/localtime \</span><br><span class="line">    grafana/grafana:9.0.3</span><br></pre></td></tr></table></figure>
+
+<p>7、登录验证</p>
+<blockquote>
+<p>默认用户：admin</p>
+<p>默认密码：admin</p>
+<p>输入完成之后，会提示你再次输入新的登录密码。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220718134653471.png" alt="image-20220718134653471"></p>
+<p>功能界面</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220718134806098.png" alt="image-20220718134806098"></p>
+<p>8、忘记密码</p>
+<blockquote>
+<p>如果忘记密码，如何重置？</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">语法：grafana-cli &lt;登录用户&gt; reset-admin-password &lt;新密码&gt;</span></span><br><span class="line"></span><br><span class="line">docker exec grafana grafana-cli admin reset-admin-password admin@123</span><br></pre></td></tr></table></figure>
+
+<p>9、插件安装</p>
+<ul>
+<li><p>在线安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker exec grafana grafana-cli plugins list-remote | more   # 查看远程可用插件</span><br><span class="line">id: abhisant-druid-datasource version: 0.0.6</span><br><span class="line">id: aceiot-svg-panel version: 0.0.11</span><br><span class="line">id: ae3e-plotly-panel version: 0.5.0</span><br><span class="line">id: agenty-flowcharting-panel version: 0.9.1</span><br><span class="line">id: aidanmountford-html-panel version: 0.0.2</span><br><span class="line">id: akumuli-datasource version: 1.3.12</span><br><span class="line">id: alexanderzobnin-zabbix-app version: 4.2.10</span><br><span class="line">...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>根据这些远程可用插件即可进行安装</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">案例：grafana-cli plugins install &lt;插件名&gt; &lt;插件版本号&gt;</span></span><br><span class="line">grafana-cli plugins install alexanderzobnin-zabbix-app 4.2.10</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">指定安装路径</span></span><br><span class="line">grafana-cli --pluginsDir=/data/grafana/plugins plugins install alexanderzobnin-zabbix-app 4.1.5</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>安装语法</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">COMMANDS:</span><br><span class="line">   install                  install &lt;plugin id&gt; &lt;plugin version (optional)&gt;</span><br><span class="line">   list-remote              list remote available plugins</span><br><span class="line">   list-versions            list-versions &lt;plugin id&gt;</span><br><span class="line">   update, upgrade          update &lt;plugin id&gt;</span><br><span class="line">   update-all, upgrade-all  update all your installed plugins</span><br><span class="line">   ls                       list all installed plugins</span><br><span class="line">   uninstall, remove        uninstall &lt;plugin id&gt;</span><br><span class="line">   help, h                  Shows a list of commands or help for one command</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>手动安装</p>
+<blockquote>
+<p>如果在线安装失败，可进行手动安装</p>
+</blockquote>
+<p>第一步：访问grafana官网 <a target="_blank" rel="noopener external nofollow noreferrer" href="https://grafana.com/grafana/plugins?orderBy=weight&direction=asc">https://grafana.com/grafana/plugins?orderBy=weight&direction=asc</a></p>
+<p>第二步：查找要下载的插件，如：Pie Chart</p>
+<p>第三步：根据安官网提供的装步骤下载即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在线下载zip包</span></span><br><span class="line">wget -nv https://grafana.com/api/plugins/grafana-piechart-panel/versions/latest/download -O /tmp/grafana-piechart-panel.zip</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或上传</span></span><br><span class="line">unzip -q /tmp/grafana-piechart-panel.zip -d /tmp</span><br><span class="line">mv /tmp/grafana-piechart-panel-* /var/lib/grafana/plugins/grafana-piechart-panel</span><br><span class="line">sudo service grafana-server restar</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-3-Node-Exporter"><a href="#2-3-Node-Exporter" class="headerlink" title="2.3 Node_Exporter"></a>2.3 Node_Exporter</h3><p><code>node_exporter</code> 作为 Prometheus 的 agent 端，部署在被采集数据的 Host 上，其负责采集数据供 Prometheus 进行抓取。这里采用二进制方式部署即可。</p>
+<p>1、下载二进制包</p>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/prometheus/node_exporter">https://github.com/prometheus/node_exporter</a></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924165651183.png" alt="image-20220924165651183"></p>
+<p>2、配置 systemd 管理</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /usr/lib/systemd/system/node_exporter.service</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Node Exporter</span><br><span class="line">Wants=network-online.target</span><br><span class="line">After=network-online.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">User=prometheus</span><br><span class="line">ExecStart=/home/data/prometheus/exporters/node_exporter/node_exporter --collector.textfile.directory /home/data/node_texfile --collector.systemd --collector.systemd.unit-include=&quot;(docker|sshd).service&quot;</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=default.target</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">具体参数参考我有道云笔记《Exporter+Promethue+Grafana监控平台》部分</span></span><br></pre></td></tr></table></figure>
+
+<p>3、启动并设置开机自启</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl start node_exporter.service</span><br><span class="line">systemctl enable node_exporter.service</span><br></pre></td></tr></table></figure>
+
+<p>5、验证</p>
+<blockquote>
+<p>这里以 141 服务器演示</p>
+<p>浏览器访问：<a target="_blank" rel="noopener external nofollow noreferrer" href="http://192.168.56.141:9100/metrics">http://192.168.56.141:9100/metrics</a></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924170321058.png" alt="image-20220924170321058"></p>
+<p>&#x3D;&#x3D;这里用 Host 的方式部署即可，当然你也可以通过 Docker 的防暑部署。&#x3D;&#x3D;</p>
+<p>pull 镜像：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull prom/node-exporter:latest</span><br></pre></td></tr></table></figure>
+
+<p>运行容器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name=node-exporter \</span><br><span class="line">  --restart=always \</span><br><span class="line">  --privileged=true \</span><br><span class="line">  --hostname=harbor-nexus \</span><br><span class="line">  -p 9100:9100 \</span><br><span class="line">  -v /proc:/host/proc:ro \</span><br><span class="line">  -v /sys:/host/sys:ro \</span><br><span class="line">  -v /:/rootfs:ro \</span><br><span class="line">  prom/node-exporter:latest</span><br></pre></td></tr></table></figure>
+
+<p>Prometheus 添加配置即可（这里不再演示）</p>
+<h3 id="2-4-Alertmanager"><a href="#2-4-Alertmanager" class="headerlink" title="2.4 Alertmanager"></a>2.4 Alertmanager</h3><blockquote>
+<p>官方文档：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://prometheus.io/docs/alerting/latest/alertmanager/">https://prometheus.io/docs/alerting/latest/alertmanager/</a></p>
+</blockquote>
+<p>告警采用 Alertmanager 进行管理，其告警原理可简单概括为：当采集数据值达到告警阈值时（在prometheus设定的告警规则），就会触发 Alertmanager 进行告警（经过分组、删除重复等处理），告警通过可邮件等方式发送给相应的运维人员。主要配置步骤：</p>
+<ul>
+<li>设置和配置 Alertmanager；</li>
+<li>配置 Prometheus 与 Alertmanager 之间的对话；</li>
+<li>在 Prometheus 中创建警报规则。</li>
+</ul>
+<p><code>prometheus---&gt;触发阈值---&gt;超出持续时间---&gt;alertmanager---&gt;分组|抑制|静默---&gt;媒体类型---&gt;邮件|钉钉|微信等。</code></p>
+<p>&#x3D;&#x3D;这里我采用单节点部署，一般我们生产环境中 Alertmanager 采用集群部署。&#x3D;&#x3D;</p>
+<h4 id="2-4-1-部署与配置"><a href="#2-4-1-部署与配置" class="headerlink" title="2.4.1 部署与配置"></a>2.4.1 部署与配置</h4><p>1、先看容器启动时会加载哪些参数</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924193728233.png" alt="image-20220924193728233"></p>
+<p>2、创建本地持久化目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /home/data/alertmanager/&#123;conf,data,template&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、创建配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /home/data/alertmanager/conf/config.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 5m</span><br><span class="line">  smtp_smarthost: &#x27;smtp.163.com:465&#x27;                # 邮箱服务器</span><br><span class="line">  smtp_from: &#x27;zhurongsen_admin@163.com&#x27;             # 邮箱地址（发送用户）</span><br><span class="line">  smtp_auth_username: &#x27;zhurongsen_admin@163.com&#x27;    # 邮箱登录地址</span><br><span class="line">  smtp_auth_password: &#x27;DYKIFIZYKUOXRPFV&#x27;            # 邮箱授权码（注意是授权码，不是登录密码）</span><br><span class="line">  smtp_require_tls: false</span><br><span class="line"></span><br><span class="line">templates:</span><br><span class="line">- &#x27;/etc/alertmanager/template/*.tmpl&#x27;</span><br><span class="line"></span><br><span class="line">route:</span><br><span class="line">  group_by: [&#x27;alertname&#x27;]</span><br><span class="line">  group_wait: 20s</span><br><span class="line">  group_interval: 5m</span><br><span class="line">  repeat_interval: 3h</span><br><span class="line">  receiver: &#x27;ops&#x27;</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash"><span class="built_in">continue</span>: <span class="literal">false</span></span></span><br><span class="line">  routes:</span><br><span class="line">  - match:</span><br><span class="line">      severity: critical</span><br><span class="line">    receiver: &#x27;dev&#x27;</span><br><span class="line">    # continue: true</span><br><span class="line">  - match_re:</span><br><span class="line">      severity: ^(warning|critical)$</span><br><span class="line">    receiver: &#x27;test&#x27;</span><br><span class="line"></span><br><span class="line">receivers:</span><br><span class="line">- name: &#x27;ops&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;2564395767@qq.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line"></span><br><span class="line">- name: &#x27;dev&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;2318099451@qq.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">    </span><br><span class="line">- name: &#x27;test&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;zhurongsen_admin@126.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line"></span><br><span class="line">inhibit_rules:</span><br><span class="line">  - source_match:</span><br><span class="line">      severity: &#x27;critical&#x27;</span><br><span class="line">    target_match:</span><br><span class="line">      severity: &#x27;warning&#x27;</span><br><span class="line">    equal: [&#x27;alertname&#x27;, &#x27;dev&#x27;, &#x27;instance&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>4、运行容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --restart=always \</span><br><span class="line">  --name=alertmanager \</span><br><span class="line">  --privileged=true \</span><br><span class="line">  -p 9093:9093 \</span><br><span class="line">  -v /home/data/alertmanager/conf/config.yml:/etc/alertmanager/alertmanager.yml \</span><br><span class="line">  -v /home/data/alertmanager/template:/etc/alertmanager/template \</span><br><span class="line">  -v /etc/localtime:/etc/localtime \</span><br><span class="line">  docker.io/prom/alertmanager:latest</span><br></pre></td></tr></table></figure>
+
+<p>5、web 验证</p>
+<blockquote>
+<p>浏览器访问：<a target="_blank" rel="noopener external nofollow noreferrer" href="http://192.168.56.142:9093/">http://192.168.56.142:9093/</a></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924201055281.png" alt="image-20220924201055281"></p>
+<p>6、Prometheus 配置</p>
+<blockquote>
+<p>配置与 Alertmanager 通信</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Alertmanager configuration</span></span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">  - static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      - 192.168.56.142:9093</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Alertmanager 自身也进行了数据采集，自然也可以进行状态监控</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924204227389.png" alt="image-20220924204227389"></p>
+<h4 id="2-4-2-告警规则"><a href="#2-4-2-告警规则" class="headerlink" title="2.4.2 告警规则"></a>2.4.2 告警规则</h4><p>Alertmanager 配置完成后，还需要在 prometheus 配置文件中进行告警配置：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rule_files:</span><br><span class="line">  - &quot;first_rules.yml&quot;      # 记录规则</span><br><span class="line">  - &quot;second_rules.yml&quot;     # 告警规则</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>修改 Prometheus 配置文件，定义这两个文件得路径</p>
+<p>docker 目录映射规则：&#x2F;home&#x2F;data&#x2F;prometheus&#x2F;rules:&#x2F;etc&#x2F;prometheus&#x2F;rules</p>
+<p>所以我只需要在 &#x2F;home&#x2F;data&#x2F;prometheus&#x2F;rules 目录下创建规则即可</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">rule_files:</span><br><span class="line">  - &#x27;/etc/prometheus/rules/*_rules.yml&#x27;</span><br><span class="line">  - &#x27;/etc/prometheus/rules/*_alerts.yml&#x27;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-4-2-1-记录规则"><a href="#2-4-2-1-记录规则" class="headerlink" title="2.4.2.1 记录规则"></a>2.4.2.1 记录规则</h5><blockquote>
+<p>新建记录规则文件：简单测试被采集服务器得健康状况</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /home/data/prometheus/rules</span><br><span class="line">vim host_rules.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">groups:</span><br><span class="line">- name: host.rules</span><br><span class="line">  rules:</span><br><span class="line">    - record: instance:node_stat:up</span><br><span class="line">      expr: up&#123;job=&quot;linux&quot;&#125; == 0</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-4-2-2-告警规则"><a href="#2-4-2-2-告警规则" class="headerlink" title="2.4.2.2 告警规则"></a>2.4.2.2 告警规则</h5><blockquote>
+<p>主机节点基础告警</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /home/data/prometheus/rules</span><br><span class="line">vim host_alerts.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">groups:</span><br><span class="line">- name: host.alter</span><br><span class="line">  rules:</span><br><span class="line">    - alert: host_up</span><br><span class="line">      expr: instance:node_stat:up == 0</span><br><span class="line">      for: 20s</span><br><span class="line">      labels:</span><br><span class="line">        severity: warning</span><br><span class="line">      annotations:</span><br><span class="line">        summary: &quot;&#123;&#123; $labels.instance &#125;&#125; 已停止运行超过20s！请手动检查服务健康状态&quot;</span><br></pre></td></tr></table></figure>
+
+<p>&#x3D;&#x3D;在 Prometheus 服务上可看见定义的告警规则&#x3D;&#x3D;</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924232204472.png" alt="image-20220924232204472"></p>
+<h4 id="2-4-3-告警验证"><a href="#2-4-3-告警验证" class="headerlink" title="2.4.3 告警验证"></a>2.4.3 告警验证</h4><p>以上记录规则和告警规则都完成后，现在就模拟服务器故障，看是否发送告警。</p>
+<p>1、先看看健康状态</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924231451970.png" alt="image-20220924231451970"></p>
+<p>2、停掉 141 服务器的 node_exporter 插件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">141</span></span><br><span class="line">systemctl stop node_exporter.service</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">142</span></span><br><span class="line">systemctl stop node_exporter.service</span><br></pre></td></tr></table></figure>
+
+<p>下图是我 126 邮箱收到的信息，原因是根据 Alertmanager 的路由策略来分发的，即当收到 wornning 告警时会匹配到该邮件并发送邮件。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924233102780.png" alt="image-20220924233102780"></p>
+<h2 id="三、应用案例"><a href="#三、应用案例" class="headerlink" title="三、应用案例"></a>三、应用案例</h2><h3 id="3-1-主机发现"><a href="#3-1-主机发现" class="headerlink" title="3.1 主机发现"></a>3.1 主机发现</h3><h4 id="3-1-1-静态配置"><a href="#3-1-1-静态配置" class="headerlink" title="3.1.1 静态配置"></a>3.1.1 静态配置</h4><p><code>node_exporter</code> 部署完成后，还需要在 Prometheus 服务配置文件中进行配置，以此来 pull node_exporter 采集的数据。</p>
+<p>什么是静态配置？所谓的静态配置就是在 Prometheus 配置文件中直接指定目标 Host。</p>
+<p>1、修改 Prometheus 配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">...</span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &#x27;prometheus&#x27;</span><br><span class="line">    static_configs:</span><br><span class="line">    # - targets: [&#x27;localhost:9090&#x27;]</span><br><span class="line"></span><br><span class="line">  - job_name: &#x27;linux&#x27;</span><br><span class="line">    static_configs:</span><br><span class="line">    - targets: [&#x27;192.168.56.141:9100&#x27;, &#x27;192.168.56.142:9100&#x27;]</span><br><span class="line">...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>2、Prometheus 服务热更新或重启</p>
+<blockquote>
+<p>先检测语法是否错误再重启或热加载，否则你也是启动不了的。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart prometheus</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-1-2-动态配置"><a href="#3-1-2-动态配置" class="headerlink" title="3.1.2 动态配置"></a>3.1.2 动态配置</h4><h5 id="3-1-2-1-基于本地文件"><a href="#3-1-2-1-基于本地文件" class="headerlink" title="3.1.2.1 基于本地文件"></a>3.1.2.1 基于本地文件</h5><p>动态配置是将被采集的目标 Host 写入一个 json 文件中，Prometheus 服务会定期去扫描其中的目标主机，如果有新的主机添加，则 Prometheus 自动获取无需热更或重启 Prometheus 服务。</p>
+<p>1、修改 Prometheus 配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">...</span><br><span class="line">  - job_name: &#x27;linux&#x27;</span><br><span class="line">    file_sd_configs:</span><br><span class="line">      - files:</span><br><span class="line">        - /data/prometheus/target/nodes/*.json</span><br><span class="line">        refresh_interval: 1m</span><br><span class="line">...</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这个 json 文件可以是一个泛文件：<code>/data/prometheus/target/nodes/*.json</code> 表示 Prometheus 或每隔 1 分钟查找 <code>/data/prometheus/target/nodes/</code> 目录下的所有以 <code>.json</code> 结尾的文件。</p>
+<p>2、编写 json 文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建存放json目录（对于docker部署的Prometheus，该目录在容器内部必须能读取得到）</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">上面得配置文件中/data/prometheus/目录已经被映射到/home/data/prometheus/data/目录下了</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">所以直接在/home/data/prometheus/data/目录下创建相关文件即可</span></span><br><span class="line">mkdir -p /home/data/prometheus/data/target/nodes</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在*.json文件中添加目标主机IP</span></span><br><span class="line">vim host.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">  &quot;targets&quot;: [</span><br><span class="line">    &quot;192.168.56.141:9100&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先写一台Host IP进行测试，成功再添加另一台</span></span><br></pre></td></tr></table></figure>
+
+<p>3、Prometheus 语法检测</p>
+<p>4、等 1 分钟时间后再去验证一下</p>
+<blockquote>
+<p>可看到 141 服务器已经被添加上来了</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924173134729.png" alt="image-20220924173134729"></p>
+<p>我再次添加 142 主机 IP，再次验证是否自动添加，同样修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">  &quot;targets&quot;: [</span><br><span class="line">    &quot;192.168.56.141:9100&quot;,</span><br><span class="line">    &quot;192.168.56.142:9100&quot;</span><br><span class="line">  ]</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>再次验证：可看到在 1 分钟后 142 服务器被自动添加</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220924173427913.png" alt="image-20220924173427913"></p>
+<p><mark>如何给主机节点添加标签？</mark></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">  &quot;targets&quot;: [&quot;192.168.56.141:9100&quot;],</span><br><span class="line">  &quot;labels&quot;: &#123;</span><br><span class="line">    &quot;instance&quot;: &quot;192.168.56.141&quot;,</span><br><span class="line">    &quot;Hostname&quot;: &quot;prometheus&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;, &#123;</span><br><span class="line">  &quot;targets&quot;: [&quot;192.168.56.142:9100&quot;],</span><br><span class="line">  &quot;labels&quot;: &#123;</span><br><span class="line">    &quot;instance&quot;: &quot;192.168.56.142&quot;,</span><br><span class="line">    &quot;Hostname&quot;: &quot;grafana&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="3-1-2-2-基于-DNS"><a href="#3-1-2-2-基于-DNS" class="headerlink" title="3.1.2.2 基于 DNS"></a>3.1.2.2 基于 DNS</h5><p>1、Prometheus 配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- job_name: &#x27;webapp&#x27;</span><br><span class="line">  dns_sd_configs:</span><br><span class="line">    - names: [&#x27;app.scedutek.com&#x27;]  # 域名，保证该域名需做了解析</span><br><span class="line">      refresh_interval: 5m         # 5每分钟执行（刷新）一次</span><br><span class="line">      type: A</span><br><span class="line">      port: 80</span><br></pre></td></tr></table></figure>
+
+<p>2、热更或重启 prometheus</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart prometheus</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-钉钉集成"><a href="#3-2-钉钉集成" class="headerlink" title="3.2 钉钉集成"></a>3.2 钉钉集成</h3><h4 id="3-2-1-钉钉机器人配置"><a href="#3-2-1-钉钉机器人配置" class="headerlink" title="3.2.1 钉钉机器人配置"></a>3.2.1 钉钉机器人配置</h4><blockquote>
+<p>进入钉钉应用进行相关配置</p>
+</blockquote>
+<p>1、创建项目群</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007102952619.png" alt="image-20221007102952619"></p>
+<p>2、群聊添加告警机器人</p>
+<ul>
+<li><p>项目群中点击设置</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007103334618.png" alt="image-20221007103334618"></p>
+</li>
+<li><p>点击群智能助手</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007103440941.png" alt="image-20221007103440941"></p>
+</li>
+<li><p>添加机器人</p>
+<blockquote>
+<p>点击添加机器人</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007103654901.png" alt="image-20221007103654901"></p>
+<blockquote>
+<p>进一步点击设置进行添加</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007103802892.png" alt="image-20221007103802892"></p>
+</li>
+<li><p>添加自定义机器人</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007104024684.png" alt="image-20221007104024684"></p>
+</li>
+</ul>
+<p>3、配置认证（加签）</p>
+<blockquote>
+<ol>
+<li>自定义机器人名字；</li>
+<li>将机器人添加到群组；</li>
+<li>安全设置处加签，并记录加签值（钉钉插件配置文件会用到）</li>
+</ol>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007104211324.png" alt="image-20221007104211324"></p>
+<p>4、获取机器人 <code>webhook</code></p>
+<blockquote>
+<p>钉钉插件配置文件会用到</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007104600830.png" alt="image-20221007104600830"></p>
+<h4 id="3-2-2-部署钉钉插件"><a href="#3-2-2-部署钉钉插件" class="headerlink" title="3.2.2 部署钉钉插件"></a>3.2.2 部署钉钉插件</h4><p>1、准备配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建</span></span><br><span class="line">mkdir -p /home/data/dingtalk/conf/&#123;conf,templates&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动临时容器</span></span><br><span class="line">docker run --rm --name=tmp timonwong/prometheus-webhook-dingtalk:latest</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">复制相关配置文件至Host</span></span><br><span class="line">cd /home/data/dingtalk/conf &amp;&amp; docker cp tmp:/etc/prometheus-webhook-dingtalk/config.yml .</span><br><span class="line">cd /home/data/dingtalk/templates &amp;&amp; docker cp dingtalk:/etc/prometheus-webhook-dingtalk/templates/default.tmpl .</span><br></pre></td></tr></table></figure>
+
+<p>2、准备告警模板</p>
+<blockquote>
+<p>可以先简单测试一下</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/data/dingtalk/templates/default.tmpl</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; define &quot;ding.link.content&quot; &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Firing) 0 -&#125;&#125;</span><br><span class="line">告警列表:</span><br><span class="line">&#123;&#123; template &quot;__text_alert_list&quot; .Alerts.Firing &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Resolved) 0 -&#125;&#125;</span><br><span class="line">恢复列表:</span><br><span class="line">&#123;&#123; template &quot;__text_resolve_list&quot; .Alerts.Resolved &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上测试无误后，以下为最终模板</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/data/dingtalk/templates/default.tmpl</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; template &quot;ding.link.content&quot; . &#125;&#125;&#123;&#123; define &quot;__subject&quot; &#125;&#125;[&#123;&#123; .Status | toUpper &#125;&#125;&#123;&#123; if eq .Status &quot;firing&quot; &#125;&#125;:&#123;&#123; .Alerts.Firing | len &#125;&#125;&#123;&#123; end &#125;&#125;] &#123;&#123; .GroupLabels.SortedPairs.Values | join &quot; &quot; &#125;&#125; &#123;&#123; if gt (len .CommonLabels) (len .GroupLabels) &#125;&#125;(&#123;&#123; with .CommonLabels.Remove .GroupLabels.Names &#125;&#125;&#123;&#123; .Values | join &quot; &quot; &#125;&#125;&#123;&#123; end &#125;&#125;)&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;__alertmanagerURL&quot; &#125;&#125;&#123;&#123; $alertURL := &quot;http://192.168.56.142:9093&quot; &#125;&#125; &#123;&#123;- $alertURL -&#125;&#125;/#/alerts?receiver=&#123;&#123; .Receiver &#125;&#125;&amp;tmp=&#123;&#123; .ExternalURL &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line"> </span><br><span class="line">&#123;&#123; define &quot;__text_alert_list&quot; &#125;&#125;&#123;&#123; range . &#125;&#125;</span><br><span class="line">**Labels**</span><br><span class="line">&#123;&#123; range .Labels.SortedPairs &#125;&#125;&gt; - &#123;&#123; .Name &#125;&#125;: &#123;&#123; .Value | markdown | html &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">**Annotations**</span><br><span class="line">&#123;&#123; range .Annotations.SortedPairs &#125;&#125;&gt; - &#123;&#123; .Name &#125;&#125;: &#123;&#123; .Value | markdown | html &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;</span><br><span class="line">**Source:** [&#123;&#123; .GeneratorURL &#125;&#125;](&#123;&#123; .GeneratorURL &#125;&#125;)</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line"> </span><br><span class="line">&#123;&#123;/* Firing */&#125;&#125;</span><br><span class="line"> </span><br><span class="line">&#123;&#123; define &quot;default.__text_alert_list&quot; &#125;&#125;&#123;&#123; range . &#125;&#125;</span><br><span class="line"> </span><br><span class="line">**触发时间:** &#123;&#123; dateInZone &quot;2006.01.02 15:04:05&quot; (.StartsAt) &quot;Asia/Shanghai&quot; &#125;&#125;</span><br><span class="line"></span><br><span class="line">**摘要:** &#123;&#123; .Annotations.summary &#125;&#125;</span><br><span class="line"></span><br><span class="line">**描述:** &#123;&#123; .Annotations.description &#125;&#125;</span><br><span class="line"></span><br><span class="line">**监控:** [grafana](http://192.168.25.10:3000/grafana/d/GuJ5DHMnz/fu-wu-qi-jian-kong-tu-biao?orgId=1)</span><br><span class="line"></span><br><span class="line">**详情:**</span><br><span class="line">&#123;&#123; range .Labels.SortedPairs &#125;&#125;&#123;&#123; if and (ne (.Name) &quot;severity&quot;) (ne (.Name) &quot;summary&quot;) &#125;&#125;&gt; - &#123;&#123; .Name &#125;&#125;: &#123;&#123; .Value | markdown | html &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line"> </span><br><span class="line">&#123;&#123;/* Resolved */&#125;&#125;</span><br><span class="line"> </span><br><span class="line">&#123;&#123; define &quot;default.__text_resolved_list&quot; &#125;&#125;&#123;&#123; range . &#125;&#125;</span><br><span class="line"> </span><br><span class="line">**触发时间:** &#123;&#123; dateInZone &quot;2006.01.02 15:04:05&quot; (.StartsAt) &quot;Asia/Shanghai&quot; &#125;&#125;</span><br><span class="line"></span><br><span class="line">**解除时间:** &#123;&#123; dateInZone &quot;2006.01.02 15:04:05&quot; (.EndsAt) &quot;Asia/Shanghai&quot; &#125;&#125;</span><br><span class="line"> </span><br><span class="line">**摘要:** &#123;&#123; .Annotations.summary &#125;&#125;</span><br><span class="line">**监控:** [grafana](http://192.168.25.10:8000/grafana/d/GuJ5DHMnz/fu-wu-qi-jian-kong-tu-biao?orgId=1)</span><br><span class="line">**详情:**</span><br><span class="line">&#123;&#123; range .Labels.SortedPairs &#125;&#125;&#123;&#123; if and (ne (.Name) &quot;severity&quot;) (ne (.Name) &quot;summary&quot;) &#125;&#125;&gt; - &#123;&#123; .Name &#125;&#125;: &#123;&#123; .Value | markdown | html &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; end &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line"></span><br><span class="line">&#123;&#123;/* Default */&#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;default.title&quot; &#125;&#125;&#123;&#123; template &quot;__subject&quot; . &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;default.content&quot; &#125;&#125;#### \[&#123;&#123; .Status | toUpper &#125;&#125;&#123;&#123; if eq .Status &quot;firing&quot; &#125;&#125;:&#123;&#123; .Alerts.Firing | len &#125;&#125;&#123;&#123; end &#125;&#125;\] **[&#123;&#123; index .GroupLabels &quot;alertname&quot; &#125;&#125;](&#123;&#123; template &quot;__alertmanagerURL&quot; . &#125;&#125;)**</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Firing) 0 -&#125;&#125;</span><br><span class="line"></span><br><span class="line">![Firing-img](https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fpic1.zhimg.com%2F50%2Fv2-6cf86cca04090c375720cd5a90cb9156_720w.jpg%3Fsource%3D1940ef5c&amp;refer=http%3A%2F%2Fpic1.zhimg.com&amp;app=2002&amp;size=f9999,10000&amp;q=a80&amp;n=0&amp;g=0n&amp;fmt=auto?sec=1658461957&amp;t=25a208eae036691050ea197ccfbb3a7b)</span><br><span class="line"></span><br><span class="line">**告警通知**</span><br><span class="line">&#123;&#123; template &quot;default.__text_alert_list&quot; .Alerts.Firing &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123; if gt (len .Alerts.Resolved) 0 -&#125;&#125;</span><br><span class="line"></span><br><span class="line">![Resolved-img](https://t10.baidu.com/it/u=3212103844,163082301&amp;fm=30&amp;app=106&amp;f=JPEG?w=640&amp;h=480&amp;s=03801B6418732B8E0C9D2DDA030010A2)</span><br><span class="line"></span><br><span class="line">**告警解除**</span><br><span class="line">&#123;&#123; template &quot;default.__text_resolved_list&quot; .Alerts.Resolved &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line"></span><br><span class="line">&#123;&#123;/* Legacy */&#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;legacy.title&quot; &#125;&#125;&#123;&#123; template &quot;__subject&quot; . &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;legacy.content&quot; &#125;&#125;#### \[&#123;&#123; .Status | toUpper &#125;&#125;&#123;&#123; if eq .Status &quot;firing&quot; &#125;&#125;:&#123;&#123; .Alerts.Firing | len &#125;&#125;&#123;&#123; end &#125;&#125;\] **[&#123;&#123; index .GroupLabels &quot;alertname&quot; &#125;&#125;](&#123;&#123; template &quot;__alertmanagerURL&quot; . &#125;&#125;)**</span><br><span class="line">&#123;&#123; template &quot;__text_alert_list&quot; .Alerts.Firing &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line"></span><br><span class="line">&#123;&#123;/* Following names for compatibility */&#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;ding.link.title&quot; &#125;&#125;&#123;&#123; template &quot;default.title&quot; . &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">&#123;&#123; define &quot;ding.link.content&quot; &#125;&#125;&#123;&#123; template &quot;default.content&quot; . &#125;&#125;&#123;&#123; end &#125;&#125;</span><br><span class="line">                                                                          </span><br></pre></td></tr></table></figure>
+
+<p>3、修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/data/dingtalk/conf/config.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">templates:</span><br><span class="line">  - /etc/prometheus-webhook-dingtalk/templates/default.tmpl</span><br><span class="line">targets:</span><br><span class="line">  webhook1:</span><br><span class="line">    url: https://oapi.dingtalk.com/robot/send?access_token=8cf8d025f4cffb1c140129360bd373c6fa64a74dc29d6a41fcd07bb5a4537b22 </span><br><span class="line">    secret: SECb7e604e38d9d58456f4811c29daaa8953f39f3bfc5b98cccb664325a1d95fbab</span><br><span class="line">    mention:                            </span><br><span class="line">      all: true</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">templates：指定模板位置</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">webhook1：指定钉钉的Token</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">securet：机器人加签的值</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mention：告警时提醒对象</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">   all：提醒所有人</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">   mobiles: [<span class="string">&#x27;152***&#x27;</span>, <span class="string">&#x27;134***&#x27;</span>]  提醒指定钉钉用户</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012134825735.png" alt="image-20221012134825735"></p>
+<p>3、运行钉钉插件容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name=dingtalk \</span><br><span class="line">  --restart always \</span><br><span class="line">  -p 8060:8060 \</span><br><span class="line">  -v /home/data/dingtalk/conf/config.yml:/etc/prometheus-webhook-dingtalk/config.yml \</span><br><span class="line">  -v /home/data/dingtalk/templates/default.tmpl:/etc/prometheus-webhook-dingtalk/templates/default.tmpl \</span><br><span class="line">  timonwong/prometheus-webhook-dingtalk:latest --web.enable-ui --config.file=/etc/prometheus-webhook-dingtalk/config.yml</span><br></pre></td></tr></table></figure>
+
+<p><mark>以上钉钉是通过加签的方式进行认证，接下来介绍通过 IP 的方式进行认证</mark></p>
+<p>同样在钉钉告警机器人处设置，添加 IP，下图解释很清楚，只有同个网络下的请求才能被处理，有一定的局限性，加签的方式却没有这些局限。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012133219719.png" alt="image-20221012133219719"></p>
+<p><mark>此时钉钉的配置文件如下：</mark></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /home/data/dingtalk/conf/config.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">templates:</span><br><span class="line">  - /etc/prometheus-webhook-dingtalk/templates/default.tmpl</span><br><span class="line">targets:</span><br><span class="line">  webhook1:</span><br><span class="line">    url: https://oapi.dingtalk.com/robot/send?access_token=8cf8d025f4cffb1c140129360bd373c6fa64a74dc29d6a41fcd07bb5a4537b22</span><br><span class="line">    mention:</span><br><span class="line">      all: true</span><br><span class="line">      </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数说明：</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">templates：指定模板位置</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">webhook1：指定钉钉的Token</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mention：告警时提醒对象</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">   all：提醒所有人</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">   mobiles: [<span class="string">&#x27;152***&#x27;</span>, <span class="string">&#x27;134***&#x27;</span>]  提醒指定钉钉用户</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012133818087.png" alt="image-20221012133818087"></p>
+<p>修改完配置重启即可！</p>
+<h4 id="3-2-3-Alertmanager-配置"><a href="#3-2-3-Alertmanager-配置" class="headerlink" title="3.2.3 Alertmanager 配置"></a>3.2.3 Alertmanager 配置</h4><blockquote>
+<p>设置<code>alertmanager</code> 的yml的<code>route</code>与<code>receivers</code></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 5m</span><br><span class="line">route:</span><br><span class="line">  group_wait: 25s</span><br><span class="line">  group_interval: 30s</span><br><span class="line">  repeat_interval: 1m</span><br><span class="line">  group_by: [&#x27;instance&#x27;]</span><br><span class="line">  receiver: &#x27;web.hook.prometheusalert&#x27;</span><br><span class="line"></span><br><span class="line">receivers:</span><br><span class="line">- name: &#x27;web.hook.prometheusalert&#x27;</span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: &#x27;http://192.168.56.142:8060/dingtalk/webhook1/send&#x27;</span><br><span class="line">    send_resolved: true</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面的配置是，无论什么的告警级别，都会向钉钉发送告警。而下面的配置则会根据告警级别选择性发送告警</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">route:</span><br><span class="line">  group_by: [&#x27;alertname&#x27;]</span><br><span class="line">  group_wait: 20s</span><br><span class="line">  group_interval: 30s</span><br><span class="line">  repeat_interval: 1m</span><br><span class="line">  receiver: &#x27;ops&#x27;</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash"><span class="built_in">continue</span>: <span class="literal">false</span></span></span><br><span class="line">  routes:</span><br><span class="line">  - match:</span><br><span class="line">      severity: critical</span><br><span class="line">    receiver: &#x27;dev&#x27;</span><br><span class="line">    # continue: true</span><br><span class="line">  - match_re:</span><br><span class="line">      severity: ^(warning|critical)$</span><br><span class="line">    receiver: &#x27;webhook&#x27;</span><br><span class="line"></span><br><span class="line">receivers:</span><br><span class="line">- name: &#x27;dev&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;2222222@qq.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">- name: &#x27;webhook&#x27;</span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: http://192.168.56.142:8060/dingtalk/webhook1/send</span><br><span class="line">    send_resolved: true</span><br></pre></td></tr></table></figure>
+
+<p>比如：一般信息告警 ——&gt; 普通告警 ——&gt; 灾难告警，不同的告警分别发送给不同的用户。为了快速测试，我选择了无论什么告警我都发送告警。</p>
+<h4 id="3-2-4-告警测试验证"><a href="#3-2-4-告警测试验证" class="headerlink" title="3.2.4 告警测试验证"></a>3.2.4 告警测试验证</h4><h5 id="3-2-4-1-默认告警模板"><a href="#3-2-4-1-默认告警模板" class="headerlink" title="3.2.4.1 默认告警模板"></a>3.2.4.1 默认告警模板</h5><p>如果钉钉配置文件不指定 templates 的位置，则使用默认告警模板。</p>
+<p>1、告警</p>
+<blockquote>
+<p>故意停掉 node_exporter 进程</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221004231759335.png" alt="image-20221004231759335"></p>
+<p>2、恢复</p>
+<blockquote>
+<p>恢复 node_exporter 进程</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221004232000604.png" alt="image-20221004232000604"></p>
+<h5 id="3-2-4-2-自定义告警模板"><a href="#3-2-4-2-自定义告警模板" class="headerlink" title="3.2.4.2 自定义告警模板"></a>3.2.4.2 自定义告警模板</h5><p>1、告警</p>
+<blockquote>
+<p>故意停掉 node_exporter 进程</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012134640168.png" alt="image-20221012134640168"></p>
+<p>2、恢复</p>
+<blockquote>
+<p>恢复 node_exporter 进程</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012134722471.png" alt="image-20221012134722471"></p>
+<h3 id="3-3-企业微信集成"><a href="#3-3-企业微信集成" class="headerlink" title="3.3 企业微信集成"></a>3.3 企业微信集成</h3><h4 id="3-3-1-应用告警"><a href="#3-3-1-应用告警" class="headerlink" title="3.3.1 应用告警"></a>3.3.1 应用告警</h4><h5 id="3-3-1-1-创建应用"><a href="#3-3-1-1-创建应用" class="headerlink" title="3.3.1.1 创建应用"></a>3.3.1.1 创建应用</h5><p>1、windows 登录企业微信后台创建应用</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007095158587.png" alt="image-20221007095158587"></p>
+<blockquote>
+<ol>
+<li>上传 logo；</li>
+<li>填写应用名；</li>
+<li>应用介绍（可选）；</li>
+<li>选择可见范围（即哪些部门&#x2F;成员可使用）。</li>
+</ol>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007095324360.png" alt="image-20221007095324360"></p>
+<p>2、记录应用的 <code>AgentId</code>、<code>Secret</code></p>
+<blockquote>
+<p><strong>AgentId</strong>：<code>1000002</code></p>
+<p><strong>Secret</strong>：<code>EKmMR_DieISGXZDallbdnFb1OGaV2kADrrjN_UCj56Y</code></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007095829708.png" alt="image-20221007095829708"></p>
+<p>3、记录企业 ID</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007100654570.png" alt="image-20221007100654570"></p>
+<p>4、记录部门 ID</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221007114732172.png" alt="image-20221007114732172"></p>
+<h5 id="3-3-1-2-Alertmanager-配置"><a href="#3-3-1-2-Alertmanager-配置" class="headerlink" title="3.3.1.2 Alertmanager 配置"></a>3.3.1.2 Alertmanager 配置</h5><p>看官方配置：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://prometheus.io/docs/alerting/latest/configuration/#wechat_config">https://prometheus.io/docs/alerting/latest/configuration/#wechat_config</a></p>
+<p>1、配置说明</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Whether to notify about resolved alerts.</span></span><br><span class="line">[ send_resolved: &lt;boolean&gt; | default = false ]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The API key to use when talking to the WeChat API.</span></span><br><span class="line">[ api_secret: &lt;secret&gt; | default = global.wechat_api_secret ]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The WeChat API URL.</span></span><br><span class="line">[ api_url: &lt;string&gt; | default = global.wechat_api_url ]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The corp <span class="built_in">id</span> <span class="keyword">for</span> authentication.</span></span><br><span class="line">[ corp_id: &lt;string&gt; | default = global.wechat_api_corp_id ]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">API request data as defined by the WeChat API.</span></span><br><span class="line">[ message: &lt;tmpl_string&gt; | default = &#x27;&#123;&#123; template &quot;wechat.default.message&quot; . &#125;&#125;&#x27; ]</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Type of the message <span class="built_in">type</span>, supported values are `text` and `markdown`.</span></span><br><span class="line">[ message_type: &lt;string&gt; | default = &#x27;text&#x27; ]</span><br><span class="line">[ agent_id: &lt;string&gt; | default = &#x27;&#123;&#123; template &quot;wechat.default.agent_id&quot; . &#125;&#125;&#x27; ]</span><br><span class="line">[ to_user: &lt;string&gt; | default = &#x27;&#123;&#123; template &quot;wechat.default.to_user&quot; . &#125;&#125;&#x27; ]</span><br><span class="line">[ to_party: &lt;string&gt; | default = &#x27;&#123;&#123; template &quot;wechat.default.to_party&quot; . &#125;&#125;&#x27; ]</span><br><span class="line">[ to_tag: &lt;string&gt; | default = &#x27;&#123;&#123; template &quot;wechat.default.to_tag&quot; . &#125;&#125;&#x27; ]</span><br></pre></td></tr></table></figure>
+
+<p>2、消息模板定义，用于格式化消息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /home/data/alertmanager/conf &amp;&amp; vim wechat.tmpl</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&#123;&#123; define &quot;wechat.default.message&quot; &#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len .Alerts.Firing) 0 -&#125;&#125;</span><br><span class="line">&#123;&#123;- range $index, $alert := .Alerts -&#125;&#125;</span><br><span class="line">&#123;&#123;- if eq $index 0 -&#125;&#125;</span><br><span class="line">告警类型: &#123;&#123; $alert.Labels.alertname &#125;&#125;</span><br><span class="line">告警级别: &#123;&#123; $alert.Labels.severity &#125;&#125;</span><br><span class="line">=====================</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">===告警详情===</span><br><span class="line">告警详情: &#123;&#123; $alert.Annotations.message &#125;&#125;</span><br><span class="line">故障时间: &#123;&#123; $alert.StartsAt.Format &quot;2006-01-02 15:04:05&quot; &#125;&#125;</span><br><span class="line">===参考信息===</span><br><span class="line">&#123;&#123; if gt (len $alert.Labels.instance) 0 -&#125;&#125;故障实例ip: &#123;&#123; $alert.Labels.instance &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.namespace) 0 -&#125;&#125;故障实例所在namespace: &#123;&#123; $alert.Labels.namespace &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.node) 0 -&#125;&#125;故障物理机ip: &#123;&#123; $alert.Labels.node &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.pod_name) 0 -&#125;&#125;故障pod名称: &#123;&#123; $alert.Labels.pod_name &#125;&#125;&#123;&#123;- end &#125;&#125;</span><br><span class="line">=====================</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len .Alerts.Resolved) 0 -&#125;&#125;</span><br><span class="line">&#123;&#123;- range $index, $alert := .Alerts -&#125;&#125;</span><br><span class="line">&#123;&#123;- if eq $index 0 -&#125;&#125;</span><br><span class="line">告警类型: &#123;&#123; $alert.Labels.alertname &#125;&#125;</span><br><span class="line">告警级别: &#123;&#123; $alert.Labels.severity &#125;&#125;</span><br><span class="line">=====================</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">===告警详情===</span><br><span class="line">告警详情: &#123;&#123; $alert.Annotations.message &#125;&#125;</span><br><span class="line">故障时间: &#123;&#123; $alert.StartsAt.Format &quot;2006-01-02 15:04:05&quot; &#125;&#125;</span><br><span class="line">恢复时间: &#123;&#123; $alert.EndsAt.Format &quot;2006-01-02 15:04:05&quot; &#125;&#125;</span><br><span class="line">===参考信息===</span><br><span class="line">&#123;&#123; if gt (len $alert.Labels.instance) 0 -&#125;&#125;故障实例ip: &#123;&#123; $alert.Labels.instance &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.namespace) 0 -&#125;&#125;故障实例所在namespace: &#123;&#123; $alert.Labels.namespace &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.node) 0 -&#125;&#125;故障物理机ip: &#123;&#123; $alert.Labels.node &#125;&#125;;&#123;&#123;- end -&#125;&#125;</span><br><span class="line">&#123;&#123;- if gt (len $alert.Labels.pod_name) 0 -&#125;&#125;故障pod名称: &#123;&#123; $alert.Labels.pod_name &#125;&#125;;&#123;&#123;- end &#125;&#125;</span><br><span class="line">=====================</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br><span class="line">&#123;&#123;- end &#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>3、修改 Alertmanager 配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cd /home/data/alertmanager/template &amp;&amp; vim config.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 5m</span><br><span class="line">  smtp_smarthost: &#x27;smtp.163.com:465&#x27;                # 邮箱服务器</span><br><span class="line">  smtp_from: &#x27;zhurongsen_admin@163.com&#x27;             # 邮箱地址（发送用户）</span><br><span class="line">  smtp_auth_username: &#x27;zhurongsen_admin@163.com&#x27;    # 邮箱登录地址</span><br><span class="line">  smtp_auth_password: &#x27;DYKIFIZYKUOXRPFV&#x27;            # 邮箱授权码（注意是授权码，不是登录密码）</span><br><span class="line">  smtp_require_tls: false</span><br><span class="line">  wechat_api_url: &#x27;https://qyapi.weixin.qq.com/cgi-bin/&#x27;   # 企业微信URL</span><br><span class="line">  wechat_api_corp_id: &#x27;wwb5ef1460edf62593&#x27;                 # 企业ID</span><br><span class="line"></span><br><span class="line">templates:</span><br><span class="line">- &#x27;/etc/alertmanager/template/*.tmpl&#x27;                  # 消息模板的位置</span><br><span class="line"></span><br><span class="line">route:</span><br><span class="line">  group_by: [&#x27;alertname&#x27;]</span><br><span class="line">  group_wait: 25s</span><br><span class="line">  group_interval: 30s</span><br><span class="line">  repeat_interval: 1m</span><br><span class="line">  receiver: &#x27;ops&#x27;</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash"><span class="built_in">continue</span>: <span class="literal">false</span></span></span><br><span class="line">  routes:</span><br><span class="line">  - match:</span><br><span class="line">      severity: critical</span><br><span class="line">    receiver: &#x27;dev&#x27;</span><br><span class="line">    # continue: truea</span><br><span class="line">  - match:</span><br><span class="line">      severity: warning</span><br><span class="line">    receiver: &#x27;wechat&#x27;</span><br><span class="line">  - match_re:</span><br><span class="line">      severity: ^(warning|critical)$</span><br><span class="line">    receiver: &#x27;dingtalk&#x27;</span><br><span class="line">    </span><br><span class="line">receivers:</span><br><span class="line">- name: &#x27;ops&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;2564395767@qq.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">- name: &#x27;dev&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;2318099451@qq.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">- name: &#x27;test&#x27;</span><br><span class="line">  email_configs:</span><br><span class="line">  - to: &#x27;zhurongsen_admin@126.com&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">- name: &#x27;dingtalk&#x27;</span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: http://192.168.56.142:8060/dingtalk/webhook1/send</span><br><span class="line">    send_resolved: true</span><br><span class="line">- name: &#x27;wechat&#x27;</span><br><span class="line">  wechat_configs:</span><br><span class="line">  - send_resolved: true</span><br><span class="line">    to_user: &#x27;@all&#x27;    # 所有用户</span><br><span class="line">    message: &#x27;&#123;&#123; template &quot;wechat.default.message&quot; . &#125;&#125;&#x27;</span><br><span class="line">    agent_id: &#x27;1000002&#x27;                                           # 应用的 AgentId</span><br><span class="line">    api_secret: &#x27;EKmMR_DieISGXZDallbdnFb1OGaV2kADrrjN_UCj56Y&#x27;     # 应用的 Secret</span><br><span class="line"></span><br><span class="line">inhibit_rules:</span><br><span class="line">  - source_match:</span><br><span class="line">      severity: &#x27;critical&#x27;</span><br><span class="line">    target_match:</span><br><span class="line">      severity: &#x27;warning&#x27;</span><br><span class="line">    equal: [&#x27;alertname&#x27;, &#x27;dev&#x27;, &#x27;instance&#x27;]</span><br></pre></td></tr></table></figure>
+
+<p>4、重启 Alertmanager</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart alertmanager</span><br></pre></td></tr></table></figure>
+
+<p><mark>我这里的企业微信无法完成认证（企业认证），先暂时搁置。</mark>其实完全可以用机器人来实现。</p>
+<h4 id="3-3-2-机器人告警"><a href="#3-3-2-机器人告警" class="headerlink" title="3.3.2 机器人告警"></a>3.3.2 机器人告警</h4><h5 id="3-3-2-1-添加机企业微信器人"><a href="#3-3-2-1-添加机企业微信器人" class="headerlink" title="3.3.2.1 添加机企业微信器人"></a>3.3.2.1 添加机企业微信器人</h5><p>1、登录企业微信管理后台启用机器人</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017163651760.png" alt="image-20221017163651760"></p>
+<p>2、启用机器人</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017163732481.png" alt="image-20221017163732481"></p>
+<p>3、在客户端对应的群聊中添加机器人</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017153756504.png" alt="image-20221017153756504"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017153928431.png" alt="image-20221017153928431"></p>
+<p>4、复制生成的 webhook 地址</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=6bce5460-be7e-4f33-8de9-8b5f0b1c9b9a</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017154037011.png" alt="image-20221017154037011"></p>
+<p>至此机器人添加完成！</p>
+<h5 id="3-3-2-2-安装企业微信报警插件"><a href="#3-3-2-2-安装企业微信报警插件" class="headerlink" title="3.3.2.2 安装企业微信报警插件"></a>3.3.2.2 安装企业微信报警插件</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name wechat \</span><br><span class="line">  --restart always \</span><br><span class="line">  -p 8880:80 \</span><br><span class="line">  guyongquan/webhook-adapter:latest \</span><br><span class="line">  --adapter=/app/prometheusalert/wx.js=/wx=&lt;你的webhook地址&gt;</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-3-2-3-Alertmanager-配置"><a href="#3-3-2-3-Alertmanager-配置" class="headerlink" title="3.3.2.3 Alertmanager 配置"></a>3.3.2.3 Alertmanager 配置</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 5m</span><br><span class="line">route:</span><br><span class="line">  group_wait: 0s</span><br><span class="line">  group_interval: 5s</span><br><span class="line">  repeat_interval: 1m</span><br><span class="line">  group_by: [&#x27;instance&#x27;]</span><br><span class="line">  receiver: &#x27;web.hook.prometheusalert&#x27;</span><br><span class="line">...</span><br><span class="line">- name: &#x27;web.hook.prometheusalert&#x27;</span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: &#x27;http://192.168.56.142:8880/adapter/wx&#x27;</span><br><span class="line">    send_resolved: true</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017155618326.png" alt="image-20221017155618326"></p>
+<h5 id="3-3-2-4-机器人告警验证"><a href="#3-3-2-4-机器人告警验证" class="headerlink" title="3.3.2.4 机器人告警验证"></a>3.3.2.4 机器人告警验证</h5><p>1、触发告警</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017161205328.png" alt="image-20221017161205328"></p>
+<p>2、解除告警</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221017161311414.png" alt="image-20221017161311414"></p>
+<h3 id="3-4-Grafana-模板导入"><a href="#3-4-Grafana-模板导入" class="headerlink" title="3.4 Grafana 模板导入"></a>3.4 Grafana 模板导入</h3><blockquote>
+<p>官方参考模板：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://grafana.com/grafana/dashboards/">https://grafana.com/grafana/dashboards/</a></p>
+</blockquote>
+<p>1、添加数据源为 Prometheus</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221005203521799.png" alt="image-20221005203521799"></p>
+<p>2、导入模板</p>
+<blockquote>
+<p>我此处的模板是官方模板：11074</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221005203718190.png" alt="image-20221005203718190"></p>
+<p>3、数据展示</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221005203029392.png" alt="image-20221005203029392"></p>
+<p>&#x3D;&#x3D;该模板展示了 node 节点的基本情况，在大多数情况下已经够用了，当然你也可以根据自己公司的实际情况进行自定义配置。&#x3D;&#x3D;</p>
+<h3 id="3-5-容器监控"><a href="#3-5-容器监控" class="headerlink" title="3.5 容器监控"></a>3.5 容器监控</h3><p>为了解决 <code>docker stats</code> 的问题(存储、展示)，谷歌开源的 <code>cadvisor</code> 诞生了，&#96;&#96;cadvisor<code>不仅可以搜集一台机器上所有运行的容器信息，还提供基础查询界面和</code>http<code>接口，方便其他组件如</code>Prometheus<code>进行数据抓取，或者</code>cadvisor + influxdb + grafna&#96; 搭配使用。</p>
+<h4 id="3-5-1-Cadvisor-部署"><a href="#3-5-1-Cadvisor-部署" class="headerlink" title="3.5.1 Cadvisor 部署"></a>3.5.1 Cadvisor 部署</h4><p>1、pull 镜像</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull google/cadvisor:latest</span><br></pre></td></tr></table></figure>
+
+<p>2、启动容器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">docker run \</span><br><span class="line">  -itd -u root \</span><br><span class="line">  --privileged=true \</span><br><span class="line">  --detach=true \</span><br><span class="line">  --name=cadvisor \</span><br><span class="line">  --restart always \</span><br><span class="line">  -v /:/rootfs:ro \</span><br><span class="line">  -v /var/run:/var/run:rw \</span><br><span class="line">  -v /sys:/sys:ro \</span><br><span class="line">  -v /var/lib/docker/:/var/lib/docker:ro \</span><br><span class="line">  -v /dev/disk/:/dev/disk:ro \</span><br><span class="line">  -p 8080:8080 \</span><br><span class="line">  google/cadvisor:latest</span><br></pre></td></tr></table></figure>
+
+<p>3、验证</p>
+<blockquote>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="http://192.168.56.142:8080/containers/">http://192.168.56.142:8080/containers/</a></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221005210013965.png" alt="image-20221005210013965"></p>
+<p>4、监控指标展示（TXT）</p>
+<blockquote>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="http://192.168.56.142:8080/metrics">http://192.168.56.142:8080/metrics</a></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221005215249368.png" alt="image-20221005215249368"></p>
+<h4 id="3-5-2-Prometheus-配置"><a href="#3-5-2-Prometheus-配置" class="headerlink" title="3.5.2 Prometheus 配置"></a>3.5.2 Prometheus 配置</h4><p>通过监控指标展示（TXT），类似于 <code>noed_export</code> 我们可以在 Prometheus 进行配置。</p>
+<p>1、配置JOB</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">my global config</span></span><br><span class="line">global:</span><br><span class="line">  scrape_interval:     15s</span><br><span class="line">  evaluation_interval: 15s</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">scrape_timeout is <span class="built_in">set</span> to the global default (10s).</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Alertmanager configuration</span></span><br><span class="line">alerting:</span><br><span class="line">  alertmanagers:</span><br><span class="line">  - static_configs:</span><br><span class="line">    - targets:</span><br><span class="line">      - 192.168.56.142:9093</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Load rules once and periodically evaluate them according to the global <span class="string">&#x27;evaluation_interval&#x27;</span>.</span></span><br><span class="line">rule_files:</span><br><span class="line">  - &#x27;/etc/prometheus/rules/*.yml&#x27;</span><br><span class="line"></span><br><span class="line">scrape_configs:</span><br><span class="line">  - job_name: &#x27;prometheus&#x27;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&#x27;192.168.56.141:9090&#x27;]</span><br><span class="line">  - job_name: &#x27;Alertmanager&#x27;</span><br><span class="line">    static_configs:</span><br><span class="line">      - targets: [&#x27;192.168.56.142:9093&#x27;]</span><br><span class="line">  - job_name: &#x27;Linux节点监控&#x27;</span><br><span class="line">    file_sd_configs:</span><br><span class="line">      - files:</span><br><span class="line">        - /data/prometheus/target/nodes/*.json</span><br><span class="line">        refresh_interval: 1m</span><br><span class="line">  - job_name: &#x27;容器监控&#x27;</span><br><span class="line">    file_sd_configs:</span><br><span class="line">      - files:</span><br><span class="line">        - /data/prometheus/target/container/*.json</span><br><span class="line">        refresh_interval: 1m</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>2、添加主机发现</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /home/data/prometheus/data/target/container/Cadvisor.json</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[&#123;</span><br><span class="line">        &quot;targets&quot;: [&quot;192.168.56.141:8080&quot;],</span><br><span class="line">        &quot;labels&quot;: &#123;</span><br><span class="line">                &quot;instance&quot;: &quot;192.168.56.141&quot;,</span><br><span class="line">                &quot;Hostname&quot;: &quot;prometheus&quot;,</span><br><span class="line">                &quot;type&quot;: &quot;container&quot;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;, &#123;</span><br><span class="line">        &quot;targets&quot;: [&quot;192.168.56.142:8080&quot;],</span><br><span class="line">        &quot;labels&quot;: &#123;</span><br><span class="line">                &quot;instance&quot;: &quot;192.168.56.142&quot;,</span><br><span class="line">                &quot;Hostname&quot;: &quot;grafana&quot;,</span><br><span class="line">                &quot;type&quot;: &quot;container&quot;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;, &#123;</span><br><span class="line">        &quot;targets&quot;: [&quot;192.168.56.180:8080&quot;],</span><br><span class="line">        &quot;labels&quot;: &#123;</span><br><span class="line">                &quot;instance&quot;: &quot;192.168.56.180&quot;,</span><br><span class="line">                &quot;Hostname&quot;: &quot;habor-nexus&quot;,</span><br><span class="line">                &quot;type&quot;: &quot;container&quot;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;]</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012145115351.png" alt="image-20221012145115351"></p>
+<p>3、验证</p>
+<blockquote>
+<p>Prometheus 服务上查看健康状态</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012144650621.png" alt="image-20221012144650621"></p>
+<p>4、容器的 grafana 模板</p>
+<blockquote>
+<p>导入模板ID：14282</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221012145310021.png" alt="image-20221012145310021"></p>
+<p>&#x3D;&#x3D;Prometheus 数据持久化存储方案会在后续介绍，本次就简单介绍到这里，欢迎大家进行补充。&#x3D;&#x3D;</p>
+<h2 id="四、FAQ"><a href="#四、FAQ" class="headerlink" title="四、FAQ"></a>四、FAQ</h2><h3 id="4-1-钉钉配置"><a href="#4-1-钉钉配置" class="headerlink" title="4.1 钉钉配置"></a>4.1 钉钉配置</h3><p>1、错误描述</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">level=error ts=2022-10-04T14:08:53.510Z caller=dingtalk.go:103 component=web target=webhook1 msg=&quot;Failed to send notification to DingTalk&quot; respCode=310000 respMsg=description:关键词不匹配;solution:请联系群管理员查看此机器人的关键词，并在发送的信息中包含此关键词;</span><br></pre></td></tr></table></figure>
+
+<p>2、解决方案</p>
+<p>在钉钉机器人配置处加签，如下图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221004222615046.png" alt="image-20221004222615046"></p>
+<h3 id="4-2-其他"><a href="#4-2-其他" class="headerlink" title="4.2 其他"></a>4.2 其他</h3><p>暂时没遇到其他问题，欢迎大家进行补充。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/e36de20c.html">https://blog.rabcnops.cn/posts/articles/e36de20c.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Prometheus/">Prometheus</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/articles/2f967c8.html" title="Prometheus - SSL 证书过期监控"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230328101307841.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Prometheus - SSL 证书过期监控</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/2f967c8.html" title="Prometheus - SSL 证书过期监控"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230328101307841.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-28</div><div class="title">Prometheus - SSL 证书过期监控</div></div></a></div><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">Ansible 快速入门</div></div></a></div><div><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 基础操作快速入门</div></div></a></div><div><a href="/posts/articles/7255efaf.html" title="Gitlab 备份与恢复"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与恢复</div></div></a></div><div><a href="/posts/articles/c74519c0.html" title="Gitlab 项目自动同步"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 项目自动同步</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">37</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">9</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn2"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%A7%84%E5%88%92"><span class="toc-text">一、规划</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-text">1.1 架构图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E4%B8%BB%E6%9C%BA%E8%A7%84%E5%88%92"><span class="toc-text">1.2 主机规划</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E9%83%A8%E7%BD%B2"><span class="toc-text">二、部署</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Prometheus"><span class="toc-text">2.1 Prometheus</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Grafana"><span class="toc-text">2.2 Grafana</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Node-Exporter"><span class="toc-text">2.3 Node_Exporter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Alertmanager"><span class="toc-text">2.4 Alertmanager</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-1-%E9%83%A8%E7%BD%B2%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="toc-text">2.4.1 部署与配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-2-%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99"><span class="toc-text">2.4.2 告警规则</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-2-1-%E8%AE%B0%E5%BD%95%E8%A7%84%E5%88%99"><span class="toc-text">2.4.2.1 记录规则</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-2-2-%E5%91%8A%E8%AD%A6%E8%A7%84%E5%88%99"><span class="toc-text">2.4.2.2 告警规则</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-3-%E5%91%8A%E8%AD%A6%E9%AA%8C%E8%AF%81"><span class="toc-text">2.4.3 告警验证</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-text">三、应用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%B8%BB%E6%9C%BA%E5%8F%91%E7%8E%B0"><span class="toc-text">3.1 主机发现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-1-%E9%9D%99%E6%80%81%E9%85%8D%E7%BD%AE"><span class="toc-text">3.1.1 静态配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-2-%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AE"><span class="toc-text">3.1.2 动态配置</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-2-1-%E5%9F%BA%E4%BA%8E%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6"><span class="toc-text">3.1.2.1 基于本地文件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-1-2-2-%E5%9F%BA%E4%BA%8E-DNS"><span class="toc-text">3.1.2.2 基于 DNS</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E9%92%89%E9%92%89%E9%9B%86%E6%88%90"><span class="toc-text">3.2 钉钉集成</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-1-%E9%92%89%E9%92%89%E6%9C%BA%E5%99%A8%E4%BA%BA%E9%85%8D%E7%BD%AE"><span class="toc-text">3.2.1 钉钉机器人配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-2-%E9%83%A8%E7%BD%B2%E9%92%89%E9%92%89%E6%8F%92%E4%BB%B6"><span class="toc-text">3.2.2 部署钉钉插件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-3-Alertmanager-%E9%85%8D%E7%BD%AE"><span class="toc-text">3.2.3 Alertmanager 配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-4-%E5%91%8A%E8%AD%A6%E6%B5%8B%E8%AF%95%E9%AA%8C%E8%AF%81"><span class="toc-text">3.2.4 告警测试验证</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-4-1-%E9%BB%98%E8%AE%A4%E5%91%8A%E8%AD%A6%E6%A8%A1%E6%9D%BF"><span class="toc-text">3.2.4.1 默认告警模板</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-2-4-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%8A%E8%AD%A6%E6%A8%A1%E6%9D%BF"><span class="toc-text">3.2.4.2 自定义告警模板</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E9%9B%86%E6%88%90"><span class="toc-text">3.3 企业微信集成</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-1-%E5%BA%94%E7%94%A8%E5%91%8A%E8%AD%A6"><span class="toc-text">3.3.1 应用告警</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-1-1-%E5%88%9B%E5%BB%BA%E5%BA%94%E7%94%A8"><span class="toc-text">3.3.1.1 创建应用</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-1-2-Alertmanager-%E9%85%8D%E7%BD%AE"><span class="toc-text">3.3.1.2 Alertmanager 配置</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-2-%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%91%8A%E8%AD%A6"><span class="toc-text">3.3.2 机器人告警</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-1-%E6%B7%BB%E5%8A%A0%E6%9C%BA%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E5%99%A8%E4%BA%BA"><span class="toc-text">3.3.2.1 添加机企业微信器人</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-2-%E5%AE%89%E8%A3%85%E4%BC%81%E4%B8%9A%E5%BE%AE%E4%BF%A1%E6%8A%A5%E8%AD%A6%E6%8F%92%E4%BB%B6"><span class="toc-text">3.3.2.2 安装企业微信报警插件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-3-Alertmanager-%E9%85%8D%E7%BD%AE"><span class="toc-text">3.3.2.3 Alertmanager 配置</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-4-%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%91%8A%E8%AD%A6%E9%AA%8C%E8%AF%81"><span class="toc-text">3.3.2.4 机器人告警验证</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Grafana-%E6%A8%A1%E6%9D%BF%E5%AF%BC%E5%85%A5"><span class="toc-text">3.4 Grafana 模板导入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E5%AE%B9%E5%99%A8%E7%9B%91%E6%8E%A7"><span class="toc-text">3.5 容器监控</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-1-Cadvisor-%E9%83%A8%E7%BD%B2"><span class="toc-text">3.5.1 Cadvisor 部署</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-2-Prometheus-%E9%85%8D%E7%BD%AE"><span class="toc-text">3.5.2 Prometheus 配置</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81FAQ"><span class="toc-text">四、FAQ</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E9%92%89%E9%92%89%E9%85%8D%E7%BD%AE"><span class="toc-text">4.1 钉钉配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E5%85%B6%E4%BB%96"><span class="toc-text">4.2 其他</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/e36de20c.html" title="基于 Docker 的 Prometheus 监控方案"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于 Docker 的 Prometheus 监控方案"/></a><div class="content"><a class="title" href="/posts/articles/e36de20c.html" title="基于 Docker 的 Prometheus 监控方案">基于 Docker 的 Prometheus 监控方案</a><time datetime="2023-03-28T07:51:14.000Z" title="发表于 2023-03-28 15:51:14">2023-03-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/2f967c8.html" title="Prometheus - SSL 证书过期监控"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230328101307841.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus - SSL 证书过期监控"/></a><div class="content"><a class="title" href="/posts/articles/2f967c8.html" title="Prometheus - SSL 证书过期监控">Prometheus - SSL 证书过期监控</a><time datetime="2023-03-28T02:56:54.000Z" title="发表于 2023-03-28 10:56:54">2023-03-28</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20220908134844265.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器文件（数据）共享"/></a><div class="content"><a class="title" href="/posts/articles/7dd3df1e.html" title="Docker 容器文件（数据）共享">Docker 容器文件（数据）共享</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Docker 容器间通信"/></a><div class="content"><a class="title" href="/posts/articles/ffa06faa.html" title="Docker 容器间通信">Docker 容器间通信</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/docker-docs.webp" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 环境下 Docker 容器的 PID 变化情况"/></a><div class="content"><a class="title" href="/posts/articles/377c1d95.html" title="Linux 环境下 Docker 容器的 PID 变化情况">Linux 环境下 Docker 容器的 PID 变化情况</a><time datetime="2023-03-23T04:18:21.000Z" title="发表于 2023-03-23 12:18:21">2023-03-23</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/prometheus.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/e36de20c.html'
+    this.page.identifier = '/posts/articles/e36de20c.html'
+    this.page.title = '基于 Docker 的 Prometheus 监控方案'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
