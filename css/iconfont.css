@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3979977 */
-  src: url('//at.alicdn.com/t/c/font_3979977_rlr0qp3zqle.woff2?t=1680161020365') format('woff2'),
-       url('//at.alicdn.com/t/c/font_3979977_rlr0qp3zqle.woff?t=1680161020365') format('woff'),
-       url('//at.alicdn.com/t/c/font_3979977_rlr0qp3zqle.ttf?t=1680161020365') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.woff2?t=1680191659381') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.woff?t=1680191659381') format('woff'),
+       url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.ttf?t=1680191659381') format('truetype');
 }
 
 .iconfont {
@@ -13,41 +13,70 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-QQ1:before {
+  content: "\e610";
+  /* 修改大小 */
+  font-size: 24px;
+}
+
+.icon-QQ:before {
+  content: "\e882";
+  color: red;
+  /* 修改大小 */
+  font-size: 24px;
+}
+
 .icon-rss:before {
   content: "\ea03";
   color: #ee802f;
+  /* 修改大小 */
+  font-size: 21px;
 }
 
 .icon-mingpian2:before {
   content: "\e61f";
+  /* 修改大小 */
+  font-size: 15px;
 }
 
 .icon-csdn2:before {
   content: "\e60c";
   /* 修改颜色 */
   color: red;
+  /* 修改大小 */
+  font-size: 21px;
 }
 
 .icon-minutemailer:before {
   content: "\e64c";
   color: #1296db;
+  /* 修改大小 */
+  font-size: 21px;
 }
 
 .icon-csdn1:before {
   content: "\e600";
   color: red;
+  /* 修改大小 */
+  font-size: 21px;
 }
 
 .icon-yonghu1:before {
   content: "\e660";
+  /* 修改大小 */
+  /*font-size: 10px;*/
 }
 
 .icon-csdn:before {
   content: "\e639";
   color: red;
+  /* 修改大小 */
+  font-size: 21px;
 }
 
 .icon-yonghu:before {
   content: "\e638";
+  /* 修改大小 */
+  /*font-size: 10px;*/
 }
 
