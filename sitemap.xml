@@ -407,7 +407,7 @@
 
   
   <url>
-    <loc>https://blog.rabcnops.cn/tags/Ansible/</loc>
+    <loc>https://blog.rabcnops.cn/tags/CICD/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -421,14 +421,14 @@
   </url>
   
   <url>
-    <loc>https://blog.rabcnops.cn/tags/CICD/</loc>
+    <loc>https://blog.rabcnops.cn/tags/Jenkins-Pipeline/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://blog.rabcnops.cn/tags/Jenkins-Pipeline/</loc>
+    <loc>https://blog.rabcnops.cn/tags/Ansible/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -479,14 +479,14 @@
 
   
   <url>
-    <loc>https://blog.rabcnops.cn/categories/%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4/</loc>
+    <loc>https://blog.rabcnops.cn/categories/DevOps/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://blog.rabcnops.cn/categories/DevOps/</loc>
+    <loc>https://blog.rabcnops.cn/categories/%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
@@ -500,14 +500,14 @@
   </url>
   
   <url>
-    <loc>https://blog.rabcnops.cn/categories/%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4/Ansible/</loc>
+    <loc>https://blog.rabcnops.cn/categories/DevOps/Jenkins/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://blog.rabcnops.cn/categories/DevOps/Jenkins/</loc>
+    <loc>https://blog.rabcnops.cn/categories/%E8%87%AA%E5%8A%A8%E5%8C%96%E8%BF%90%E7%BB%B4/Ansible/</loc>
     <lastmod>2023-03-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
