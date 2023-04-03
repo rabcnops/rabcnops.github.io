@@ -1,0 +1,425 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>一文彻底搞懂 Alertmanager 的告警抑制与静默 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一文彻底搞懂 Alertmanager 的告警抑制与静默。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一文彻底搞懂 Alertmanager 的告警抑制与静默">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/57fa097e.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="一文彻底搞懂 Alertmanager 的告警抑制与静默。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png">
+<meta property="article:published_time" content="2023-04-03T07:50:00.000Z">
+<meta property="article:modified_time" content="2023-04-03T07:51:34.059Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Alertmanager">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/57fa097e.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '一文彻底搞懂 Alertmanager 的告警抑制与静默',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-04-03 15:51:34'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Rabcnops" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">44</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">一文彻底搞懂 Alertmanager 的告警抑制与静默</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-03T07:50:00.000Z" title="发表于 2023-04-03 15:50:00">2023-04-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-03T07:51:34.059Z" title="更新于 2023-04-03 15:51:34">2023-04-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/">监控系统</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%9B%91%E6%8E%A7%E7%B3%BB%E7%BB%9F/Alertmanager/">Alertmanager</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="一文彻底搞懂 Alertmanager 的告警抑制与静默"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png" alt="image-20230403153709093"></p>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前面提到了，<code>Prometheus 数据指标采集</code> + <code>Grafana 数据 Web 展示</code> + <code>钉钉告警消息通知</code>，但是仅仅是做了一个实验，并没有深究其触发告警问题，那 Prometheus 到底是如何触发告警的？我们接着往下看。</p>
+<h2 id="一、Prometheus-架构"><a href="#一、Prometheus-架构" class="headerlink" title="一、Prometheus 架构"></a>一、Prometheus 架构</h2><p>在搞清楚 Prometheus 是如何触发告警前，首先我们要清楚 Prometheus 的一个整体架构，其他部分我们先不看，我们就来看 Alertmanager 部分，从架构图中可看到它作为一个整体独立存在，Prometheus 以 Push 消息的方式与其通信，Alertmanager 最后再将 Prometheus 推送过来的告警信息经过其模板渲染后路由给指定用户&amp;&amp;接收端（邮件&#x2F;钉钉&#x2F;企业微信等），从而实现告警通知。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230331164522715.png" alt="image-20230331164522715"></p>
+<p>沿用前两篇博客案例来逐步解释。</p>
+<blockquote>
+<p><a href="https://blog.rabcnops.cn/posts/articles/2f967c8.html">Prometheus - SSL 证书过期监控 | Rabcnops</a></p>
+<p><a href="https://blog.rabcnops.cn/posts/articles/462c3ed6.html">Prometheus - SSL 证书过期监控 - 钉钉告警 | Rabcnops</a></p>
+</blockquote>
+<h2 id="二、Prometheus-告警触发"><a href="#二、Prometheus-告警触发" class="headerlink" title="二、Prometheus 告警触发"></a>二、Prometheus 告警触发</h2><h3 id="2-1-Prometheus-规则文件与字段解释"><a href="#2-1-Prometheus-规则文件与字段解释" class="headerlink" title="2.1 Prometheus 规则文件与字段解释"></a>2.1 Prometheus 规则文件与字段解释</h3><p>首先，来看 Prometheus 的告警规则：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /home/data/prometheus/rules/ssl_cert_alerts.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">groups</span>:                        <span class="comment"># 父分组</span></span><br><span class="line">- name: <span class="string">&quot;SSL证书过期提醒&quot;</span>        <span class="comment"># 子分组。该字段下可配置多个子分组（子分组名用name字段定义），也就是说Prometheus以组的形式进行告警配置。本案例中定义了名为“SSL证书过期提醒”的一个子分组。</span></span><br><span class="line">  rules:                       <span class="comment"># 定义子分组的告警规则。</span></span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;30天&quot;</span>   <span class="comment"># 定义告警名。</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 30  <span class="comment"># 告警条件（只有满足这个表达式条件时才会触发告警）</span></span><br><span class="line">    <span class="keyword">for</span>: 0s                    <span class="comment"># 持续的时间（满足告警条件持续时间多久后，才会发送告警到Alertmanager）</span></span><br><span class="line">    labels:                    <span class="comment"># 标签（K/V的形式，如定义告警的级别 - - &gt; 提示、告警、严重。）</span></span><br><span class="line">      severity: <span class="string">&quot;提示&quot;</span></span><br><span class="line">    annotations:               <span class="comment"># 注释（summary -- 摘要、description -- 详情）</span></span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期！&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在30天后过期，请注意及时续费！&quot;</span></span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;7天&quot;</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 7</span><br><span class="line">    <span class="keyword">for</span>: 0s</span><br><span class="line">    labels:</span><br><span class="line">      severity: <span class="string">&quot;告警&quot;</span></span><br><span class="line">    annotations:</span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期！&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在7天后过期，请注意及时续费！&quot;</span></span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;1天&quot;</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 1</span><br><span class="line">    <span class="keyword">for</span>: 0s</span><br><span class="line">    labels:</span><br><span class="line">      severity: <span class="string">&quot;灾难&quot;</span></span><br><span class="line">    annotations:</span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期！&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在1天后过期，请注意及时续费！&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-规则文件检测"><a href="#2-2-规则文件检测" class="headerlink" title="2.2 规则文件检测"></a>2.2 规则文件检测</h3><blockquote>
+<p>检测规则语法是否有误，SUCCESS 代表语法是没问题的。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> prometheus promtool check rules conf/rules/ssl_cert_alerts.yml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Checking conf/rules/ssl_cert_alerts.yml</span><br><span class="line">  SUCCESS: 3 rules found</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-重启-x2F-热加载-Prometheus"><a href="#2-3-重启-x2F-热加载-Prometheus" class="headerlink" title="2.3 重启&#x2F;热加载 Prometheus"></a>2.3 重启&#x2F;热加载 Prometheus</h3><blockquote>
+<p>重启 Prometheus 使配置文件生效。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart prometheus</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、Alertmanager-告警通知"><a href="#三、Alertmanager-告警通知" class="headerlink" title="三、Alertmanager 告警通知"></a>三、Alertmanager 告警通知</h2><h3 id="3-1-基础环境"><a href="#3-1-基础环境" class="headerlink" title="3.1 基础环境"></a>3.1 基础环境</h3><p>在 Prometheus 服务端有三个告警状态：</p>
+<ul>
+<li><strong>inactive</strong>：没有异常。</li>
+<li><strong>pending</strong>：已触发阈值，但未满足告警的持续时间（即 rule 中的 for 字段）。</li>
+<li><strong>firing</strong>：已触发阈值且满足告警的持续时间，然后将告警发送至 Alertmanager，Alertmanager 根据相关模板发送至Email&#x2F;钉钉等。</li>
+</ul>
+<p>在我的案例中有三个 SSL 证书的时间 &lt; 7 天了，如下图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403100434740.png" alt="image-20230403100434740"></p>
+<h3 id="3-2-接收-Prometheus-告警"><a href="#3-2-接收-Prometheus-告警" class="headerlink" title="3.2 接收 Prometheus 告警"></a>3.2 接收 Prometheus 告警</h3><blockquote>
+<p>钉钉告警配置在前面已经讲过了，这里来验证整个告警过程。</p>
+</blockquote>
+<p><strong>1、Prometheus 规则定义并重启服务生效</strong></p>
+<p><strong>2、此时我们会看到 Prometheus 的三个告警状态的变化</strong></p>
+<blockquote>
+<p>为了不产生告警，我已经关闭了小于 30 天、7 天的告警规则了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403101011131.png" alt="image-20230403101011131"></p>
+<blockquote>
+<p>现在开启小于 7 天的告警，看看其状态变化情况。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403101256286.png" alt="image-20230403101256286"></p>
+<blockquote>
+<p>没有经历 Pending，那是因为我的告警规则的 for 值是 0s，所以你会看到直接跳到 Firing 了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403101320253.png" alt="image-20230403101320253"></p>
+<h3 id="3-3-Alertmanager-发送告警消息"><a href="#3-3-Alertmanager-发送告警消息" class="headerlink" title="3.3 Alertmanager 发送告警消息"></a>3.3 Alertmanager 发送告警消息</h3><blockquote>
+<p>当 Firing 的时候，Prometheus 就会将告警推送到 Alertmanager</p>
+</blockquote>
+<p>Alertmanager 接收到来自 Prometheus 的告警时，会根据 Alertmanager 相关配置（如组等待时间、组发送间隔）将消息发送给 Email、钉钉等。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403101500114.png" alt="image-20230403101500114"></p>
+<h3 id="3-4-Alertmanager-配置文件与字段解释"><a href="#3-4-Alertmanager-配置文件与字段解释" class="headerlink" title="3.4 Alertmanager 配置文件与字段解释"></a>3.4 Alertmanager 配置文件与字段解释</h3><blockquote>
+<p>先看看一份简单的配置文件与字段解释。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 1m                               <span class="comment"># 恢复等待（如果1m后没收到来自Prometheus的告警，则发送恢复告警通知）</span></span><br><span class="line">  smtp_smarthost: <span class="string">&#x27;smtp.163.com:465&#x27;</span>                <span class="comment"># 邮箱服务器</span></span><br><span class="line">  smtp_from: <span class="string">&#x27;zhurongsen_admin@163.com&#x27;</span>             <span class="comment"># 邮箱地址（发送用户）</span></span><br><span class="line">  smtp_auth_username: <span class="string">&#x27;zhurongsen_admin@163.com&#x27;</span>    <span class="comment"># 邮箱登录地址</span></span><br><span class="line">  smtp_auth_password: <span class="string">&#x27;DYKIFIZYKUOXRPFV&#x27;</span>            <span class="comment"># 邮箱授权码（注意是授权码，不是登录密码）</span></span><br><span class="line">  smtp_require_tls: <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">templates:</span><br><span class="line">- <span class="string">&#x27;/etc/alertmanager/template/*.tmpl&#x27;</span>     <span class="comment"># alertmanager模板文件（用于定义告警通知时的模板，如HTML模板、邮件模板等，当然像钉钉有自己的模板则就不会使用该模板，而是使用钉钉自己的模板，也就是说这是缺省模板）</span></span><br><span class="line"></span><br><span class="line">route:                                    <span class="comment"># 根路由</span></span><br><span class="line">  group_by: [<span class="string">&#x27;alertname&#x27;</span>]                 <span class="comment"># 分组（通过alertname标签的值进行分组）</span></span><br><span class="line">  group_wait: 10s                         <span class="comment"># 第一次产生告警，等待10s，组内有告警就一起发出，没有则单独发出</span></span><br><span class="line">  group_interval: 1m                      <span class="comment"># 第二次产生告警，先等待1m，如果1m后还没恢复就进入repeat_interval。定义相同的Group之间发送告警通知的时间间隔</span></span><br><span class="line">  repeat_interval: 5m                     <span class="comment"># 在最终发送消息前再等待5m，5m后还没恢复就发送第二次告警</span></span><br><span class="line">  receiver: <span class="string">&#x27;ops&#x27;</span>                         <span class="comment"># 接收者（全局接收者）不管什么样的告警类型都会接收到告警信息</span></span><br><span class="line">  <span class="comment"># continue: false                       # 如果为false，则不进行后续匹配，为true则继续匹配子路由</span></span><br><span class="line">  routes:                                 <span class="comment"># 子路由</span></span><br><span class="line">  - match:                                <span class="comment"># 常规匹配</span></span><br><span class="line">      severity: critical                  <span class="comment"># 匹配critical值（这里主要是看你在没在你的Prometheus规则中定义）</span></span><br><span class="line">    receiver: <span class="string">&#x27;dev&#x27;</span>                       <span class="comment"># 只有匹配到critical时，才会发送告警消息给dev</span></span><br><span class="line">    <span class="comment"># continue: true                      # 同样是否继续匹配（看你的实际情况）</span></span><br><span class="line">  - match_re:                             <span class="comment"># 正则匹配</span></span><br><span class="line">      severity: ^(warning|critical)$      <span class="comment"># 匹配warning或critical</span></span><br><span class="line">    receiver: <span class="string">&#x27;webhook&#x27;</span>                   <span class="comment"># 只有匹配到warning或critical师，才会发送告警给webhook</span></span><br><span class="line"></span><br><span class="line">receivers:                            <span class="comment"># 接收者的具体信息</span></span><br><span class="line">- name: <span class="string">&#x27;ops&#x27;</span></span><br><span class="line">  email_configs:</span><br><span class="line">  - to: <span class="string">&#x27;2564395767@qq.com&#x27;</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line">- name: <span class="string">&#x27;dev&#x27;</span></span><br><span class="line">  email_configs:</span><br><span class="line">  - to: <span class="string">&#x27;2318099451@qq.com&#x27;</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line">- name: <span class="string">&#x27;test&#x27;</span></span><br><span class="line">  email_configs:</span><br><span class="line">  - to: <span class="string">&#x27;zhurongsen_admin@126.com&#x27;</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line">- name: <span class="string">&#x27;webhook&#x27;</span></span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: http://192.168.56.142:8060/dingtalk/webhook1/send</span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">inhibit_rules:                                  <span class="comment"># 抑制规则（当匹配到critical时抑制掉warning的告警，防止重复告警）</span></span><br><span class="line">  - source_match:</span><br><span class="line">      severity: <span class="string">&#x27;critical&#x27;</span>                      <span class="comment"># 此时，这个告警会被通知</span></span><br><span class="line">    target_match:</span><br><span class="line">      severity: <span class="string">&#x27;warning&#x27;</span>                       <span class="comment"># 此时，这个告警会被抑制</span></span><br><span class="line">    equal: [<span class="string">&#x27;alertname&#x27;</span>, <span class="string">&#x27;dev&#x27;</span>, <span class="string">&#x27;instance&#x27;</span>]     <span class="comment"># 匹配哪些对象的告警</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-重启-Alertmanager-服务"><a href="#3-5-重启-Alertmanager-服务" class="headerlink" title="3.5 重启 Alertmanager 服务"></a>3.5 重启 Alertmanager 服务</h3><blockquote>
+<p>任何修改配置文件的动作都要重启&#x2F;热加载才会生效。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart alertmanager</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、案例"><a href="#四、案例" class="headerlink" title="四、案例"></a>四、案例</h2><h3 id="4-1-Prometheus-规则"><a href="#4-1-Prometheus-规则" class="headerlink" title="4.1 Prometheus 规则"></a>4.1 Prometheus 规则</h3><blockquote>
+<p>上面提到有3个证书要过期了，但我已经续费了，为了体现效果，我将修改过期时间。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">groups</span>:</span><br><span class="line">- name: <span class="string">&quot;SSL证书过期提醒&quot;</span></span><br><span class="line">  rules:</span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;200天&quot;</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 200</span><br><span class="line">    <span class="keyword">for</span>: 0s</span><br><span class="line">    labels:</span><br><span class="line">      severity: <span class="string">&quot;提示&quot;</span></span><br><span class="line">      <span class="built_in">type</span>: ssl</span><br><span class="line">    annotations:</span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期 - 提示&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在200天后过期，请注意及时续费！&quot;</span></span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;100天&quot;</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 100</span><br><span class="line">    <span class="keyword">for</span>: 0s</span><br><span class="line">    labels:</span><br><span class="line">      severity: <span class="string">&quot;告警&quot;</span></span><br><span class="line">      <span class="built_in">type</span>: ssl</span><br><span class="line">    annotations:</span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期 - 告警&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在100天后过期，请注意及时续费！&quot;</span></span><br><span class="line">  - alert: <span class="string">&quot;证书过期时间&lt;1天&quot;</span></span><br><span class="line">    <span class="built_in">expr</span>: probe_ssl_earliest_cert_expiry&#123;job=<span class="string">&quot;SSL证书时间&quot;</span>&#125; - time() &lt; 86400 * 1</span><br><span class="line">    <span class="keyword">for</span>: 0s</span><br><span class="line">    labels:</span><br><span class="line">      severity: <span class="string">&quot;灾难&quot;</span></span><br><span class="line">      <span class="built_in">type</span>: ssl</span><br><span class="line">    annotations:</span><br><span class="line">      summary: <span class="string">&quot;SSL 证书即将过期 - 灾难&quot;</span></span><br><span class="line">      description: <span class="string">&quot;&#123;&#123; <span class="variable">$labels</span>.instance &#125;&#125; SSL 证书将在1天后过期，请注意及时续费！&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-Alertmanager-告警与抑制"><a href="#4-2-Alertmanager-告警与抑制" class="headerlink" title="4.2 Alertmanager 告警与抑制"></a>4.2 Alertmanager 告警与抑制</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">  resolve_timeout: 30s</span><br><span class="line">route:</span><br><span class="line">  group_wait: 10s</span><br><span class="line">  group_interval: 5s</span><br><span class="line">  repeat_interval: 1m</span><br><span class="line">  group_by: [<span class="string">&#x27;alertname&#x27;</span>]</span><br><span class="line">  receiver: <span class="string">&#x27;ops&#x27;</span></span><br><span class="line">  routes:</span><br><span class="line">  - match:</span><br><span class="line">      severity: <span class="string">&#x27;提示&#x27;</span></span><br><span class="line">    receiver: <span class="string">&#x27;web.hook.prometheusalert&#x27;</span></span><br><span class="line">  - match:</span><br><span class="line">      severity: <span class="string">&#x27;告警&#x27;</span></span><br><span class="line">    receiver: <span class="string">&#x27;web.hook.prometheusalert&#x27;</span></span><br><span class="line">  - match:</span><br><span class="line">      severity: <span class="string">&#x27;灾难&#x27;</span></span><br><span class="line">    receiver: <span class="string">&#x27;web.hook.prometheusalert&#x27;</span></span><br><span class="line"></span><br><span class="line">receivers:</span><br><span class="line">- name: <span class="string">&#x27;ops&#x27;</span></span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: <span class="string">&#x27;http://192.168.56.150:8060/dingtalk/webhook1/send&#x27;</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line">- name: <span class="string">&#x27;web.hook.prometheusalert&#x27;</span></span><br><span class="line">  webhook_configs:</span><br><span class="line">  - url: <span class="string">&#x27;http://192.168.56.142:8060/dingtalk/webhook1/send&#x27;</span></span><br><span class="line">    send_resolved: <span class="literal">true</span></span><br><span class="line"></span><br><span class="line">inhibit_rules:</span><br><span class="line">  - source_match:</span><br><span class="line">      severity: <span class="string">&#x27;告警&#x27;</span></span><br><span class="line">    target_match:</span><br><span class="line">      severity: <span class="string">&#x27;提示&#x27;</span></span><br><span class="line">    equal: [<span class="string">&#x27;ssl&#x27;</span>]</span><br></pre></td></tr></table></figure>
+
+<p><strong>告警策略分析</strong>：当子路由匹配到不同的 <code>severity</code> 时就会将消息发往不同的 <code>receiver</code>，当子路由无法匹配到时，消息会默认发往根路由的 <code>receiver</code>，因此，无论是否匹配到子路由规则，消息都会发往根路由的 <code>receiver</code>。</p>
+<p><strong>抑制策略分析</strong>：当匹配到<code>告警</code>标签值时会抑制<code>提示</code>标签值的告警（无论根路由或子路由），但是要注意的是，抑制策略必须来自同个标签类型（即 equal 标签的值必须相同才能起到抑制效果），否则抑制不生效。举个例子：之前我将 <code>equal</code> 设置为<code>alertname</code>是不生效的，原因是在 <code>Prometheus</code> 那端的 <code>alertname</code> 就不一样（除非你设置为一样的），因此解决方法就是将 <code>alertname</code> 设置为相同的值，或自定义额外标签（案例中我就添加的额外标签 - - &gt; type 且值都统一为 ssl），这样的话当匹配到 <code>告警</code> 时就会抑制<code>提示</code>的告警通知并检查他们是否来自于同个 ssl（即ssl标签的值相同抑制才会生效）。</p>
+<blockquote>
+<p>看看最终效果，可见只发送了<code>告警</code>相关的消息，<code>提示</code>相关的消息已经被抑制了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403144843933.png" alt="image-20230403144843933"></p>
+<p><mark>除了通过 Alertmanager 配置文件配置实现抑制，那还有没其他方式实现类似抑制效果呢？是有的，就是 Alertmanager 自身的静默机制，接下来顺便看看如何设置静默。</mark></p>
+<h3 id="4-3-Alertmanager-告警与静默"><a href="#4-3-Alertmanager-告警与静默" class="headerlink" title="4.3 Alertmanager 告警与静默"></a>4.3 Alertmanager 告警与静默</h3><h4 id="4-3-1-访问-Web-端"><a href="#4-3-1-访问-Web-端" class="headerlink" title="4.3.1 访问 Web 端"></a>4.3.1 访问 Web 端</h4><blockquote>
+<p><a target="_blank" rel="noopener external nofollow noreferrer" href="http://192.168.56.142:9093/">http://192.168.56.142:9093/</a></p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152031509.png" alt="image-20230403152031509"></p>
+<h4 id="4-3-2-设置静默"><a href="#4-3-2-设置静默" class="headerlink" title="4.3.2 设置静默"></a>4.3.2 设置静默</h4><blockquote>
+<p>两种方式：<code>根据现有的告警设置静默</code>和<code>新建告警静默</code>。</p>
+</blockquote>
+<p><strong>1、根据现有的告警设置静默</strong></p>
+<ul>
+<li><p>直接点击 Silence 静默</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152000217.png" alt="image-20230403152000217"></p>
+</li>
+<li><p>开始静默设置</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403151633448.png" alt="image-20230403151633448"></p>
+</li>
+<li><p>最后再看看钉钉告警</p>
+<blockquote>
+<p>此时就只收到两条告警信息了（有一条）</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403151547284.png" alt="image-20230403151547284"></p>
+</li>
+</ul>
+<p><strong>2、新建告警静默</strong></p>
+<ul>
+<li><p>点击 <code>New Silence</code></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403151922758.png" alt="image-20230403151922758"></p>
+</li>
+<li><p>剩下的配置都一样（不再重复演示）</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152106300.png" alt="image-20230403152106300"></p>
+</li>
+</ul>
+<h4 id="4-3-3-解除静默"><a href="#4-3-3-解除静默" class="headerlink" title="4.3.3 解除静默"></a>4.3.3 解除静默</h4><p><strong>1、Silence - - &gt; Exprire</strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152402199.png" alt="image-20230403152402199"></p>
+<p><strong>2、最后点击 <code>Confirm</code></strong></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152432980.png" alt="image-20230403152432980"></p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152611507.png" alt="image-20230403152611507"></p>
+<p><strong>3、再看看告警通知</strong></p>
+<blockquote>
+<p>又恢复三条告警信息了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403152724051.png" alt="image-20230403152724051"></p>
+<p><mark>注意：</mark>告警恢复（resolve）的时候，消息是正常通知的，没有受抑制的影响。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>其实配置都比较简单，我认为重点在于搞懂 Prometheus 是如何触发的，Alertmanager 又是如何告警的？简单总结一下：</p>
+<ul>
+<li>告警触发于 Prometheus（根据触发告警规则）；</li>
+<li>Prometheus 触发告警经历三阶段（Inactive、Pending 和 Firing）；</li>
+<li>Prometheus 在 Firing 阶段时，将告警 push 到 Alertmanager（符合架构）；</li>
+<li>Alertmanager 根据路由、匹配和抑制进行告警通知，最终实现告警；</li>
+<li>如果需对服务器维护或应用升级时，需进行静默设置（避免消息误报）。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/57fa097e.html">https://blog.rabcnops.cn/posts/articles/57fa097e.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Alertmanager/">Alertmanager</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">CentOS7 搭建 DHCP 服务</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/1c8d3a9.html" title="Ansible 部署 Wordpress"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-29</div><div class="title">Ansible 部署 Wordpress</div></div></a></div><div><a href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">Ansible 快速入门</div></div></a></div><div><a href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-31</div><div class="title">CentOS7 搭建 DHCP 服务</div></div></a></div><div><a href="/posts/articles/c74519c0.html" title="Gitlab 项目自动同步"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 项目自动同步</div></div></a></div><div><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 基础操作快速入门</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">44</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn1"></i></a><a class="social-icon" href="tencent://Message/?Uin=2564395767&amp;websiteName=www.oicqzone.com&amp;Menu=yes" rel="external nofollow noreferrer" target="_blank" title="QQ"><i class="iconfont icon-QQ"></i></a><a class="social-icon" href="https://blog.rabcnops.cn/atom.xml" target="_blank" title="RSS"><i class="iconfont icon-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Prometheus-%E6%9E%B6%E6%9E%84"><span class="toc-text">一、Prometheus 架构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Prometheus-%E5%91%8A%E8%AD%A6%E8%A7%A6%E5%8F%91"><span class="toc-text">二、Prometheus 告警触发</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Prometheus-%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6%E4%B8%8E%E5%AD%97%E6%AE%B5%E8%A7%A3%E9%87%8A"><span class="toc-text">2.1 Prometheus 规则文件与字段解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E8%A7%84%E5%88%99%E6%96%87%E4%BB%B6%E6%A3%80%E6%B5%8B"><span class="toc-text">2.2 规则文件检测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E9%87%8D%E5%90%AF-x2F-%E7%83%AD%E5%8A%A0%E8%BD%BD-Prometheus"><span class="toc-text">2.3 重启&#x2F;热加载 Prometheus</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81Alertmanager-%E5%91%8A%E8%AD%A6%E9%80%9A%E7%9F%A5"><span class="toc-text">三、Alertmanager 告警通知</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83"><span class="toc-text">3.1 基础环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E6%8E%A5%E6%94%B6-Prometheus-%E5%91%8A%E8%AD%A6"><span class="toc-text">3.2 接收 Prometheus 告警</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-Alertmanager-%E5%8F%91%E9%80%81%E5%91%8A%E8%AD%A6%E6%B6%88%E6%81%AF"><span class="toc-text">3.3 Alertmanager 发送告警消息</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-Alertmanager-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%8E%E5%AD%97%E6%AE%B5%E8%A7%A3%E9%87%8A"><span class="toc-text">3.4 Alertmanager 配置文件与字段解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E9%87%8D%E5%90%AF-Alertmanager-%E6%9C%8D%E5%8A%A1"><span class="toc-text">3.5 重启 Alertmanager 服务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%A1%88%E4%BE%8B"><span class="toc-text">四、案例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-Prometheus-%E8%A7%84%E5%88%99"><span class="toc-text">4.1 Prometheus 规则</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-Alertmanager-%E5%91%8A%E8%AD%A6%E4%B8%8E%E6%8A%91%E5%88%B6"><span class="toc-text">4.2 Alertmanager 告警与抑制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-Alertmanager-%E5%91%8A%E8%AD%A6%E4%B8%8E%E9%9D%99%E9%BB%98"><span class="toc-text">4.3 Alertmanager 告警与静默</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-1-%E8%AE%BF%E9%97%AE-Web-%E7%AB%AF"><span class="toc-text">4.3.1 访问 Web 端</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-2-%E8%AE%BE%E7%BD%AE%E9%9D%99%E9%BB%98"><span class="toc-text">4.3.2 设置静默</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-3-%E8%A7%A3%E9%99%A4%E9%9D%99%E9%BB%98"><span class="toc-text">4.3.3 解除静默</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/57fa097e.html" title="一文彻底搞懂 Alertmanager 的告警抑制与静默"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一文彻底搞懂 Alertmanager 的告警抑制与静默"/></a><div class="content"><a class="title" href="/posts/articles/57fa097e.html" title="一文彻底搞懂 Alertmanager 的告警抑制与静默">一文彻底搞懂 Alertmanager 的告警抑制与静默</a><time datetime="2023-04-03T07:50:00.000Z" title="发表于 2023-04-03 15:50:00">2023-04-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="CentOS7 搭建 DHCP 服务"/></a><div class="content"><a class="title" href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务">CentOS7 搭建 DHCP 服务</a><time datetime="2023-03-31T13:33:14.000Z" title="发表于 2023-03-31 21:33:14">2023-03-31</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/2d762e62.html" title="Hexo + GitHub 个人博客部署"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230330132102576.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo + GitHub 个人博客部署"/></a><div class="content"><a class="title" href="/posts/articles/2d762e62.html" title="Hexo + GitHub 个人博客部署">Hexo + GitHub 个人博客部署</a><time datetime="2023-03-30T05:20:54.000Z" title="发表于 2023-03-30 13:20:54">2023-03-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/462c3ed6.html" title="Prometheus - SSL 证书过期监控 - 钉钉告警"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/1000.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Prometheus - SSL 证书过期监控 - 钉钉告警"/></a><div class="content"><a class="title" href="/posts/articles/462c3ed6.html" title="Prometheus - SSL 证书过期监控 - 钉钉告警">Prometheus - SSL 证书过期监控 - 钉钉告警</a><time datetime="2023-03-30T03:40:54.000Z" title="发表于 2023-03-30 11:40:54">2023-03-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/1c8d3a9.html" title="Ansible 部署 Wordpress"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ansible 部署 Wordpress"/></a><div class="content"><a class="title" href="/posts/articles/1c8d3a9.html" title="Ansible 部署 Wordpress">Ansible 部署 Wordpress</a><time datetime="2023-03-29T02:51:14.000Z" title="发表于 2023-03-29 10:51:14">2023-03-29</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/57fa097e.html'
+    this.page.identifier = '/posts/articles/57fa097e.html'
+    this.page.title = '一文彻底搞懂 Alertmanager 的告警抑制与静默'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
