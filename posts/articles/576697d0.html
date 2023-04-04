@@ -1,0 +1,382 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>云原生时代下 K8s CGroup/CRI 的优劣势 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="云原生时代下 K8s CGroup&#x2F;CRI 的优劣势。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="云原生时代下 K8s CGroup&#x2F;CRI 的优劣势">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/576697d0.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="云原生时代下 K8s CGroup&#x2F;CRI 的优劣势。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg">
+<meta property="article:published_time" content="2023-04-04T01:33:14.000Z">
+<meta property="article:modified_time" content="2023-04-04T02:43:13.205Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="K8s">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/576697d0.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '云原生时代下 K8s CGroup/CRI 的优劣势',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-04-04 10:43:13'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Rabcnops" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">47</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">云原生时代下 K8s CGroup/CRI 的优劣势</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-04T01:33:14.000Z" title="发表于 2023-04-04 09:33:14">2023-04-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-04T02:43:13.205Z" title="更新于 2023-04-04 10:43:13">2023-04-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/">云原生</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/K8s/">K8s</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>6分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="云原生时代下 K8s CGroup/CRI 的优劣势"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg" alt="k8s-1"></p>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在 v1.24 版本之前的 k8s 直接集成了 <code>Docker Engine</code> 组件，但从 v1.24 版本起，<code>Kubernetes</code> 项目正式移除了 <code>Dockershim</code>，也就是说 K8s 不再唯一支持以 Docker 作为 K8s 容器运行时。尽管移除了 Dockershim，但这并不代表 Docker 不可用，我们依然可通过<code>容器运行时接口（CRI）</code>来将 Docker 作为 K8s 的容器运行时。</p>
+<p><mark>容器运行时部署于 K8s 集群的 work 节点上，以使得 Pod 可以正常运行。</mark></p>
+<p><strong>常见容器运行时：</strong></p>
+<ul>
+<li>Containerd</li>
+<li>CRI-O</li>
+<li>Docker Engine</li>
+<li>Mirantis Container Runtime</li>
+</ul>
+<h2 id="一、CGroup"><a href="#一、CGroup" class="headerlink" title="一、CGroup"></a>一、CGroup</h2><h3 id="1-1-基本概念"><a href="#1-1-基本概念" class="headerlink" title="1.1 基本概念"></a>1.1 基本概念</h3><p><code>CGroup</code> 相信大家并不陌生，只要接触过 Docker 容器技术的应该都用过。CGroup 是 Linux 的一个底层技术，用于限制分配给系统进程的资源。</p>
+<p>在我前面的 K8s 集群部署文档中，我们知道 <code>kubelet</code> 和底层容器运行时需要对控制组实现 Pod 和容器资源管理和限制（如 CPU、内存等资源设置请求和限制）。<font color=IndianRed>因此，想要对接 K8s 控制组，关键点就在于 kubelet 和容器运行时需要使用同一个 <code>cgroup</code> 驱动。</font></p>
+<p>CGroup 驱动有一下两种：</p>
+<ul>
+<li>cgroupfs</li>
+<li>systemd</li>
+</ul>
+<h3 id="1-2-cgroupfs-驱动"><a href="#1-2-cgroupfs-驱动" class="headerlink" title="1.2 cgroupfs 驱动"></a>1.2 cgroupfs 驱动</h3><h4 id="1-2-1-基本概念"><a href="#1-2-1-基本概念" class="headerlink" title="1.2.1 基本概念"></a>1.2.1 基本概念</h4><p><code>cgroupfs 驱动</code> 是 kubelet 中默认的 cgroup 驱动，当使用 <code>cgroupfs</code> 驱动时， kubelet 和容器运行时将直接对接 cgroup 文件系统来配置 cgroup。</p>
+<p>当你的系统是以 systemd 作为初始化时，不推荐使用 <code>cgroupfs</code> 驱动，因为 systemd 期望系统上只有一个 cgroup 管理器。 此外，如果你的系统使用的 <code>cgroup v2</code> 版本，则应用 <code>systemd</code> 驱动取代 <code>cgroupfs</code>。</p>
+<h4 id="1-2-2-什么是-cgroup-v2"><a href="#1-2-2-什么是-cgroup-v2" class="headerlink" title="1.2.2 什么是 cgroup v2"></a>1.2.2 什么是 cgroup v2</h4><p>Linux 中有两个 cgroup 版本：cgroup v1 和 cgroup v2。cgroup v2 是新一代的 <code>cgroup</code> API，cgroup v2 提供了一个具有增强资源管理能力的统一控制系统。一些 Kubernetes 特性专门使用 cgroup v2 来增强资源管理和隔离，<font color=IndianRed>因此，推荐使用 systemd 来作为 cgroup 驱动，从而可提升更好的资源管理效果。</font></p>
+<p><strong>如何查看 Linux 节点上的 cgroup 版本？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">stat -fc %T /sys/fs/cgroup/</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于 cgroup v2，输出为 cgroup2fs</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">对于 cgroup v1，输出为 tmpfs</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>下图的 cgroup 版本为 v1</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221026113557429.png" alt="image-20221026113557429"></p>
+<h4 id="1-2-3-cgroup-v2-使用要求"><a href="#1-2-3-cgroup-v2-使用要求" class="headerlink" title="1.2.3 cgroup v2 使用要求"></a>1.2.3 cgroup v2 使用要求</h4><ul>
+<li>操作系统发行版启用 cgroup v2</li>
+<li>Linux 内核为 5.8 或更高版本</li>
+<li>容器运行时支持 cgroup v2</li>
+<li>kubelet 和容器运行时被配置为使用 systemd cgroup 驱动</li>
+</ul>
+<h3 id="1-3-systemd-cgroup-驱动"><a href="#1-3-systemd-cgroup-驱动" class="headerlink" title="1.3 systemd cgroup 驱动"></a>1.3 systemd cgroup 驱动</h3><h4 id="1-3-1-基本概念"><a href="#1-3-1-基本概念" class="headerlink" title="1.3.1 基本概念"></a>1.3.1 基本概念</h4><p>当某个 Linux 系统发行版使用 systemd 作为其初始化系统时，初始化进程会生成并使用一个 root 控制组（<code>cgroup</code>），并充当 cgroup 管理器。</p>
+<p>systemd 与 cgroup 集成紧密，并将为每个 systemd 单元分配一个 cgroup。 因此，如果你 <code>systemd</code> 用作初始化系统，同时使用 <code>cgroupfs</code> 驱动，则系统中会存在两个不同的 cgroup 管理器。</p>
+<p><font color=IndianRed>同时存在两个 cgroup 管理器将造成系统中针对可用的资源和使用中的资源出现两个视图。</font>某些情况下， 将 kubelet 和容器运行时配置为使用 <code>cgroupfs</code>、但为剩余的进程使用 <code>systemd</code> 的那些节点将在资源压力增大时变得不稳定。</p>
+<p><font color=IndianRed>当 systemd 是选定的初始化系统时，缓解这个不稳定问题的方法是针对 kubelet 和容器运行时将 <code>systemd</code> 用作 cgroup 驱动。</font></p>
+<h4 id="1-3-2-kubelet-设置-cgroup-驱动"><a href="#1-3-2-kubelet-设置-cgroup-驱动" class="headerlink" title="1.3.2 kubelet 设置 cgroup 驱动"></a>1.3.2 kubelet 设置 cgroup 驱动</h4><blockquote>
+<p>如：将 <code>systemd</code> 设置为 cgroup 驱动</p>
+<p>编辑 <code>KubeletConfiguration</code> 的 <code>cgroupDriver</code> 选项，并将其设置为 <code>systemd</code></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: kubelet.config.k8s.io/v1beta1</span><br><span class="line">kind: KubeletConfiguration</span><br><span class="line">...</span><br><span class="line">cgroupDriver: systemd</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>下图为我博客截图：</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221026120542791.png" alt="image-20221026120542791"></p>
+<p><font color=IndianRed>注意：更改已加入集群的节点的 cgroup 驱动是一项敏感的操作。 如果 kubelet 已经使用某 cgroup 驱动的语义创建了 Pod，此时更改运行时以使用别的 cgroup 驱动，当为现有的 Pod 重新创建 PodSandbox 时会产生错误，该错误重启 kubelet 也可能无法解决此类问题，只能重新部署 K8s 集群，因此对于一个正在正常运行的 K8s 集群，我们就最好不要动其 cgroup 驱动了。</font></p>
+<h2 id="二、CRI"><a href="#二、CRI" class="headerlink" title="二、CRI"></a>二、CRI</h2><blockquote>
+<p>这里我以 Kubernetes 1.24 举例，因为我部署的就是该版本的 k8s 集群。</p>
+<p>各位小伙伴也可以尝试以二进制方式部署一下 K8s 集群，会有很大收获。</p>
+</blockquote>
+<p>什么是 CRI？其实 CRI 就是我们的容器运行时接口，可以通过 CRI 来实现 K8s 来集成不同的容器组件。</p>
+<p>首先，对于 Kubernetes 1.24 集群，你的容器运行时必须至少支持 <code>v1alpha2</code> 版本的容器运行时接口。因为 Kubernetes 1.24 默认使用 v1 版本的 CRI API。如果容器运行时不支持 v1 版本的 API， 则 kubelet 会回退到使用（已弃用的）<code>v1alpha2</code>  版本的 API。</p>
+<h3 id="2-1-Containerd"><a href="#2-1-Containerd" class="headerlink" title="2.1 Containerd"></a>2.1 Containerd</h3><h4 id="2-1-1-基本概念"><a href="#2-1-1-基本概念" class="headerlink" title="2.1.1 基本概念"></a>2.1.1 基本概念</h4><p>什么是 Containerd ？这里不过多解释，简单的说：Containerd 不需要经过 dockershim，是一个工业级标准的容器运行时，它强调简单性、健壮性和可移植性。在 Linux 上，containerd 的默认 CRI 套接字是 <code>/run/containerd/containerd.sock</code>。</p>
+<h4 id="2-1-2-配置-CGroup-驱动"><a href="#2-1-2-配置-CGroup-驱动" class="headerlink" title="2.1.2 配置 CGroup 驱动"></a>2.1.2 配置 CGroup 驱动</h4><blockquote>
+<p>以 systemd 驱动为例</p>
+</blockquote>
+<p>1、安装 Containerd</p>
+<p>2、生成配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /etc/containerd &amp;&amp; containerd config default &gt; /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+
+<p>3、修改配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/containerd/config.toml</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">SystemdCgroup = true</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 SystemdCgroup = <span class="literal">false</span> 改为 SystemdCgroup = <span class="literal">true</span></span></span><br><span class="line">...</span><br><span class="line">sandbox_image = &quot;registry.aliyuncs.com/google_containers/pause:3.7&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 sandbox_image = <span class="string">&quot;k8s.gcr.io/pause:3.6&quot;</span> 改为：sandbox_image = <span class="string">&quot;registry.aliyuncs.com/google_containers/pause:3.7&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>4、启动 Containerd</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl enable containerd &amp;&amp; systemctl start containerd</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-CRI-O"><a href="#2-2-CRI-O" class="headerlink" title="2.2 CRI-O"></a>2.2 CRI-O</h3><h4 id="2-2-1-基本概念"><a href="#2-2-1-基本概念" class="headerlink" title="2.2.1 基本概念"></a>2.2.1 基本概念</h4><p>对 CRI-O 没有过多的研究，CRI-O 是一个由 redhat 发起并开源且由社区驱动的 container-runtime，专为 K8s 而生。这里就不过多介绍，感兴趣的化可以深入研究。</p>
+<p>CRI-O 默认使用 systemd cgroup 驱动程序，可编辑 <code>/etc/crio/crio.conf</code> 或在 <code>/etc/crio/crio.conf.d/02-cgroup-manager.conf</code> 中放置一个插入式配置，具体操作如下。</p>
+<h4 id="2-2-2-配置-CGroup-驱动"><a href="#2-2-2-配置-CGroup-驱动" class="headerlink" title="2.2.2 配置 CGroup 驱动"></a>2.2.2 配置 CGroup 驱动</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[crio.runtime]</span><br><span class="line">conmon_cgroup = &quot;pod&quot;</span><br><span class="line">cgroup_manager = &quot;cgroupfs&quot;</span><br><span class="line">...</span><br><span class="line">[crio.image]</span><br><span class="line">pause_image=&quot;registry.aliyuncs.com/google_containers/pause:3.7&quot;</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 pause_image=<span class="string">&quot;registry.k8s.io/pause:3.6&quot;</span> 改为 pause_image=<span class="string">&quot;registry.aliyuncs.com/google_containers/pause:3.7&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p><font color=IndianRed>当使用 CRI-O 时，并且 CRI-O 的 cgroup 设置为 <code>cgroupfs</code> 时，必须将 <code>conmon_cgroup</code> 设置为值 <code>pod</code>。</font></p>
+<h3 id="2-3-Docker-Engine"><a href="#2-3-Docker-Engine" class="headerlink" title="2.3 Docker Engine"></a>2.3 Docker Engine</h3><h4 id="2-3-1-基本概念"><a href="#2-3-1-基本概念" class="headerlink" title="2.3.1 基本概念"></a>2.3.1 基本概念</h4><p>Docker 就不用多说，各位想必再熟悉不过了。想要使用 docker 作为 k8s 的编排对象，那需要安装 cri-docker 来作为 dockershim。对于 <code>cri-dockerd</code>，默认情况下，CRI 套接字是 <code>/run/cri-dockerd.sock</code>。</p>
+<p>cri-docker 源码安装地址：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/Mirantis/cri-dockerd">https://github.com/Mirantis/cri-dockerd</a></p>
+<h4 id="2-3-2-配置-CGroup-驱动"><a href="#2-3-2-配置-CGroup-驱动" class="headerlink" title="2.3.2 配置 CGroup 驱动"></a>2.3.2 配置 CGroup 驱动</h4><p>修改 CGroup 为 systemd</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221026150427417.png" alt="image-20221026150427417"></p>
+<p>修改沙箱镜像为国内源</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">[Service]</span><br><span class="line">Type=notify</span><br><span class="line">ExecStart=/usr/local/bin/cri-dockerd --container-runtime-endpoint fd:// --network-plugin=cni --pod-infra-container-image=registry.aliyuncs.com/google_containers/pause:3.7</span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line">TimeoutSec=0</span><br><span class="line">RestartSec=2</span><br><span class="line">Restart=always</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在 ExecStart= 部分添加即可</span></span><br></pre></td></tr></table></figure>
+
+<p>修改完成后重启 Docker 即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart docker.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-4-Mirantis"><a href="#2-4-Mirantis" class="headerlink" title="2.4 Mirantis"></a>2.4 Mirantis</h3><p><code>Mirantis Container Runtime (MCR)</code> 是一种商用容器运行时，以前称为 Docker 企业版，可以使用 MCR 中包含的开源 <code>cri-dockerd</code> 组件将 Mirantis Container Runtime 与 Kubernetes 一起使用。</p>
+<p>更多 Mirantis 相关知识，可阅读其<a target="_blank" rel="noopener external nofollow noreferrer" href="https://docs.mirantis.com/mcr/20.10/install.html">官方文档。</a></p>
+<p><mark>看了这么多容器运行时，没有谁好谁坏，适合自己公司业务的就是最好的</mark></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/576697d0.html">https://blog.rabcnops.cn/posts/articles/576697d0.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/K8s/">K8s</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/posts/articles/3f333f2d.html" title="Deployment 的基础应用案例"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Deployment 的基础应用案例</div></div></a></div><div class="next-post pull-right"><a href="/posts/articles/57fa097e.html" title="一文彻底搞懂 Alertmanager 的告警抑制与静默"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">一文彻底搞懂 Alertmanager 的告警抑制与静默</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/3f333f2d.html" title="Deployment 的基础应用案例"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-04</div><div class="title">Deployment 的基础应用案例</div></div></a></div><div><a href="/posts/articles/dae759d1.html" title="K8s Pod 迁移"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/yys.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-04</div><div class="title">K8s Pod 迁移</div></div></a></div><div><a href="/posts/articles/d2d57643.html" title="K8s 探针"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">K8s 探针</div></div></a></div><div><a href="/posts/articles/2ac58511.html" title="K8s 高可用集群架构（二进制）部署及应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">K8s 高可用集群架构（二进制）部署及应用</div></div></a></div><div><a href="/posts/articles/82357013.html" title="kubeadm 部署 k8s 集群"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">kubeadm 部署 k8s 集群</div></div></a></div><div><a href="/posts/articles/e927d0f0.html" title="如何理解 K8s 动态伸缩与触发上线？"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/yys.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">如何理解 K8s 动态伸缩与触发上线？</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">47</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">13</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">16</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn1"></i></a><a class="social-icon" href="tencent://Message/?Uin=2564395767&amp;websiteName=www.oicqzone.com&amp;Menu=yes" rel="external nofollow noreferrer" target="_blank" title="QQ"><i class="iconfont icon-QQ"></i></a><a class="social-icon" href="https://blog.rabcnops.cn/atom.xml" target="_blank" title="RSS"><i class="iconfont icon-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81CGroup"><span class="toc-text">一、CGroup</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">1.1 基本概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-cgroupfs-%E9%A9%B1%E5%8A%A8"><span class="toc-text">1.2 cgroupfs 驱动</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">1.2.1 基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-2-%E4%BB%80%E4%B9%88%E6%98%AF-cgroup-v2"><span class="toc-text">1.2.2 什么是 cgroup v2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-3-cgroup-v2-%E4%BD%BF%E7%94%A8%E8%A6%81%E6%B1%82"><span class="toc-text">1.2.3 cgroup v2 使用要求</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-systemd-cgroup-%E9%A9%B1%E5%8A%A8"><span class="toc-text">1.3 systemd cgroup 驱动</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">1.3.1 基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-2-kubelet-%E8%AE%BE%E7%BD%AE-cgroup-%E9%A9%B1%E5%8A%A8"><span class="toc-text">1.3.2 kubelet 设置 cgroup 驱动</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81CRI"><span class="toc-text">二、CRI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-Containerd"><span class="toc-text">2.1 Containerd</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">2.1.1 基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-2-%E9%85%8D%E7%BD%AE-CGroup-%E9%A9%B1%E5%8A%A8"><span class="toc-text">2.1.2 配置 CGroup 驱动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-CRI-O"><span class="toc-text">2.2 CRI-O</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">2.2.1 基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-2-%E9%85%8D%E7%BD%AE-CGroup-%E9%A9%B1%E5%8A%A8"><span class="toc-text">2.2.2 配置 CGroup 驱动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Docker-Engine"><span class="toc-text">2.3 Docker Engine</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-text">2.3.1 基本概念</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-2-%E9%85%8D%E7%BD%AE-CGroup-%E9%A9%B1%E5%8A%A8"><span class="toc-text">2.3.2 配置 CGroup 驱动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-Mirantis"><span class="toc-text">2.4 Mirantis</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/dae759d1.html" title="K8s Pod 迁移"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/yys.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="K8s Pod 迁移"/></a><div class="content"><a class="title" href="/posts/articles/dae759d1.html" title="K8s Pod 迁移">K8s Pod 迁移</a><time datetime="2023-04-04T02:33:14.000Z" title="发表于 2023-04-04 10:33:14">2023-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/3f333f2d.html" title="Deployment 的基础应用案例"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Deployment 的基础应用案例"/></a><div class="content"><a class="title" href="/posts/articles/3f333f2d.html" title="Deployment 的基础应用案例">Deployment 的基础应用案例</a><time datetime="2023-04-04T01:33:14.000Z" title="发表于 2023-04-04 09:33:14">2023-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/576697d0.html" title="云原生时代下 K8s CGroup/CRI 的优劣势"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="云原生时代下 K8s CGroup/CRI 的优劣势"/></a><div class="content"><a class="title" href="/posts/articles/576697d0.html" title="云原生时代下 K8s CGroup/CRI 的优劣势">云原生时代下 K8s CGroup/CRI 的优劣势</a><time datetime="2023-04-04T01:33:14.000Z" title="发表于 2023-04-04 09:33:14">2023-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/57fa097e.html" title="一文彻底搞懂 Alertmanager 的告警抑制与静默"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230403153709093.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一文彻底搞懂 Alertmanager 的告警抑制与静默"/></a><div class="content"><a class="title" href="/posts/articles/57fa097e.html" title="一文彻底搞懂 Alertmanager 的告警抑制与静默">一文彻底搞懂 Alertmanager 的告警抑制与静默</a><time datetime="2023-04-03T07:50:00.000Z" title="发表于 2023-04-03 15:50:00">2023-04-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="CentOS7 搭建 DHCP 服务"/></a><div class="content"><a class="title" href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务">CentOS7 搭建 DHCP 服务</a><time datetime="2023-03-31T13:33:14.000Z" title="发表于 2023-03-31 21:33:14">2023-03-31</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-1.jpeg')"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/576697d0.html'
+    this.page.identifier = '/posts/articles/576697d0.html'
+    this.page.title = '云原生时代下 K8s CGroup/CRI 的优劣势'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
