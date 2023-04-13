@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Nginx 性能优化 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Nginx 性能优化及应用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 性能优化">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/31a3358a.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="Nginx 性能优化及应用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png">
+<meta property="article:published_time" content="2023-04-13T02:51:14.000Z">
+<meta property="article:modified_time" content="2023-04-13T02:58:24.333Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Nginx">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/31a3358a.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Nginx 性能优化',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-04-13 10:58:24'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Rabcnops" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">18</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于作者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Nginx 性能优化</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-13T02:51:14.000Z" title="发表于 2023-04-13 10:51:14">2023-04-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-13T02:58:24.333Z" title="更新于 2023-04-13 10:58:24">2023-04-13</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BC%98%E5%8C%96%E7%AF%87/">优化篇</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E4%BC%98%E5%8C%96%E7%AF%87/Nginx/">Nginx</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>11分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Nginx 性能优化"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" alt="image-20230413105645046"></p>
+<hr>
+<h3 id="1、调整-worker-进程数"><a href="#1、调整-worker-进程数" class="headerlink" title="1、调整 worker 进程数"></a>1、调整 worker 进程数</h3><p>nginx 有一个 master 进程和多个 work 进程。master 进程的主要目的是读取和评估配置，并维护 work 进程。work 进程对请求进行实际处理。在高并发、高访问的场景下，需要提前启动更多的 nginx 进程，以保证快速响应，处理大量并发用户的请求。</p>
+<p>现在的服务器基本上都是多线程和多进程的，而 Nginx 默认不允许处理多个工作负载，因此你可以修改配置文件中<code>worker_processes</code>参数使其作为多线程 web 服务器来工作。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看CPU核心数</span></span><br><span class="line">grep processor /proc/cpuinfo | wc -l</span><br><span class="line">2</span><br></pre></td></tr></table></figure>
+
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">于是可设置工作进程为4并绑定到不同CPU</span></span><br><span class="line">worker_processes  2;  # 如果设置未auto，就不需要手动绑定，它会自动绑定</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果你的服务器是2核</span></span><br><span class="line">worker_cpu_affinity 0101 1010;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果你的服务器是4核</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">worker_cpu_affinity 0001 0010 0100 1000;</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果你的服务器是8核</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">worker_cpu_affinity 00000001 00000010 00000100 00001000 00010000 00100000 01000000 10000000;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里放一个 <code>worker_cpu_affinity</code> 的计算脚本，该脚本会根据你服务器的 CPU 核数来自动计算 <code>worker_cpu_affinity</code></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># @file: nginx-affinity.sh</span></span><br><span class="line"><span class="comment"># @brief:</span></span><br><span class="line"><span class="comment"># @author: YoungJoo.Kim &lt;http://vozlt.com&gt;</span></span><br><span class="line"><span class="comment"># @version:</span></span><br><span class="line"><span class="comment"># @date:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Linux only.</span></span><br><span class="line"><span class="comment"># Nginx worker_cpu_affinity</span></span><br><span class="line"><span class="comment"># http://wiki.nginx.org/CoreModule</span></span><br><span class="line"></span><br><span class="line">n=$(awk <span class="string">&#x27;/^processor/&#123;n=$3&#125; END&#123;print n&#125;&#x27;</span> /proc/cpuinfo)</span><br><span class="line">aff=$(<span class="built_in">printf</span> <span class="string">&quot;0%0<span class="variable">$&#123;n&#125;</span>d&quot;</span> 0)</span><br><span class="line"><span class="built_in">printf</span> <span class="string">&quot;worker_processes %d;\n&quot;</span> $((n+<span class="number">1</span>))</span><br><span class="line">[ <span class="variable">$n</span> -eq 0 ] &amp;&amp; <span class="built_in">exit</span>;</span><br><span class="line"><span class="built_in">printf</span> <span class="string">&quot;worker_cpu_affinity &quot;</span></span><br><span class="line"><span class="keyword">for</span> ((a=<span class="number">0</span>; a &lt;= n; a++))</span><br><span class="line"><span class="keyword">do</span></span><br><span class="line">    poss=$((n - a))</span><br><span class="line">    pose=$((n - poss))</span><br><span class="line">    <span class="keyword">if</span> [ <span class="variable">$pose</span> -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">printf</span> <span class="string">&quot;%0<span class="variable">$&#123;poss&#125;</span>d1&quot;</span> 0</span><br><span class="line">    <span class="keyword">elif</span> [ <span class="variable">$poss</span> -eq 0 ]; <span class="keyword">then</span></span><br><span class="line">        [ <span class="variable">$poss</span> -eq 0 ] &amp;&amp; <span class="built_in">printf</span> <span class="string">&quot;1%0<span class="variable">$&#123;pose&#125;</span>d&quot;</span> 0</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        [ <span class="variable">$pose</span> -ne 0 ] &amp;&amp; <span class="built_in">printf</span> <span class="string">&quot;%0<span class="variable">$&#123;poss&#125;</span>d1%0<span class="variable">$&#123;pose&#125;</span>d&quot;</span> 0 0</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">    [ <span class="variable">$n</span> != <span class="variable">$a</span> ] &amp;&amp; <span class="built_in">echo</span> -n <span class="string">&quot; &quot;</span> || <span class="built_in">echo</span> <span class="string">&quot;;&quot;</span>;</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221221103441811.png" alt="image-20221221103441811"></p>
+<h3 id="2、调整-worker-连接数"><a href="#2、调整-worker-连接数" class="headerlink" title="2、调整 worker 连接数"></a>2、调整 worker 连接数</h3><p><code>work 连接数</code>与<code>work 进程数</code>息息相关，可通过 <code>worker_connections</code> 参数设置 work 连接数。worker_connections 参数用于设置 Nginx 单个 work 进程（worker_processes）允许的最大客户端连接数。</p>
+<p>而 Nginx 默认的 1024 在生产环境来说是比较小的，因此需要调整该参数。该配置参数位于 events 事件中，Linux 中 nginx 采用 epoll 的 I&#x2F;O 复用模型，FreeBSD 中使用 kqueue 的 I&#x2F;O 复用模型，Solaris 中使用 &#x2F;dev&#x2F;poll 的 I&#x2F;O 复用模型，Windows中使用 ICOP 等。</p>
+<p>因此，我们需要针对不同的系统类型来选择不同的事件处理模型。我用的是 CentOS 7，所以把 nginx 的事件处理模型调整为 epoll 模型。</p>
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">events &#123;</span><br><span class="line">    use epoll;</span><br><span class="line">    worker_connections  20240;</span><br><span class="line">    multi_accept on;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>还有一个参数也是需要注意的，就是 <code>multi_accept on</code>，该参数告诉 nginx 收到一个新连接通知后接受尽可能多的连接，<code>默认是on</code>，且为串行处理连接数。当为 off 时为并行处理连接数，即多个 work 进程同时处理连接。因此，<code>当你的客户端连接数较少时，参数值置为 on，相反在连接数较多、服务器吞吐量较大时，参数值置 off，可提高 Nginx 性能。</code></p>
+<p>当然，这个 work 连接数也不是说可无限设置大，它和系统自身<code>内存</code>、<code>最大文件打开数</code>有关。一个连接分别对应一个 <code>read_event</code> 和一个 <code>write_event</code> 事件。一个连接本身占用 232 字节左右，两个事件总占 96 字节左右，于是一个连接（连接 + read_event + write_event）总共就占 328 字节。</p>
+<p>因此，上面的 20240 的连接数就会占用 20240*328&#x2F;1024&#x2F;1024 &#x3D; 6M 大小内存。</p>
+<p>在来看看 worker 进程最大打开文件数，该值其实在我们设置系统最大打开文件数的时候已经指定（*&#x2F;指定用户），如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cat /etc/security/limits.conf</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line">root soft nofile 65535</span><br><span class="line">root hard nofile 65535</span><br><span class="line">* soft nofile 65535</span><br><span class="line">* hard nofile 65535</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">End of file</span></span><br></pre></td></tr></table></figure>
+
+<p>因此，只需要设置 <code>worker_rlimit_nofile</code> 值为以上 65535 值即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置Nginx worker进程最大打开文件数</span></span><br><span class="line">worker_rlimit_nofile 65535;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、调整-work-进程最大打开文件数"><a href="#3、调整-work-进程最大打开文件数" class="headerlink" title="3、调整 work 进程最大打开文件数"></a>3、调整 work 进程最大打开文件数</h3><p>接下来调整配置 nginx 的 worker 进程的最大打开文件数，控制连接数的参数是 <code>worker_rlimit_nofile</code>，该值与 nginx 所在操作系统的最大打开文件数相关，也就是你 nginx 的 work 进程最大打开文件数必须小于或等于自身操作系统的最大打开文件数，要不然设置了也是没意义的。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先查看系统自身最大打开文件数</span></span><br><span class="line">ulimit -n</span><br><span class="line">65536</span><br></pre></td></tr></table></figure>
+
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">控制在系统最大打开文件数内即可</span></span><br><span class="line">worker_rlimit_nofile 65536;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意：</p>
+<h3 id="4、开启高效文件传输模式"><a href="#4、开启高效文件传输模式" class="headerlink" title="4、开启高效文件传输模式"></a>4、开启高效文件传输模式</h3><p><code>sendfile on|off</code> 参数用于启用高效文件传输模式，默认是 off 的，作用域：http、server、location。该参数通常结合 <code>tcp_nopush on|off</code> 参数和 <code>tcp_nodelay on|off</code> 来防止网络和磁盘 I&#x2F;O 阻塞，提升 nginx 效率。当开启 sendfile 后 <code>tcp_nopush on|off</code> 参数和 <code>tcp_nodelay on|off</code> 只能二选一，而且开启 sendfile 后默认启用的是 <code>tcp_nopush on</code>。</p>
+<ul>
+<li><strong>tcp_nopush on|off</strong>：该参数会启用 tcp_cork 方法，仅当 sendfile 开启后生效，其功能是：当应用程序收到数据包时不会马上传送出去，而是等到数据包最大时，才一次性的传输出去。这样解决了网络堵塞问题。</li>
+<li><strong>tcp_nodelay on|off</strong>：该参数会启用 tcp_nodelay 方法，其功能是：当应用程序收到数据包时会尽量发送小数据块，而不是等一定数据量满了之后才发送。这样解决了磁盘I&#x2F;O问题。</li>
+</ul>
+<p>如何选择？下面注释写得比较清楚</p>
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sendfile on;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解决网络拥塞问题</span></span><br><span class="line">tcp_nopush on;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解决磁盘I/O问题</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">tcp_nodelay on;</span></span><br></pre></td></tr></table></figure>
+<h3 id="5、限制文件上传大小"><a href="#5、限制文件上传大小" class="headerlink" title="5、限制文件上传大小"></a>5、限制文件上传大小</h3><p><code>限制文件上传大小</code> 指的是 <code>限制 HTTP 请求正文大小</code>，通过 <code>client_ max_ body_ Size</code> 参数设置。如果上传文件的大小超过此设置，则会响应 <code>413 Request Entity Too Large</code> 错误代码。如果服务器涉及上传文件的业务，就可以通过该参数来限制。</p>
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">client_max_body_Size 10m;</span><br></pre></td></tr></table></figure>
+
+<p>nginx 对上传文件大小默认为 1m 大小，如果很大，还要适当调整上传超时时间。</p>
+<ul>
+<li><strong>client_header_timeout</strong>：读取请求头的超时时间，默认60秒。若超过所设定的大小，返回 408 错误。</li>
+<li><strong>client_body_timeout</strong>：读取请求实体的超时时间，默认60秒。若超过所设定的大小，返回 413 错误。</li>
+</ul>
+<p>作为代理时的超时时间：</p>
+<ul>
+<li><strong>proxy_connect_timeout</strong>：HTTP 请求无法立即被容器（tomcat, netty 等）处理，被放在 nginx 的待处理池中等待被处理超时时间。默认为 60s，官方推荐最长不要超过 75s。</li>
+<li><strong>proxy_read_timeout</strong>：HTTP 请求被容器（tomcat, netty 等）处理完后，nginx 等待处理结果的时长，默认60秒。</li>
+<li><strong>proxy_send_timeout</strong>：HTTP 请求被容器（tomcat, netty 等）处理完后，把数据传返回给 nginx 的时长，默认60秒。</li>
+</ul>
+<p>最终配置参考：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">client_max_body_Size 10m;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其实以下参数你不配置，它都是默认生效的</span></span><br><span class="line">client_header_timeout 60;</span><br><span class="line">client_body_timeout 60;</span><br><span class="line">proxy_connect_timeout 60;</span><br><span class="line">proxy_read_timeout 60;</span><br><span class="line">proxy_send_timeout 60;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6、开启-gzip-压缩"><a href="#6、开启-gzip-压缩" class="headerlink" title="6、开启 gzip 压缩"></a>6、开启 gzip 压缩</h3><p>gzip 压缩模块提供了压缩文件内容的功能，在用户请求的内容发送到用户客户端之前，nginx 服务器会根据一些具体的策略执行压缩策略，从而节省网站的出口带宽，加快数据传输效率，提升用户体验。</p>
+<p><code>最好是在有大文件时启用它，因为它本身也会消耗CPU资源。</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">gzip  on;</span><br><span class="line">gzip_min_length  1k;</span><br><span class="line">gzip_buffers     4 16k;</span><br><span class="line">gzip_http_version 1.1;</span><br><span class="line">gzip_comp_level 9;</span><br><span class="line">gzip_types text/plain text/javascript application/javascript text/css application/xml application/json;</span><br><span class="line">gzip_disable &quot;MSIE [1-6]\.&quot;;</span><br><span class="line">gzip_vary on;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7、本地缓存静态资源"><a href="#7、本地缓存静态资源" class="headerlink" title="7、本地缓存静态资源"></a>7、本地缓存静态资源</h3><p>每个网站都有页面、图像和其他内容，这些内容在访问者在网站上的会话期间基本保持不变。现代网页上几乎 30% 的数据是静态的，应该缓存这些内容以提高 Nginx 的性能。</p>
+<p>优点：</p>
+<ul>
+<li>静态资源加载快：因为不经过 Nginx 连接请求；</li>
+<li>降低了 Nginx 的连接请求压力：可降低 Nginx 服务器负载。</li>
+</ul>
+<p><strong>如何在 Nginx 服务器上配置？</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">location ~* .(jpg|jpeg|png|gif|ico|css|js)$ &#123;</span><br><span class="line">    expires 365d;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">该语句将会在客户端（浏览器）请求后，将这些静态资源缓存于本地（浏览器），并且设置有效期365天</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="8、调整缓冲区大小"><a href="#8、调整缓冲区大小" class="headerlink" title="8、调整缓冲区大小"></a>8、调整缓冲区大小</h3><ul>
+<li><p><strong>Client_header_buffer_size</strong>：限制客户端（浏览器）请求头大小，一般设置为 1k 左右。如果（请求行 + 请求头）的大小如果没超过1k，则放行请求。如果（请求行 + 请求头）的大小如果超过1k，则以<code>large_client_header_buffers</code>配置为准决定是否放行。</p>
+</li>
+<li><p><strong>large_client_header_buffers</strong>：Client_header_buffer_size 的最大值。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">例如：</span></span><br><span class="line">large_client_header_buffers 2 1k</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">请求行不能超过1k，否则返回414错误代码</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">请求头不能超过1k，否则返回400错误代码</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">请求行+请求头不能超过2k（2*1k），否则报错</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Client_body_buffer_size</strong>：客户端（浏览器）在 web 网站上发布请求的缓冲区大小，一般设置 128k 左右。</p>
+</li>
+<li><p><strong>Client_max_body_size</strong>：客户端（浏览器）在 web 网站上发布请求的最大主体大小，比如设置为 10m，当超过该值将向客户端返回 <code>Request Entity Too Large</code> 错误。</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">client_header_buffer_size 1k；</span><br><span class="line">large_client_header_buffers 2 1k;  # 这里是2个1k的大小（即最大为2*1K=2K）</span><br><span class="line">client_body_buffer_size 128k；</span><br><span class="line">client_max_body_size 10m；</span><br></pre></td></tr></table></figure>
+
+<h3 id="9、尽可能少使用-if-检查-server-name-语句"><a href="#9、尽可能少使用-if-检查-server-name-语句" class="headerlink" title="9、尽可能少使用 if 检查 server_name 语句"></a>9、尽可能少使用 if 检查 server_name 语句</h3><p>你想想，每一个请求连接进来都要进行一次 if 判断，这势必会增加 web 服务器开销，尤其是在十万&#x2F;百万并发场景下。因此，你也可以在 if 语句层面来优化。</p>
+<p>例如：server_name 指定 hello.com 和 <a target="_blank" rel="noopener external nofollow noreferrer" href="http://www.hello.com/">www.hello.com</a> 两个域名，当 Nginx 收到请求时，无论请求的是哪个子域，如果始终对 if 指令进行评估，那效率都是很低的。</p>
+<ul>
+<li><p>低效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  server_name     hello.com www.hello.com;</span><br><span class="line">  if ($host = www.hello.com) &#123;</span><br><span class="line">    return   301 https://hello.com$request_uri;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>高效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    server_name      www.hello.com;</span><br><span class="line">    return           301 $scheme://hello.com$request_uri;</span><br><span class="line">    ## If you force your web traffic to use HTTPS:</span><br><span class="line">    # return 301 https://domain.com$request_uri;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="10、避免过多正则表达"><a href="#10、避免过多正则表达" class="headerlink" title="10、避免过多正则表达"></a>10、避免过多正则表达</h3><ul>
+<li><p>低效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">rewrite ^/(.*)$ https://example.com/$1 permanent;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">或</span></span><br><span class="line">rewrite ^ https://example.com$request_uri? permanent;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>高效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">return 301 https://example.com$request_uri;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$request_uri</span>就是完整url中刨去最前面<span class="variable">$host</span>剩下的部分</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">比如：http://www.baidu.com/test</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">那么<span class="variable">$request_uri</span>的值就是/test</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果只有：http://www.baidu.com，那么<span class="variable">$request_uri</span>的值就是/</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="11、return-代替-rewrite-实现重定向"><a href="#11、return-代替-rewrite-实现重定向" class="headerlink" title="11、return 代替 rewrite 实现重定向"></a>11、return 代替 rewrite 实现重定向</h3><ul>
+<li><p>低效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  ...</span><br><span class="line">  if ($host = api.domain.com) &#123;</span><br><span class="line">    rewrite     ^/(.*)$ http://example.com/$1 permanent;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>高效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  ...</span><br><span class="line">  if ($host = api.domain.com) &#123;</span><br><span class="line">    return      403;</span><br><span class="line">    ## or other examples:</span><br><span class="line">    ##   return    301 https://domain.com$request_uri;</span><br><span class="line">    ##   return    301 $scheme://$host$request_uri;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="12、使用-try-files-指令确认文件是否存在"><a href="#12、使用-try-files-指令确认文件是否存在" class="headerlink" title="12、使用 try_files 指令确认文件是否存在"></a>12、使用 try_files 指令确认文件是否存在</h3><ul>
+<li><p>低效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">root /var/www/example.com;</span><br><span class="line">location /images &#123;</span><br><span class="line">  if (-f $request_filename) &#123;</span><br><span class="line">    expires 30d;</span><br><span class="line">    break;</span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>高效率配置</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">  ...</span><br><span class="line">  root /var/www/example.com;</span><br><span class="line">  location /images &#123;</span><br><span class="line">    try_files $uri $uri/ =404;</span><br><span class="line">  ...</span><br><span class="line">  &#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">比如，我请求 http://www.hello.com/images  那<span class="variable">$uri</span>的值就是/images</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$uri</span>：Nginx 首先判断images是否是个文件且存不存在，如果是且存在则返回，否则继续<span class="variable">$uri</span>/判断</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="variable">$uri</span>/：Nginx 再次判断images/是否是个目录且存不存在，如果是且存在则返回，否则将返回404错误代码</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="13、设置-keepalive-timeout"><a href="#13、设置-keepalive-timeout" class="headerlink" title="13、设置 keepalive_timeout"></a>13、设置 keepalive_timeout</h3><p>一般地，在我们的 web 网站中，为了避免同一个客户长时间占用连接，造成资源浪费，可设置相应的超时时间，实现对连接访问时间的控制。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">keepalive_timeout 65 180</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一个参数值65：表示客户发送请求头的超时时间，服务器会在这个时间之后关闭连接</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第二个参数值180：表示请求体读超时时间，客户端（浏览器）会在这个时间后关闭连接</span></span><br></pre></td></tr></table></figure>
+
+<p>企业生产环境中，我们一般设置为该值就可以了（当然也需要根据实际情况来调整）。</p>
+<h3 id="14、TCP-backlog"><a href="#14、TCP-backlog" class="headerlink" title="14、TCP_ backlog"></a>14、TCP_ backlog</h3><p>在 TCP 的优化一节中，我们提到了<code>tcp_max_syn_backlog</code>参数，该参数为 Linux 内核级别，指的是 TCP 半连接队列长度，而我们的 web 服务，如： nginx、tomcat、Apache 的默认值均为 511，因此我们可以根据不同 web 服务进行调整。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server ｛</span><br><span class="line">    listen 8089 default backlog=1024;</span><br><span class="line">    server_name localhost;</span><br><span class="line">    ....</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+
+<h3 id="15、日志文件轮转"><a href="#15、日志文件轮转" class="headerlink" title="15、日志文件轮转"></a>15、日志文件轮转</h3><p>随着业务量的增加，web 服务的日志访问量也越来越大，久而久之将会耗尽系统磁盘空间。因此，日志轮转就显得非常重要了，有关日志轮转的相关知识的可查看我之前的博文<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/IT_ZRS/article/details/108418623?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522165166874716782425159797%2522%252C%2522scm%2522%253A%252220140713.130102334.pc%255Fblog.%2522%257D&request_id=165166874716782425159797&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~blog~first_rank_ecpm_v1~rank_v31_ecpm-1-108418623.nonecase&utm_term=%E6%97%A5%E5%BF%97%E8%BD%AE%E8%BD%AC&spm=1018.2226.3001.4450">《Linux系统之计划任务及日志轮转》</a>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编辑nginx轮转文件</span></span><br><span class="line">cat /etc/logrotate.d/nginx</span><br><span class="line"></span><br><span class="line">/data/nginx/logs/access.log &#123;</span><br><span class="line">    missingok   # 丢失不提醒</span><br><span class="line">    notifempty  # 空文件不轮转</span><br><span class="line">    maxsize 4G  # 只要到了4G日志大小就轮转</span><br><span class="line">    rotate 4    # 保留文件数</span><br><span class="line">    daily       # 每天轮转一次</span><br><span class="line">    create 0600 root root</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>日志轮转可配合计划任务来实现自动轮转！！</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/31a3358a.html">https://blog.rabcnops.cn/posts/articles/31a3358a.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a><a class="post-meta__tags" href="/tags/Nginx/">Nginx</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/articles/c1852d71.html" title="Nginx 安全优化"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Nginx 安全优化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/c1852d71.html" title="Nginx 安全优化"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-13</div><div class="title">Nginx 安全优化</div></div></a></div><div><a href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">Ansible 快速入门</div></div></a></div><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-31</div><div class="title">CentOS7 搭建 DHCP 服务</div></div></a></div><div><a href="/posts/articles/1c8d3a9.html" title="Ansible 部署 Wordpress"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-29</div><div class="title">Ansible 部署 Wordpress</div></div></a></div><div><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 基础操作快速入门</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">52</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">14</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">18</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn1"></i></a><a class="social-icon" href="tencent://Message/?Uin=2564395767&amp;websiteName=www.oicqzone.com&amp;Menu=yes" rel="external nofollow noreferrer" target="_blank" title="QQ"><i class="iconfont icon-QQ"></i></a><a class="social-icon" href="https://blog.rabcnops.cn/atom.xml" target="_blank" title="RSS"><i class="iconfont icon-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1%E3%80%81%E8%B0%83%E6%95%B4-worker-%E8%BF%9B%E7%A8%8B%E6%95%B0"><span class="toc-text">1、调整 worker 进程数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2%E3%80%81%E8%B0%83%E6%95%B4-worker-%E8%BF%9E%E6%8E%A5%E6%95%B0"><span class="toc-text">2、调整 worker 连接数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3%E3%80%81%E8%B0%83%E6%95%B4-work-%E8%BF%9B%E7%A8%8B%E6%9C%80%E5%A4%A7%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%E6%95%B0"><span class="toc-text">3、调整 work 进程最大打开文件数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4%E3%80%81%E5%BC%80%E5%90%AF%E9%AB%98%E6%95%88%E6%96%87%E4%BB%B6%E4%BC%A0%E8%BE%93%E6%A8%A1%E5%BC%8F"><span class="toc-text">4、开启高效文件传输模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5%E3%80%81%E9%99%90%E5%88%B6%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%A4%A7%E5%B0%8F"><span class="toc-text">5、限制文件上传大小</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6%E3%80%81%E5%BC%80%E5%90%AF-gzip-%E5%8E%8B%E7%BC%A9"><span class="toc-text">6、开启 gzip 压缩</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7%E3%80%81%E6%9C%AC%E5%9C%B0%E7%BC%93%E5%AD%98%E9%9D%99%E6%80%81%E8%B5%84%E6%BA%90"><span class="toc-text">7、本地缓存静态资源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8%E3%80%81%E8%B0%83%E6%95%B4%E7%BC%93%E5%86%B2%E5%8C%BA%E5%A4%A7%E5%B0%8F"><span class="toc-text">8、调整缓冲区大小</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9%E3%80%81%E5%B0%BD%E5%8F%AF%E8%83%BD%E5%B0%91%E4%BD%BF%E7%94%A8-if-%E6%A3%80%E6%9F%A5-server-name-%E8%AF%AD%E5%8F%A5"><span class="toc-text">9、尽可能少使用 if 检查 server_name 语句</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10%E3%80%81%E9%81%BF%E5%85%8D%E8%BF%87%E5%A4%9A%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE"><span class="toc-text">10、避免过多正则表达</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11%E3%80%81return-%E4%BB%A3%E6%9B%BF-rewrite-%E5%AE%9E%E7%8E%B0%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-text">11、return 代替 rewrite 实现重定向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12%E3%80%81%E4%BD%BF%E7%94%A8-try-files-%E6%8C%87%E4%BB%A4%E7%A1%AE%E8%AE%A4%E6%96%87%E4%BB%B6%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8"><span class="toc-text">12、使用 try_files 指令确认文件是否存在</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13%E3%80%81%E8%AE%BE%E7%BD%AE-keepalive-timeout"><span class="toc-text">13、设置 keepalive_timeout</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14%E3%80%81TCP-backlog"><span class="toc-text">14、TCP_ backlog</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15%E3%80%81%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E8%BD%AE%E8%BD%AC"><span class="toc-text">15、日志文件轮转</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/31a3358a.html" title="Nginx 性能优化"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 性能优化"/></a><div class="content"><a class="title" href="/posts/articles/31a3358a.html" title="Nginx 性能优化">Nginx 性能优化</a><time datetime="2023-04-13T02:51:14.000Z" title="发表于 2023-04-13 10:51:14">2023-04-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/c1852d71.html" title="Nginx 安全优化"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 安全优化"/></a><div class="content"><a class="title" href="/posts/articles/c1852d71.html" title="Nginx 安全优化">Nginx 安全优化</a><time datetime="2023-04-13T02:51:14.000Z" title="发表于 2023-04-13 10:51:14">2023-04-13</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/b808de0b.html" title="K8s 应用版本升级与回退"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="K8s 应用版本升级与回退"/></a><div class="content"><a class="title" href="/posts/articles/b808de0b.html" title="K8s 应用版本升级与回退">K8s 应用版本升级与回退</a><time datetime="2023-04-04T08:11:14.000Z" title="发表于 2023-04-04 16:11:14">2023-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/6d84ddb0.html" title="K8s 的 DNS 机制"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="K8s 的 DNS 机制"/></a><div class="content"><a class="title" href="/posts/articles/6d84ddb0.html" title="K8s 的 DNS 机制">K8s 的 DNS 机制</a><time datetime="2023-04-04T07:50:14.000Z" title="发表于 2023-04-04 15:50:14">2023-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/ed05778b.html" title="K8s Service 负载均衡底层分析"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221216162035975.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="K8s Service 负载均衡底层分析"/></a><div class="content"><a class="title" href="/posts/articles/ed05778b.html" title="K8s Service 负载均衡底层分析">K8s Service 负载均衡底层分析</a><time datetime="2023-04-04T07:30:14.000Z" title="发表于 2023-04-04 15:30:14">2023-04-04</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png')"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/31a3358a.html'
+    this.page.identifier = '/posts/articles/31a3358a.html'
+    this.page.title = 'Nginx 性能优化'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
