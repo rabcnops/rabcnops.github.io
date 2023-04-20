@@ -1,0 +1,430 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>你真理解 Linux 系统的平均负载吗？ | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Linux 系统平均负载解读。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="你真理解 Linux 系统的平均负载吗？">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/f026fcb9.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="Linux 系统平均负载解读。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png">
+<meta property="article:published_time" content="2023-04-20T09:12:00.000Z">
+<meta property="article:modified_time" content="2023-04-20T09:14:27.631Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/f026fcb9.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"文章发布于","messageNext":"天前，文章内容可能已经过期，请持续关注本博客最新文档！"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '你真理解 Linux 系统的平均负载吗？',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-04-20 17:14:27'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Rabcnops" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">23</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">你真理解 Linux 系统的平均负载吗？</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-20T09:12:00.000Z" title="发表于 2023-04-20 17:12:00">2023-04-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-20T09:14:27.631Z" title="更新于 2023-04-20 17:14:27">2023-04-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux-%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%90%E7%BB%B4%E5%AE%9E%E6%88%98/">Linux 服务器运维实战</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux-%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%90%E7%BB%B4%E5%AE%9E%E6%88%98/%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80%E8%BF%90%E7%BB%B4%E7%AF%87/">系统基础运维篇</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.4k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="你真理解 Linux 系统的平均负载吗？"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png" alt="image-20230420135405814"></p>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们经常用到 top、uptime 来查看系统的平均负载，那下图的这三个值的含义你真正理解了吗？</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420133044303.png" alt="image-20230420133044303"></p>
+<p><strong>平均负载是 CPU 使用率吗？</strong></p>
+<p>显然不是，平均负载指的是<code>单位时间内，系统处于“可运行状态”和“不可中断状态”的平均进程数</code>，即<code>平均活跃进程数</code>，它和 CPU 的使用率并没有直接关系。</p>
+<p><strong>什么是可运行状态？什么又是不可中断状态？</strong></p>
+<ul>
+<li><p><code>可运行状态</code>：正在使用 CPU 或正在等待 CPU 的调度的进程（如 R 状态的进程 - - Running&#x2F;Runnable）；</p>
+</li>
+<li><p><code>不可中断状态</code>：处于系统内核态关键流程中的进程，且这些流程是不可打断的（如 D 状态的进程）。</p>
+<blockquote>
+<p>比如：向磁盘写入数据，这个过程在未得到磁盘响应前一般是不允许中断的，否则将导致磁盘数据与进程数据不一致的问题。因此，不可中断状态实际上是系统对进程和硬件设备的一种保护机制。</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>因此，理想情况下就是每个 CPU 上都刚好运行着一个进程，这样每个 CPU 都得到了充分的利用。</strong></p>
+<p><strong>当平均负载为 2 时，意味着什么呢？</strong></p>
+<ul>
+<li>在只有 2 个 CPU 的系统上，意味着所有的 CPU 都刚好被完全占用；</li>
+<li>在 4 个 CPU 的系统上，意味着 CPU 有 50% 的空闲；</li>
+<li>而在只有 1 个 CPU 的系统上，则意味着有一半的进程竞争不到 CPU。</li>
+</ul>
+<h2 id="一、如何判断系统是否过载？"><a href="#一、如何判断系统是否过载？" class="headerlink" title="一、如何判断系统是否过载？"></a>一、如何判断系统是否过载？</h2><p>上面我们大体了解了什么是平均负载，那在实际工作中，如何判定某台服务器的平均负载过高呢？上面说到可通过 <code>top</code>、<code>uptime</code> 等命令来查看 Linux 系统的负载情况。</p>
+<p>理想情况下，平均负载等于 CPU 个数，因此，判断负载是否过高，首先要知道你当前系统有几个 CPU，可通过 <code>top</code> 命令 + 快捷键 <code>1</code> 查看 CPU  个数：如下图，我当前的 Linux 系统只有 1 个 CPU（%Cpu0）。</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420144125852.png" alt="image-20230420144125852"></p>
+<p>或通过 shell 命令查看也是可以的：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">grep <span class="string">&#x27;model name&#x27;</span> /proc/cpuinfo | <span class="built_in">wc</span> -l</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420144308842.png" alt="image-20230420144308842"></p>
+<p>有了 CPU 个数，我们就可以判断：当平均负载 &gt; CPU 个数时，系统就已经过载。在 Linux 中，系统给我们提供了三个值，这三个值分别表示过去 1 分钟、5 分钟、15 分钟的系统平均负载。那我们主要看哪一个值呢？答案是都要看，这三个值是作为变化趋势的参考，仅凭一个值是很难准确判断的。</p>
+<ul>
+<li>如果 1 分钟、5 分钟、15 分钟的三个值基本相同（或者相差不大），那就说明系统负载很稳定；</li>
+<li>但如果 1 分钟的值远小于 15 分钟的值，就说明系统最近 1 分钟的负载在减少，而过去 15 分钟内却有很大的负载；</li>
+<li>反过来，如果 1 分钟的值远大于 15 分钟的值，就说明近 1 分钟的负载在增加，这种增加可能是临时性的（因为就短短的 1 分钟），也有持续增加或逐步减少的可能，因此这种情况需要持续观察。</li>
+</ul>
+<p>再举个例子：假设在单个 CPU 的系统上有 1.73，0.60，7.98 的负载，那就说明过去 1 分钟内系统有 73% 的过载、15 分钟内系统有 698% 的超载，但是从整体来看，系统的负载在降低。</p>
+<p><strong>那么，在实际生产环境中，平均负载多高时，需要我们重点关注呢？</strong></p>
+<p>一般，<strong>当平均负载高于 CPU 数量 70% 的时候</strong>，就应该分析排查负载高的问题了。因为负载过高，就可能导致进程响应变慢，进而影响服务的正常功能。</p>
+<p><mark>因此，对于系统平均负载是否过载的问题，我们最好是通过 Zabbix 或 Prometheus 等监控工具监控起来，这样便于观察系统平均负载在某个时间段的变化趋势。</mark></p>
+<h2 id="二、平均负载与-CPU-使用率关联"><a href="#二、平均负载与-CPU-使用率关联" class="headerlink" title="二、平均负载与 CPU 使用率关联"></a>二、平均负载与 CPU 使用率关联</h2><p>前面说到，平均负载与 CPU 使用率并不是同一个 <code>“东西”</code>，是有一定的区别和联系的。一般在实际生产中会遇到这三种情况：CPU 使用率高系统平均负载低、CPU 使用率低系统平均负载高、CPU 使用率与系统平均负载都高。</p>
+<p>其实，这是在特定场景下产生的不同现象：</p>
+<ul>
+<li>对于 CPU 密集型进程而言：使用大量 CPU 会导致平均负载过高。此时就是 CPU 使用率高平均负载也会过高的情况；</li>
+<li>对于 I&#x2F;O 密集型进程而言：等待 I&#x2F;O 会导致平均负载过高，但 CPU 不一定很高。此时就是 CPU 使用率低平均负载过高的情况；</li>
+<li>大量等待 CPU 的进程调度也会导致平均负载升高，此时的 CPU 使用率也会比较高。</li>
+</ul>
+<p><strong>什么是 CPU 密集型？什么又是 I&#x2F;O 密集型？</strong></p>
+<blockquote>
+<p>参考：<a target="_blank" rel="noopener external nofollow noreferrer" href="https://blog.csdn.net/youanyyou/article/details/78990156">什么是CPU密集型、IO密集型？</a></p>
+</blockquote>
+<ul>
+<li><p><code>CPU 密集型（CPU-bound）</code>：也叫计算密集型，指的是系统的硬盘、内存性能相对CPU要好很多，此时，系统运作大部分的状况是 CPU Loading 100%，CPU 要读&#x2F;写I&#x2F;O(硬盘&#x2F;内存)，I&#x2F;O 在很短的时间就可以完成，而 CPU 还有许多运算要处理，CPU Loading 很高。</p>
+<p>在多重程序系统中，大部份时间用来做计算、逻辑判断等 CPU 动作的程序称之 CPU bound。例如一个计算圆周率至小数点一千位以下的程序，在执行的过程当中绝大部份时间用在三角函数和开根号的计算，便是属于 CPU bound 的程序。</p>
+<p>CPU bound 的程序一般而言 CPU 占用率相当高。这可能是因为任务本身不太需要访问 I&#x2F;O 设备，也可能是因为程序是多线程实现因此屏蔽掉了等待 I&#x2F;O 的时间。</p>
+</li>
+<li><p><code>IO 密集型（I/O bound）</code>：IO 密集型指的是系统的 CPU 性能相对硬盘、内存要好很多，此时，系统运作大部分的状况是 CPU 在等 I&#x2F;O (硬盘&#x2F;内存) 的读&#x2F;写操作，此时 CPU Loading 并不高。</p>
+<p>I&#x2F;O bound 的程序一般在达到性能极限时，CPU 占用率仍然较低。这可能是因为任务本身需要大量 I&#x2F;O 操作，而 Pipeline 做得不是很好，没有充分利用处理器能力。</p>
+</li>
+</ul>
+<h2 id="三、案例分析"><a href="#三、案例分析" class="headerlink" title="三、案例分析"></a>三、案例分析</h2><p>准备实现所需环境：</p>
+<ul>
+<li>Linux 系统：CentOS 7.9 2C&#x2F;4G</li>
+<li>压测工具：stress</li>
+<li>性能分析工具：sysstat（包含 mpstat、pidstat 等工具）</li>
+</ul>
+<p>安装相关工具：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y stress sysstat</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-1-CPU-密集型进程"><a href="#3-1-CPU-密集型进程" class="headerlink" title="3.1 CPU 密集型进程"></a>3.1 CPU 密集型进程</h3><p>1、终端1 - - 压测：模拟一个进程 CPU 使用率 100% 的场景</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stress --cpu 1 --<span class="built_in">timeout</span> 600</span><br></pre></td></tr></table></figure>
+
+<p>2、终端2 - - 查看负载：运行 uptime 查看系统平均负载变化情况</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">watch -d <span class="built_in">uptime</span></span><br><span class="line"><span class="comment"># -d 参数表示高亮显示变化的区域</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420162317536.png" alt="image-20230420162317536"></p>
+<p>3、终端3 - - 查看 CPU 使用率：运行 mpstat 查看 CPU 使用率的变化情况</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mpstat -P ALL 5</span><br><span class="line"><span class="comment"># -P ALL 表示监控所有 CPU，后面数字 5 表示间隔 5 秒后输出一组数据</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420160456532.png" alt="image-20230420160456532"></p>
+<p>输出结果可见：%Cpu1 的使用率基本上也是 100% 了。</p>
+<p>那么，到底是哪个进程导致了 CPU 使用率为 100% 呢？可以使用 <code>pidstat</code> 来查询：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pidstat -u 5 1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 间隔 5 秒后输出一组数据</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420161018814.png" alt="image-20230420161018814"></p>
+<p>Command 字段就是对应的执行程序。</p>
+<p>当然，方法有很多，你也可以通过 <code>top + C + P</code> 来查看占用 CPU 的程序，如下图：</p>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420161231638.png" alt="image-20230420161231638"></p>
+<h3 id="3-2-I-x2F-O-密集型进程"><a href="#3-2-I-x2F-O-密集型进程" class="headerlink" title="3.2 I&#x2F;O 密集型进程"></a>3.2 I&#x2F;O 密集型进程</h3><p>1、同理进行 I&#x2F;O 测试</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stress -i 1 --<span class="built_in">timeout</span> 600</span><br></pre></td></tr></table></figure>
+
+<p>2、uptime 查看系统平均负载变化情况</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch -d <span class="built_in">uptime</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420162638463.png" alt="image-20230420162638463"></p>
+<p>3、mpstat 查看 CPU 使用率的变化情况</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mpstat -P ALL 5</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420162908212.png" alt="image-20230420162908212"></p>
+<p>可见，其中一个 CPU 的系统 CPU 使用率升高，但并不是因为 <code>iowait</code>  导致（但实际场景中一般会因为 IO 等待导致），说明系统 IO 还未出现瓶颈。</p>
+<p>查看是由那个进程导致的系统层 CPU 使用率过高的方法同上！</p>
+<h3 id="3-3-大量进程的场景"><a href="#3-3-大量进程的场景" class="headerlink" title="3.3 大量进程的场景"></a>3.3 大量进程的场景</h3><p>当系统中运行进程超出 CPU 运行能力时，就会出现等待 CPU 的进程。</p>
+<p>1、模拟 8 个进程使用 CPU 的场景</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stress --cpu 8 --<span class="built_in">timeout</span> 600</span><br></pre></td></tr></table></figure>
+
+<p>2、查看系统平均负载</p>
+<blockquote>
+<p>由于系统只有 2 个 CPU，明显比 8 个进程要少得多，因而，系统的 CPU 处于严重过载状态，平均负载高达 7.23。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">watch -d <span class="built_in">uptime</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420165023013.png" alt="image-20230420165023013"></p>
+<p>3、查看 CPU 使用率的变化情况</p>
+<blockquote>
+<p>这两个 CPU 几乎都跑满了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420165117693.png" alt="image-20230420165117693"></p>
+<p>查看导致 CPU 过高的进程</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pidstat -u 5 1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>这 8 个进程几乎竞争到了相同的 CPU，整体算下来严重过载了。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420165216815.png" alt="image-20230420165216815"></p>
+<p>由于 CentOS 没有 iowait 字段，我换到 ubuntu 去看看效果：</p>
+<blockquote>
+<p>Linux：Ubuntu 20 1C 2G</p>
+<p>可见，8 个进程在争抢 1 个 CPU，每个进程等待 CPU 的时间（也就是代码块中的 %wait 列）高达 87%。这些超出 CPU 计算能力的进程，最终导致 CPU 过载。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pidstat -u 5 1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420170058200.png" alt="image-20230420170058200"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>平均负载高有可能是 CPU 密集型进程导致的；</li>
+<li>平均负载高并不一定代表 CPU 使用率高，还有可能是 I&#x2F;O 更繁忙了；</li>
+<li>当发现负载高的时候，你可以使用 mpstat、pidstat 等工具，辅助分析负载的来源。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/f026fcb9.html">https://blog.rabcnops.cn/posts/articles/f026fcb9.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Redis 6.0+ 的 ACL 机制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/1c8d3a9.html" title="Ansible 部署 Wordpress"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-29</div><div class="title">Ansible 部署 Wordpress</div></div></a></div><div><a href="/posts/articles/c2464361.html" title="Jenkins 实现 Gitlab API 调用及共享库应用"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/2d697c8b26a7d91dc044f623e7f80f4a.jpeg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-07-22</div><div class="title">Jenkins 实现 Gitlab API 调用及共享库应用</div></div></a></div><div><a href="/posts/articles/7fbc334.html" title="Ansible 快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/timg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-23</div><div class="title">Ansible 快速入门</div></div></a></div><div><a href="/posts/articles/7839211d.html" title="CentOS7 搭建 DHCP 服务"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230314151216808.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-03-31</div><div class="title">CentOS7 搭建 DHCP 服务</div></div></a></div><div><a href="/posts/articles/ad1bd1bd.html" title="Gitlab 基础操作快速入门"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 基础操作快速入门</div></div></a></div><div><a href="/posts/articles/7255efaf.html" title="Gitlab 备份与恢复"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/R-C.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-23</div><div class="title">Gitlab 备份与恢复</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">56</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">23</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn1"></i></a><a class="social-icon" href="tencent://Message/?Uin=2564395767&amp;websiteName=www.oicqzone.com&amp;Menu=yes" rel="external nofollow noreferrer" target="_blank" title="QQ"><i class="iconfont icon-QQ"></i></a><a class="social-icon" href="https://blog.rabcnops.cn/atom.xml" target="_blank" title="RSS"><i class="iconfont icon-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%A6%82%E4%BD%95%E5%88%A4%E6%96%AD%E7%B3%BB%E7%BB%9F%E6%98%AF%E5%90%A6%E8%BF%87%E8%BD%BD%EF%BC%9F"><span class="toc-text">一、如何判断系统是否过载？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%B9%B3%E5%9D%87%E8%B4%9F%E8%BD%BD%E4%B8%8E-CPU-%E4%BD%BF%E7%94%A8%E7%8E%87%E5%85%B3%E8%81%94"><span class="toc-text">二、平均负载与 CPU 使用率关联</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%A1%88%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-text">三、案例分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-CPU-%E5%AF%86%E9%9B%86%E5%9E%8B%E8%BF%9B%E7%A8%8B"><span class="toc-text">3.1 CPU 密集型进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-I-x2F-O-%E5%AF%86%E9%9B%86%E5%9E%8B%E8%BF%9B%E7%A8%8B"><span class="toc-text">3.2 I&#x2F;O 密集型进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E5%A4%A7%E9%87%8F%E8%BF%9B%E7%A8%8B%E7%9A%84%E5%9C%BA%E6%99%AF"><span class="toc-text">3.3 大量进程的场景</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/f026fcb9.html" title="你真理解 Linux 系统的平均负载吗？"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="你真理解 Linux 系统的平均负载吗？"/></a><div class="content"><a class="title" href="/posts/articles/f026fcb9.html" title="你真理解 Linux 系统的平均负载吗？">你真理解 Linux 系统的平均负载吗？</a><time datetime="2023-04-20T09:12:00.000Z" title="发表于 2023-04-20 17:12:00">2023-04-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis 6.0+ 的 ACL 机制"/></a><div class="content"><a class="title" href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制">Redis 6.0+ 的 ACL 机制</a><time datetime="2023-04-19T14:00:00.000Z" title="发表于 2023-04-19 22:00:00">2023-04-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/a20318db.html" title="如何将 Linux 系统时区设置为 CST ？"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230419162034139.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何将 Linux 系统时区设置为 CST ？"/></a><div class="content"><a class="title" href="/posts/articles/a20318db.html" title="如何将 Linux 系统时区设置为 CST ？">如何将 Linux 系统时区设置为 CST ？</a><time datetime="2023-04-19T08:27:14.000Z" title="发表于 2023-04-19 16:27:14">2023-04-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/f96953ab.html" title="Linux 用户如何与系统内核通信？"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/v2-7a788c9f21efafc861328add1802a614_720w.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux 用户如何与系统内核通信？"/></a><div class="content"><a class="title" href="/posts/articles/f96953ab.html" title="Linux 用户如何与系统内核通信？">Linux 用户如何与系统内核通信？</a><time datetime="2023-04-18T02:33:14.000Z" title="发表于 2023-04-18 10:33:14">2023-04-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/c1852d71.html" title="Nginx 安全优化"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230413105645046.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Nginx 安全优化"/></a><div class="content"><a class="title" href="/posts/articles/c1852d71.html" title="Nginx 安全优化">Nginx 安全优化</a><time datetime="2023-04-13T02:51:14.000Z" title="发表于 2023-04-13 10:51:14">2023-04-13</time></div></div></div></div></div></div></main><footer id="footer" style="background: #14161a"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2023 By Rab</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/f026fcb9.html'
+    this.page.identifier = '/posts/articles/f026fcb9.html'
+    this.page.title = '你真理解 Linux 系统的平均负载吗？'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
