@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Hexo + GitHub 个人博客部署 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Hexo + GitHub 个人博客部署，包括自定义个人域名 + SSL 数字证书的详细配置。">
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Hexo + GitHub 个人博客部署 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Hexo + GitHub 个人博客部署，包括自定义个人域名 + SSL 数字证书的详细配置。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Hexo + GitHub 个人博客部署">
 <meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/2d762e62.html">
@@ -143,12 +143,8 @@
       }
       const t = saveToLocal.get('theme')
     
-          const now = new Date()
-          const hour = now.getHours()
-          const isNight = hour <= 6 || hour >= 18
-          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          if (t === 'dark') activateDarkMode()
           else if (t === 'light') activateLightMode()
-          else activateDarkMode()
         
       const asideStatus = saveToLocal.get('aside-status')
       if (asideStatus !== undefined) {
