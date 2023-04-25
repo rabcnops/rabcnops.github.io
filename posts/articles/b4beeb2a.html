@@ -1,0 +1,378 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"><title>Redis 6.0+ 的 ACL 常用操作指令 | Rabcnops</title><meta name="author" content="Rab"><meta name="copyright" content="Rab"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#0d0d0d"><meta name="description" content="Redis 6.0+ 的 ACL 常用操作指令。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis 6.0+ 的 ACL 常用操作指令">
+<meta property="og:url" content="https://blog.rabcnops.cn/posts/articles/b4beeb2a.html">
+<meta property="og:site_name" content="Rabcnops">
+<meta property="og:description" content="Redis 6.0+ 的 ACL 常用操作指令。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png">
+<meta property="article:published_time" content="2023-04-25T07:00:00.000Z">
+<meta property="article:modified_time" content="2023-04-25T07:39:25.295Z">
+<meta property="article:author" content="Rab">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png"><link rel="shortcut icon" href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg"><link rel="canonical" href="https://blog.rabcnops.cn/posts/articles/b4beeb2a.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta name="google-site-verification" content="ChZGTmJgK6Cd-KcODCRca2hnXQkjF16b5ykmjM1Anl8"/><meta name="baidu-site-verification" content="codeva-VkkS25uSFS"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"文章发布于","messageNext":"天前，文章内容可能已经过期，请持续关注本博客最新文档！"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":300},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Rab","link":"链接: ","source":"来源: Rabcnops","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  }
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Redis 6.0+ 的 ACL 常用操作指令',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2023-04-25 15:39:25'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/iconfont.css"><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Rabcnops" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">59</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg fixed" id="page-header" style="background-image: url('https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png')"><nav id="nav"><span id="blog-info"><a href="/" title="Rabcnops"><span class="site-name">Rabcnops</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw iconfont icon-mingpian2"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);" rel="external nofollow noreferrer"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Redis 6.0+ 的 ACL 常用操作指令</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-04-25T07:00:00.000Z" title="发表于 2023-04-25 15:00:00">2023-04-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-04-25T07:39:25.295Z" title="更新于 2023-04-25 15:39:25">2023-04-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/">非关系型数据库</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/%E9%9D%9E%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/Redis/">Redis</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">498</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>1分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Redis 6.0+ 的 ACL 常用操作指令"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" alt="Redis Encryption"></p>
+<hr>
+<p>关于 redis 6.0+ 的 ACL 机制与基本配置在<a href="https://blog.rabcnops.cn/posts/articles/464f6e46.html">《Redis 6.0+ 的 ACL 机制》</a>一文中已经有提到，现在列举一些与 ACL 相关常用的指令。</p>
+<p><strong>1、查看当前登录用户</strong></p>
+<blockquote>
+<p>如果你是这样登录的，默认就是 default 用户：</p>
+<p>redis-cli -p 7001</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ACL WHOAMI</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425144116317.png" alt="image-20230425144116317"></p>
+<p><strong>2、创建用户</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl setuser rab</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425121649936.png" alt="image-20230425121649936"></p>
+<blockquote>
+<p>不设置密码与权限，则默认没有密码没有任何权限，且用户处于未激活状态（off），此时用户不可登录。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425121933381.png" alt="image-20230425121933381"></p>
+<p><strong>3、启用（激活）用户</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl setuser rab on</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425122108069.png" alt="image-20230425122108069"></p>
+<p><strong>4、给用户增加密码</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl setuser rab on &gt;Zhurs@2023!</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425143800401.png" alt="image-20230425143800401"></p>
+<p><strong>5、查看命令分类</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl <span class="built_in">cat</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425152710868.png" alt="image-20230425152710868"></p>
+<p>查看某个分类具体可以执行哪些命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl <span class="built_in">cat</span> slow</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425152907538.png" alt="image-20230425152907538"></p>
+<p><strong>6、给用户设置权限</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">acl setuser rab on &gt;Zhurs@2023! ~* +@all</span><br><span class="line"></span><br><span class="line"><span class="comment"># rab 用户对所有的 key 具备所有权限</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425144500649.png" alt="image-20230425144500649"></p>
+<blockquote>
+<p>查看用户权限</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl list</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425144615971.png" alt="image-20230425144615971"></p>
+<blockquote>
+<p>设置对指定 key 拥有指定的权限</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">acl setuser rab on &gt;Zhurs@2023! ~dum* -@all +<span class="built_in">set</span> +get</span><br><span class="line"></span><br><span class="line"><span class="comment"># rab 用户对 dum 开头的 key 具备 set、get 权限</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425150207114.png" alt="image-20230425150207114"></p>
+<p><strong>7、列出所有用户</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">acl list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 入下图，共三个用户</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425150020060.png" alt="image-20230425150020060"></p>
+<p><strong>8、删除用户</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl deluser rab</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425145717048.png" alt="image-20230425145717048"></p>
+<blockquote>
+<p>再次查看用户列表，发现用户已经被删除。</p>
+</blockquote>
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425145749678.png" alt="image-20230425145749678"></p>
+<p><mark>以上的设置，如创建用户、给用户授权等操作都是在命令行（终端执行），那我们如何持久化这些设置呢？通过外部 aclfile 文件来存储这些信息，具体操作如下，aclfile 如何配置？在前面的文章中有具体演示。</mark></p>
+<p>比如，先创建一个用户并授权：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">acl setuser tom on &gt;Zhurs@2023! ~* +@all</span><br><span class="line"></span><br><span class="line"><span class="comment"># 可见，下图中有4个用户</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425150754669.png" alt="image-20230425150754669"></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acl sava</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425151005484.png" alt="image-20230425151005484"></p>
+<p>最后去 aclfile 文件去查看是否有用户信息记录：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> users.acl</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230425151203149.png" alt="image-20230425151203149"></p>
+<p><strong>小结：</strong></p>
+<ul>
+<li>关于更多 ACL 命令，我们可以通过 ACL HELP 去查看；</li>
+<li>acl 的持久化方式我们可以这样操作：<ul>
+<li>登录集群，通过 acl save 指令来持久化；</li>
+<li>直接在 aclfile 文件中添加用户相关信息（包括权限等）。</li>
+</ul>
+</li>
+</ul>
+<p>—END</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn">Rab</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://blog.rabcnops.cn/posts/articles/b4beeb2a.html">https://blog.rabcnops.cn/posts/articles/b4beeb2a.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="external nofollow noreferrer" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://blog.rabcnops.cn" target="_blank">Rabcnops</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Redis/">Redis</a></div><div class="post_share"><div class="social-share" data-image="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="post-reward"><div class="reward-button"><i class="fas fa-qrcode"></i> 打赏</div><div class="reward-main"><ul class="reward-all"><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/wechat.png" alt="微信"/></a><div class="post-qr-code-desc">微信</div></li><li class="reward-item"><a href="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" rel="external nofollow noreferrer" target="_blank"><img class="post-qr-code-img" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/alipay.png" alt="支付宝"/></a><div class="post-qr-code-desc">支付宝</div></li></ul></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/posts/articles/fe7524c5.html" title="如何理解 Linux 的 CPU 上下文切换？（连载）"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/linux-protection-rings.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">如何理解 Linux 的 CPU 上下文切换？（连载）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制"><img class="cover" src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-04-19</div><div class="title">Redis 6.0+ 的 ACL 机制</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div><div id="comment-switch"><span class="first-comment">Livere</span><span class="switch-btn"></span><span class="second-comment">Disqus</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC81ODIzNS8zNDY5OA=="></div></div><div><div id="disqus_thread"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/rabcnops.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Rab</div><div class="author-info__description">专注于云计算/云原生/开发。</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">59</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">15</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">25</div></a></div><a id="card-info-btn" target="_blank" rel="noopener external nofollow noreferrer" href="https://github.com/rabcnops/"><i class="fab fa-github"></i><span>GitHub</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:zhurse@163.com" rel="external nofollow noreferrer" target="_blank" title="Email"><i class="iconfont icon-minutemailer"></i></a><a class="social-icon" href="https://blog.csdn.net/IT_ZRS" rel="external nofollow noreferrer" target="_blank" title="CSDN"><i class="iconfont icon-csdn1"></i></a><a class="social-icon" href="tencent://Message/?Uin=2564395767&amp;websiteName=www.oicqzone.com&amp;Menu=yes" rel="external nofollow noreferrer" target="_blank" title="QQ"><i class="iconfont icon-QQ"></i></a><a class="social-icon" href="https://blog.rabcnops.cn/atom.xml" target="_blank" title="RSS"><i class="iconfont icon-rss"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">2023/03/24 开通个人博客系统，会同步 CSDN 内容。</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/b4beeb2a.html" title="Redis 6.0+ 的 ACL 常用操作指令"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis 6.0+ 的 ACL 常用操作指令"/></a><div class="content"><a class="title" href="/posts/articles/b4beeb2a.html" title="Redis 6.0+ 的 ACL 常用操作指令">Redis 6.0+ 的 ACL 常用操作指令</a><time datetime="2023-04-25T07:00:00.000Z" title="发表于 2023-04-25 15:00:00">2023-04-25</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/fe7524c5.html" title="如何理解 Linux 的 CPU 上下文切换？（连载）"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/linux-protection-rings.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何理解 Linux 的 CPU 上下文切换？（连载）"/></a><div class="content"><a class="title" href="/posts/articles/fe7524c5.html" title="如何理解 Linux 的 CPU 上下文切换？（连载）">如何理解 Linux 的 CPU 上下文切换？（连载）</a><time datetime="2023-04-24T10:20:00.000Z" title="发表于 2023-04-24 18:20:00">2023-04-24</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/371209c6.html" title="如何理解 Linux 的 CPU 上下文切换？"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/linux-protection-rings.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="如何理解 Linux 的 CPU 上下文切换？"/></a><div class="content"><a class="title" href="/posts/articles/371209c6.html" title="如何理解 Linux 的 CPU 上下文切换？">如何理解 Linux 的 CPU 上下文切换？</a><time datetime="2023-04-23T04:12:00.000Z" title="发表于 2023-04-23 12:12:00">2023-04-23</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/f026fcb9.html" title="你真理解 Linux 系统的平均负载吗？"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230420135405814.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="你真理解 Linux 系统的平均负载吗？"/></a><div class="content"><a class="title" href="/posts/articles/f026fcb9.html" title="你真理解 Linux 系统的平均负载吗？">你真理解 Linux 系统的平均负载吗？</a><time datetime="2023-04-20T09:12:00.000Z" title="发表于 2023-04-20 17:12:00">2023-04-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制"><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/Screenshot-2022-09-28-135602.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Redis 6.0+ 的 ACL 机制"/></a><div class="content"><a class="title" href="/posts/articles/464f6e46.html" title="Redis 6.0+ 的 ACL 机制">Redis 6.0+ 的 ACL 机制</a><time datetime="2023-04-19T14:00:00.000Z" title="发表于 2023-04-19 22:00:00">2023-04-19</time></div></div></div></div></div></div></main><footer id="footer" style="background: #14161a"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2023 By Rab</div><div class="footer_custom_text">Hi, welcome to my <a href="https://blog.rabcnops.cn/">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script>function loadDisqus () {
+  var disqus_config = function () {
+    this.page.url = 'https://blog.rabcnops.cn/posts/articles/b4beeb2a.html'
+    this.page.identifier = '/posts/articles/b4beeb2a.html'
+    this.page.title = 'Redis 6.0+ 的 ACL 常用操作指令'
+  };
+
+  window.disqusReset = () => {
+    DISQUS.reset({
+      reload: true,
+      config: disqus_config
+    })
+  }
+
+  if (window.DISQUS) disqusReset()
+  else {
+    (function() { 
+      var d = document, s = d.createElement('script');
+      s.src = 'https://.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  }
+
+  document.getElementById('darkmode').addEventListener('click', () => {
+    setTimeout(() => window.disqusReset(), 200)
+  })
+}
+
+if ('Livere' === 'Disqus' || !false) {
+  if (false) btf.loadComment(document.getElementById('disqus_thread'), loadDisqus)
+  else loadDisqus()
+} else {
+  function loadOtherComment () {
+    loadDisqus()
+  }
+}
+</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></body></html>
