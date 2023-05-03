@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3979977 */
-  src: url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.woff2?t=1680191659381') format('woff2'),
-       url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.woff?t=1680191659381') format('woff'),
-       url('//at.alicdn.com/t/c/font_3979977_y1mz1s3hnv.ttf?t=1680191659381') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.woff2?t=1682520082545') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.woff?t=1682520082545') format('woff'),
+       url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.ttf?t=1682520082545') format('truetype');
 }
 
 .iconfont {
@@ -13,8 +13,9 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-QQ1:before {
-  content: "\e610";
+.icon-QQ2:before {
+  content: "\e667";
+  color: red;
   /* 修改大小 */
   font-size: 24px;
 }
@@ -23,7 +24,7 @@
   content: "\e882";
   color: red;
   /* 修改大小 */
-  font-size: 24px;
+  font-size: 25px;
 }
 
 .icon-rss:before {
