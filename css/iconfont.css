@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 3979977 */
-  src: url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.woff2?t=1682520082545') format('woff2'),
-       url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.woff?t=1682520082545') format('woff'),
-       url('//at.alicdn.com/t/c/font_3979977_25q93jzuxbuh.ttf?t=1682520082545') format('truetype');
+  src: url('//at.alicdn.com/t/c/font_3979977_g93yz090bdv.woff2?t=1683455474722') format('woff2'),
+       url('//at.alicdn.com/t/c/font_3979977_g93yz090bdv.woff?t=1683455474722') format('woff'),
+       url('//at.alicdn.com/t/c/font_3979977_g93yz090bdv.ttf?t=1683455474722') format('truetype');
 }
 
 .iconfont {
@@ -13,11 +13,62 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-ziyuan3:before {
+  content: "\e67d";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-youqinglianjie:before {
+  content: "\e67f";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-tag:before {
+  content: "\e60a";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-fenlei:before {
+  content: "\e60b";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-guidang:before {
+  content: "\e6b9";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-lianjie_URL:before {
+  content: "\e668";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-lianjie_connect:before {
+  content: "\e601";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-shouye:before {
+  content: "\100a6";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
+.icon-linedesign-12:before {
+  content: "\e671";
+  /* 修改大小 */
+  font-size: 15px;
+}
+
 .icon-QQ2:before {
   content: "\e667";
-  color: red;
-  /* 修改大小 */
-  font-size: 24px;
 }
 
 .icon-QQ:before {
@@ -40,14 +91,6 @@
   font-size: 15px;
 }
 
-.icon-csdn2:before {
-  content: "\e60c";
-  /* 修改颜色 */
-  color: red;
-  /* 修改大小 */
-  font-size: 21px;
-}
-
 .icon-minutemailer:before {
   content: "\e64c";
   color: #1296db;
@@ -61,23 +104,3 @@
   /* 修改大小 */
   font-size: 21px;
 }
-
-.icon-yonghu1:before {
-  content: "\e660";
-  /* 修改大小 */
-  /*font-size: 10px;*/
-}
-
-.icon-csdn:before {
-  content: "\e639";
-  color: red;
-  /* 修改大小 */
-  font-size: 21px;
-}
-
-.icon-yonghu:before {
-  content: "\e638";
-  /* 修改大小 */
-  /*font-size: 10px;*/
-}
-
