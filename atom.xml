@@ -6,7 +6,7 @@
   <link href="https://blog.rabcnops.cn/atom.xml" rel="self"/>
   
   <link href="https://blog.rabcnops.cn/"/>
-  <updated>2023-06-07T08:21:10.107Z</updated>
+  <updated>2023-06-14T12:24:06.866Z</updated>
   <id>https://blog.rabcnops.cn/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>官方都不告诉你的 Windows ISO 下载方式</title>
+    <link href="https://blog.rabcnops.cn/posts/articles/29a76d20.html"/>
+    <id>https://blog.rabcnops.cn/posts/articles/29a76d20.html</id>
+    <published>2023-06-14T12:20:00.000Z</published>
+    <updated>2023-06-14T12:24:06.866Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614183145530.png" alt="image-20230614183145530"></p><hr><h2 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h2><p>我们都知道，在日常生活中，经常会遇到各种操作系统的安装，如 Windows、Linux 等，一般都会通过 ISO 来安装。而在很多第三方地址中下载的 ISO 镜像通常会捆绑一些<code>流氓</code>软件，很是难受。那官方的纯净 ISO 包怎么下载呢？接着往下看。</p><p>搜索官方 ISO 镜像文件，点击进去你会发现：</p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614175615509.png" alt="image-20230614175615509"></p><p>并没有 ISO 下载的按钮，只有<code>在线升级/PE 媒介制作</code>下载的按钮，如下图：</p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614175929311.png" alt="image-20230614175929311"></p><p>那这个时候怎么调出 ISO 的下载按钮呢？接下来演示一下。</p><h2 id="二、下载"><a href="#二、下载" class="headerlink" title="二、下载"></a>二、下载</h2><p><strong>1、F12 进入开发者模式</strong></p><blockquote><p>下图第二步选择完成后，需要刷新一下当前网页，才会显示<code>选择版本</code>这个选项。</p><p>版本选择这里，我们选择 <code>multi-edition ISO</code> 这个版本，因为这个版本**集成了专业版和家庭版。**如果是在当前系统下升级安装，安装程序自动选择与当前系统版本对应得版本安装。如果是全新安装，安装开始时可以手动选择安装专业版还是家庭版。</p></blockquote><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614181055343.png" alt="image-20230614181055343"></p><p><strong>2、版本选择完成后点击 <code>确认</code></strong></p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614181413406.png" alt="image-20230614181413406"></p><p><strong>3、上一步确认后会接着让你选择 ISO 的语言</strong></p><blockquote><p>我们选择<code>简体中文</code>，并点击确认</p></blockquote><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614181544079.png" alt="image-20230614181544079"></p><p><strong>4、上一步确认之后，就会显示镜像下载按钮</strong></p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614181728965.png" alt="image-20230614181728965"></p><p>我们可以直接点击你所需的位数下载即可，也可以退出 F12，然后右键通过迅雷下载：</p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20230614182219518.png" alt="image-20230614182219518"></p><p>下载完成就可以将 ISO 镜像烧录到你的 PE 盘了！</p><p>-–END</p>]]></content>
+    
+    
+    <summary type="html">官方都不告诉你的 Windows ISO 下载方式。</summary>
+    
+    
+    
+    <category term="Windows" scheme="https://blog.rabcnops.cn/categories/Windows/"/>
+    
+    
+    <category term="OS" scheme="https://blog.rabcnops.cn/tags/OS/"/>
+    
+  </entry>
   
   <entry>
     <title>基于 Kafka 构建 EL(F)K 高并发分布式日志系统</title>
@@ -457,29 +478,6 @@
     
     
     <summary type="html">K8s 应用版本升级与回退。</summary>
-    
-    
-    
-    <category term="云原生" scheme="https://blog.rabcnops.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/"/>
-    
-    <category term="K8s" scheme="https://blog.rabcnops.cn/categories/%E4%BA%91%E5%8E%9F%E7%94%9F/K8s/"/>
-    
-    
-    <category term="K8s" scheme="https://blog.rabcnops.cn/tags/K8s/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>K8s 的 DNS 机制</title>
-    <link href="https://blog.rabcnops.cn/posts/articles/6d84ddb0.html"/>
-    <id>https://blog.rabcnops.cn/posts/articles/6d84ddb0.html</id>
-    <published>2023-04-04T07:50:14.000Z</published>
-    <updated>2023-04-04T08:13:11.424Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/k8s-cert.png" alt="k8s-cert"></p><hr><p>在 K8s 集群中，除了可以通过 Cluster IP 访问 Service 外，还可通过 DNS 进行访问，在查看系统名称空间的 deployment 时，你会发现有个叫 <code>coredns</code> 的组件，如下图所示：</p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221219101713029.png" alt="image-20221219101713029"></p><p><code>coredns</code> 是一个 DNS 服务器，每次创建 Service 时，coredns 都会添加该 Service 的 DNS 记录。</p><p>接下来创建一个临时 Pod 来验证通过 DNS 来访问 Service：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建Pod</span></span><br><span class="line">kubectl run busybox --<span class="built_in">rm</span> -it --image=busybox /bin/sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证（由于namespace都是default，所以可以忽略不写）</span></span><br><span class="line">wget &lt;ServiceName&gt;.&lt;namaspace&gt;</span><br></pre></td></tr></table></figure><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221219105634832.png" alt="image-20221219105634832"></p><p>如果 namespace 不同，就需要跟上 namespace，具体案例如下：</p><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先创建个namespace</span></span><br><span class="line">kubectl create namespace dns-test</span><br><span class="line"></span><br><span class="line"><span class="comment"># 再启动一个测试deployment/Service资源</span></span><br><span class="line">kubectl apply -f nginx1.yml</span><br></pre></td></tr></table></figure><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221219112206001.png" alt="image-20221219112206001"></p><p><strong>验证：</strong></p><p><img src="https://csdn-rab.oss-cn-chengdu.aliyuncs.com/img/image-20221219112721041.png" alt="image-20221219112721041"></p><p><mark>以上就是 DNS 访问 Service 的具体方法。</mark></p>]]></content>
-    
-    
-    <summary type="html">在 K8s 集群中，除了可以通过 Cluster IP 访问 Service 外，还可通过 DNS 进行访问。</summary>
     
     
     
